@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, Touchable
 import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
-import { tick, TelemetrySnapshot } from '../telemetry/SimulatedEngine';
+import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
+import { startWiFiTelemetryLoop, getWiFiStatus } from '../telemetry/WiFiConnector';
 
 const { width } = Dimensions.get('window');
 
@@ -20,11 +21,11 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
       -1, true
     );
 
-    // 100ms telemetry tick — matches real OBD-II polling rate
-    const interval = setInterval(() => {
-      setData(tick());
-    }, 100);
-    return () => clearInterval(interval);
+    // Telemetry loop — uses real WiFi adapter data or falls back to simulated
+    const stop = startWiFiTelemetryLoop((snapshot) => {
+      setData(snapshot);
+    }, 150);
+    return () => stop();
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -50,7 +51,9 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
           </View>
           <View style={styles.connectionBadge}>
             <Animated.View style={[styles.statusDot, animatedStyle]} />
-            <Text style={styles.connectionText}>ELM327 CONNECTED</Text>
+            <Text style={styles.connectionText}>
+              {getWiFiStatus().isSimulated ? 'DEMO MODE' : 'WIFI CONNECTED'}
+            </Text>
           </View>
         </View>
 
