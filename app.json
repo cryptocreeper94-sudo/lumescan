@@ -1,30 +1,58 @@
 {
   "expo": {
-    "name": "lume-auto-mobile",
-    "slug": "lume-auto-mobile",
+    "name": "Lume-Auto",
+    "slug": "lume-auto",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "scheme": "lumeauto",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0a0a0c"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.darkwavestudios.lumeauto",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
+        "NSBluetoothPeripheralUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
+        "UIBackgroundModes": ["bluetooth-central"]
+      }
     },
     "android": {
+      "package": "com.darkwavestudios.lumeauto",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0a0a0c"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": ["peripheral", "central"]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "lumeauto"
+      }
     }
   }
 }
