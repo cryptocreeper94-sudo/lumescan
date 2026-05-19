@@ -1,22 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, Dimensions, TextInput } from 'react-native';
-import { Wifi, Bluetooth, Activity, ChevronRight, Zap, Radio } from 'lucide-react-native';
+import { Wifi, Bluetooth, Activity, ChevronRight, Zap } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
   Easing, withSequence, withDelay, FadeIn
 } from 'react-native-reanimated';
 import { probeForAdapter, WiFiConnection, enterDemoMode } from '../telemetry/WiFiConnector';
+import { connectBLENative, BLEConnection, enterBLEDemoMode } from '../telemetry/BLEConnector';
 
 const { width } = Dimensions.get('window');
 
+type ConnectionMode = 'idle' | 'wifi' | 'ble';
+
 export default function ConnectionScreen({ onConnect }: { onConnect: () => void }) {
-  const [status, setStatus] = useState<WiFiConnection>({
+  const [wifiStatus, setWifiStatus] = useState<WiFiConnection>({
     status: 'disconnected', host: null, error: null, isSimulated: false, adapterInfo: null,
   });
+  const [bleStatus, setBleStatus] = useState<BLEConnection>({
+    status: 'disconnected', deviceName: null, error: null, isSimulated: false, adapterInfo: null,
+  });
+  const [mode, setMode] = useState<ConnectionMode>('idle');
   const [scanning, setScanning] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [customIP, setCustomIP] = useState('192.168.0.10');
+
+  // Active status
+  const activeStatus = mode === 'ble' ? bleStatus.status : mode === 'wifi' ? wifiStatus.status : 'disconnected';
+  const activeMessage = mode === 'ble'
+    ? (bleStatus.adapterInfo || bleStatus.error || bleStatus.deviceName || 'Ready')
+    : mode === 'wifi'
+    ? (wifiStatus.adapterInfo || wifiStatus.error || wifiStatus.host || 'Ready')
+    : 'Select a connection method';
 
   // Radar animation
   const ring1 = useSharedValue(0);
@@ -52,15 +67,17 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
   const ring2Style = makeRingStyle(ring2, 260);
   const ring3Style = makeRingStyle(ring3, 320);
 
-  async function handleConnect() {
+  // WiFi connect
+  async function handleWiFiConnect() {
+    setMode('wifi');
     setScanning(true);
-    const found = await probeForAdapter(setStatus);
+    const found = await probeForAdapter(setWifiStatus);
     if (found) {
       setTimeout(onConnect, 800);
     } else {
       Alert.alert(
-        'No Adapter Found',
-        'Make sure your phone is connected to the adapter\'s WiFi hotspot (usually named "WiFi_OBDII" or "OBDLink"), then try again.\n\nOr try Demo Mode to explore with simulated data.',
+        'No WiFi Adapter Found',
+        'Make sure your phone is connected to the adapter\'s WiFi hotspot, then try again.\n\nOr try Bluetooth or Demo Mode.',
         [
           { text: 'Try Again', onPress: () => setScanning(false) },
           { text: 'Custom IP', onPress: () => { setScanning(false); setShowAdvanced(true); } },
@@ -71,9 +88,30 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
     setScanning(false);
   }
 
-  async function handleCustomConnect() {
+  // BLE connect
+  async function handleBLEConnect() {
+    setMode('ble');
     setScanning(true);
-    const found = await probeForAdapter(setStatus, customIP);
+    const found = await connectBLENative(setBleStatus);
+    if (found) {
+      setTimeout(onConnect, 800);
+    } else {
+      Alert.alert(
+        'No BLE Adapter Found',
+        'Make sure your OBD-II adapter is powered on and in range.\n\nOr try WiFi or Demo Mode.',
+        [
+          { text: 'Try Again', onPress: () => setScanning(false) },
+          { text: 'Demo Mode', onPress: handleDemoMode },
+        ]
+      );
+    }
+    setScanning(false);
+  }
+
+  async function handleCustomConnect() {
+    setMode('wifi');
+    setScanning(true);
+    const found = await probeForAdapter(setWifiStatus, customIP);
     if (found) {
       setTimeout(onConnect, 800);
     } else {
@@ -83,21 +121,13 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
   }
 
   function handleDemoMode() {
-    enterDemoMode(setStatus);
+    enterDemoMode(setWifiStatus);
     setTimeout(onConnect, 500);
   }
 
-  const statusText: Record<string, string> = {
-    disconnected: 'Ready to connect',
-    probing: 'Scanning network...',
-    connecting: `Connecting to ${status.host}...`,
-    initializing: 'Initializing ELM327...',
-    connected: status.adapterInfo || `Connected: ${status.host}`,
-    error: status.error || 'Connection error',
-  };
-
   const statusColor: Record<string, string> = {
     disconnected: COLORS.textMuted,
+    scanning: COLORS.cyan,
     probing: COLORS.cyan,
     connecting: COLORS.cyan,
     initializing: '#f59e0b',
@@ -124,25 +154,40 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
           <Animated.View style={ring2Style} />
           <Animated.View style={ring1Style} />
           <Animated.View style={[styles.radarCore, glowStyle]}>
-            <Wifi size={32} color={COLORS.cyan} />
+            <Activity size={32} color={COLORS.cyan} />
           </Animated.View>
         </View>
 
         {/* Status */}
-        <Text style={[styles.statusText, { color: statusColor[status.status] }]}>
-          {statusText[status.status]}
+        <Text style={[styles.statusText, { color: statusColor[activeStatus] || COLORS.textMuted }]}>
+          {scanning
+            ? (mode === 'ble' ? 'Scanning for Bluetooth...' : 'Probing WiFi network...')
+            : activeMessage}
         </Text>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
+          {/* BLE */}
           <TouchableOpacity
             style={[styles.primaryBtn, scanning && styles.primaryBtnDisabled]}
-            onPress={handleConnect}
+            onPress={handleBLEConnect}
             disabled={scanning}
           >
-            <Wifi size={20} color="#000" />
+            <Bluetooth size={20} color="#000" />
             <Text style={styles.primaryBtnText}>
-              {scanning ? 'CONNECTING...' : 'CONNECT VIA WIFI'}
+              {scanning && mode === 'ble' ? 'SCANNING...' : 'CONNECT VIA BLUETOOTH'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* WiFi */}
+          <TouchableOpacity
+            style={[styles.wifiBtn, scanning && styles.primaryBtnDisabled]}
+            onPress={handleWiFiConnect}
+            disabled={scanning}
+          >
+            <Wifi size={20} color={COLORS.cyan} />
+            <Text style={styles.wifiBtnText}>
+              {scanning && mode === 'wifi' ? 'SCANNING...' : 'CONNECT VIA WIFI'}
             </Text>
           </TouchableOpacity>
 
@@ -162,9 +207,10 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
             </View>
           )}
 
+          {/* Demo */}
           <TouchableOpacity style={styles.secondaryBtn} onPress={handleDemoMode}>
-            <Zap size={18} color={COLORS.cyan} />
-            <Text style={styles.secondaryBtnText}>DEMO MODE</Text>
+            <Zap size={18} color={COLORS.emerald} />
+            <Text style={[styles.secondaryBtnText, { color: COLORS.emerald }]}>DEMO MODE</Text>
             <Text style={styles.secondaryBtnSub}>Simulated 2019 F-150 · No adapter needed</Text>
           </TouchableOpacity>
         </View>
@@ -173,9 +219,10 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
         <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>QUICK SETUP</Text>
           {[
-            '1. Plug WiFi OBD-II adapter into your car',
-            '2. Connect phone to adapter\'s WiFi hotspot',
-            '3. Come back here and tap "Connect via WiFi"',
+            '1. Plug OBD-II adapter into vehicle (below steering)',
+            '2. Turn ignition to ACC or RUN',
+            '3. Bluetooth: Tap connect — auto-scan for adapters',
+            '4. WiFi: Join adapter hotspot first, then tap connect',
           ].map((step, i) => (
             <View key={i} style={styles.infoRow}>
               <ChevronRight size={12} color={COLORS.cyan} />
@@ -184,17 +231,9 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
           ))}
         </View>
 
-        {/* Compatible */}
-        <View style={styles.compatContainer}>
-          <Text style={styles.compatTitle}>COMPATIBLE ADAPTERS</Text>
-          <Text style={styles.compatText}>
-            Any WiFi ELM327 · OBDLink MX WiFi · Veepeak · BAFX WiFi{'\n'}
-            Also supports Bluetooth (BLE) with development build
-          </Text>
-        </View>
-
-        {/* Patent */}
-        <Text style={styles.patent}>
+        <Text style={styles.compat}>
+          BLE: Veepeak BLE · OBDLink MX+ · BAFX BLE{'\n'}
+          WiFi: Any ELM327 WiFi · OBDLink MX WiFi{'\n'}
           42 Nodes · 4 Primitives · Zero AI · US Patent 64/032,339
         </Text>
       </View>
@@ -204,51 +243,52 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  header: { alignItems: 'center', marginBottom: 24 },
-  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  logoText: { color: COLORS.textMain, fontSize: 28, fontWeight: '800', letterSpacing: 2 },
-  logoSub: { color: COLORS.textMuted, fontWeight: '400' },
-  tagline: { color: COLORS.textDim, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase' },
-  radarContainer: { width: 320, height: 320, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  header: { alignItems: 'center', marginBottom: 16 },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+  logoText: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: 3 },
+  logoSub: { fontWeight: '400', color: COLORS.textMuted },
+  tagline: { fontSize: 11, color: COLORS.textDim, letterSpacing: 3, textTransform: 'uppercase' },
+  radarContainer: { width: 240, height: 240, alignItems: 'center', justifyContent: 'center', marginVertical: 16 },
   radarCore: {
-    width: 76, height: 76, borderRadius: 38,
-    backgroundColor: 'rgba(6, 182, 212, 0.1)',
-    borderWidth: 2, borderColor: COLORS.cyan,
+    width: 68, height: 68, borderRadius: 34,
+    backgroundColor: 'rgba(6,182,212,0.1)', borderWidth: 2, borderColor: COLORS.cyan,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: COLORS.cyan, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 20,
   },
-  statusText: { fontSize: 12, fontWeight: '600', letterSpacing: 1, marginBottom: 24, textTransform: 'uppercase' },
-  buttonContainer: { width: '100%', gap: 12, marginBottom: 24 },
+  statusText: { fontSize: 11, fontWeight: '600', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 },
+  buttonContainer: { width: '100%', gap: 10, marginBottom: 20 },
   primaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.cyan, borderRadius: 30, paddingVertical: 16,
+    backgroundColor: COLORS.cyan, paddingVertical: 14, borderRadius: 30,
   },
   primaryBtnDisabled: { opacity: 0.5 },
-  primaryBtnText: { color: '#000', fontSize: 14, fontWeight: '800', letterSpacing: 1.5 },
+  primaryBtnText: { color: '#000', fontSize: 13, fontWeight: '800', letterSpacing: 2 },
+  wifiBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)', paddingVertical: 14, borderRadius: 30,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+  },
+  wifiBtnText: { color: '#fff', fontSize: 13, fontWeight: '700', letterSpacing: 2 },
   advancedRow: { flexDirection: 'row', gap: 8 },
   ipInput: {
-    flex: 1, backgroundColor: COLORS.bgPanel, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
-    color: COLORS.textMain, fontFamily: 'monospace', fontSize: 14,
-    borderWidth: 1, borderColor: COLORS.borderLight,
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.03)', borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, paddingHorizontal: 16,
+    paddingVertical: 12, color: '#fff', fontFamily: 'monospace', fontSize: 15,
   },
   ipConnectBtn: {
-    backgroundColor: COLORS.cyan, borderRadius: 12, paddingHorizontal: 20, justifyContent: 'center',
+    backgroundColor: COLORS.cyan, borderRadius: 12,
+    paddingHorizontal: 20, justifyContent: 'center',
   },
   ipConnectText: { color: '#000', fontWeight: '800', fontSize: 14 },
   secondaryBtn: {
-    alignItems: 'center', gap: 4,
-    borderWidth: 1, borderColor: COLORS.borderLight, borderRadius: 16, paddingVertical: 14,
-    backgroundColor: COLORS.bgPanel,
+    alignItems: 'center', gap: 4, paddingVertical: 14, borderRadius: 16,
+    backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)',
   },
-  secondaryBtnText: { color: COLORS.cyan, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
-  secondaryBtnSub: { color: COLORS.textDim, fontSize: 10 },
-  infoContainer: { alignSelf: 'flex-start', marginBottom: 16 },
-  infoTitle: { color: COLORS.textDim, fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 8 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  infoText: { color: COLORS.textMuted, fontSize: 11 },
-  compatContainer: { marginBottom: 16 },
-  compatTitle: { color: COLORS.textDim, fontSize: 10, fontWeight: '700', letterSpacing: 1.5, marginBottom: 4, textAlign: 'center' },
-  compatText: { color: COLORS.textDim, fontSize: 10, textAlign: 'center', lineHeight: 16 },
-  patent: { color: COLORS.textDim, fontSize: 10, textAlign: 'center', lineHeight: 16 },
+  secondaryBtnText: { fontSize: 12, fontWeight: '700', letterSpacing: 2 },
+  secondaryBtnSub: { fontSize: 10, color: COLORS.textDim },
+  infoContainer: { width: '100%', marginBottom: 12 },
+  infoTitle: { fontSize: 10, fontWeight: '700', color: COLORS.textDim, letterSpacing: 3, marginBottom: 6 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 },
+  infoText: { fontSize: 11, color: COLORS.textMuted },
+  compat: { fontSize: 9, color: COLORS.textDim, textAlign: 'center', lineHeight: 16 },
 });

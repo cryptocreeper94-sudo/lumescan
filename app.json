@@ -19,7 +19,9 @@
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
         "NSBluetoothPeripheralUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
-        "UIBackgroundModes": ["bluetooth-central"]
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ]
       }
     },
     "android": {
@@ -45,13 +47,16 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": false,
-          "modes": ["peripheral", "central"]
+          "modes": [
+            "peripheral",
+            "central"
+          ]
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "lumeauto"
+        "projectId": "4da0a734-89f0-4618-b41e-2e57abdbf36f"
       }
     }
   }
