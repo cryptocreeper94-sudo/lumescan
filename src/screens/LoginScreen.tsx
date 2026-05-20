@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator,
@@ -6,7 +6,11 @@ import {
 } from 'react-native';
 import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
-import { signInWithEmail, registerWithEmail } from '../config/firebase';
+import { signInWithEmail, registerWithEmail, signInWithGoogleCredential } from '../config/firebase';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -14,6 +18,32 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'login' | 'register'>('login');
+
+  // ── Google SSO via expo-auth-session ──
+  const [_request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: '41307406912-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com',
+    // The web client ID from your Firebase console → Authentication → Sign-in method → Google
+    // You can find this in the Firebase Console under:
+    // Project Settings → General → Your Apps → Web App → OAuth 2.0 Client IDs
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      setLoading(true);
+      setError(null);
+      signInWithGoogleCredential(id_token)
+        .catch((err: any) => {
+          const msg = err?.message || 'Google sign-in failed.';
+          if (msg.includes('Access restricted')) {
+            setError('Access restricted to authorized email addresses.');
+          } else {
+            setError('Google sign-in failed. Please try again.');
+          }
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [response]);
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -85,6 +115,23 @@ export default function LoginScreen() {
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               )}
+
+              {/* Google SSO */}
+              <TouchableOpacity
+                style={styles.googleBtn}
+                onPress={() => promptAsync()}
+                disabled={loading}
+              >
+                <Text style={styles.googleIcon}>G</Text>
+                <Text style={styles.googleBtnText}>Continue with Google</Text>
+              </TouchableOpacity>
+
+              {/* Divider */}
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.dividerLine} />
+              </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
@@ -248,6 +295,45 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     flex: 1,
+  },
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  googleIcon: {
+    color: '#4285F4',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  googleBtnText: {
+    color: COLORS.textMain,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  dividerText: {
+    color: COLORS.textDim,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 2,
   },
   inputGroup: {
     marginBottom: 20,

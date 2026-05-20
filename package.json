@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "expo": "~54.0.33",
+    "expo-auth-session": "~7.0.11",
+    "expo-crypto": "~15.0.9",
     "expo-dev-client": "~6.0.21",
     "expo-status-bar": "~3.0.9",
+    "expo-web-browser": "~15.0.11",
     "firebase": "^12.13.0",
     "lucide-react-native": "^1.14.0",
     "react": "19.1.0",

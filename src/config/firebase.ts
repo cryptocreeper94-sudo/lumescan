@@ -10,6 +10,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithCredential,
+  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   type User,
@@ -61,6 +63,13 @@ export async function registerWithEmail(email: string, password: string): Promis
   const cleanEmail = email.trim();
   validateEmailDomain(cleanEmail);
   const result = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+  return result.user;
+}
+
+export async function signInWithGoogleCredential(idToken: string): Promise<User> {
+  const credential = GoogleAuthProvider.credential(idToken);
+  const result = await signInWithCredential(auth, credential);
+  validateEmailDomain(result.user.email);
   return result.user;
 }
 
