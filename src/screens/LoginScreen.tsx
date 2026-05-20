@@ -15,6 +15,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -52,7 +53,7 @@ export default function LoginScreen() {
     setError(null);
     try {
       if (mode === 'register') {
-        await registerWithEmail(email, password);
+        await registerWithEmail(email, password, displayName.trim() || undefined);
       } else {
         await signInWithEmail(email, password);
       }
@@ -143,6 +144,21 @@ export default function LoginScreen() {
                   editable={!loading}
                 />
               </View>
+
+              {mode === 'register' && (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>YOUR NAME</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Jason Smith"
+                    placeholderTextColor={COLORS.textDim}
+                    autoCapitalize="words"
+                    value={displayName}
+                    onChangeText={setDisplayName}
+                    editable={!loading}
+                  />
+                </View>
+              )}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>SECURITY KEY</Text>

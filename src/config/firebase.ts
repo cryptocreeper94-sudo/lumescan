@@ -14,6 +14,7 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  updateProfile,
   type User,
 } from 'firebase/auth';
 
@@ -37,6 +38,7 @@ const ALLOWED_EMAILS = [
   'rtaron@bellsouth.net',
   'cryptocreeper94@gmail.com',
   'averymackenna@gmail.com',
+  'barrycline33@gmail.com',
 ];
 
 function validateEmailDomain(email: string | null): void {
@@ -58,10 +60,13 @@ export async function signInWithEmail(email: string, password: string): Promise<
   return result.user;
 }
 
-export async function registerWithEmail(email: string, password: string): Promise<User> {
+export async function registerWithEmail(email: string, password: string, displayName?: string): Promise<User> {
   const cleanEmail = email.trim();
   validateEmailDomain(cleanEmail);
   const result = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+  if (displayName) {
+    await updateProfile(result.user, { displayName });
+  }
   return result.user;
 }
 

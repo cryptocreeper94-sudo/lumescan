@@ -5,12 +5,24 @@ import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
 import { startWiFiTelemetryLoop, getWiFiStatus } from '../telemetry/WiFiConnector';
+import { auth } from '../config/firebase';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen({ onReport }: { onReport?: () => void }) {
   const [data, setData] = useState<TelemetrySnapshot | null>(null);
   const pulseAnim = useSharedValue(1);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const user = auth.currentUser;
+    const name = user?.displayName || user?.email?.split('@')[0] || 'Driver';
+    const firstName = name.split(' ')[0];
+    if (hour >= 5 && hour < 12) return `Good morning, ${firstName}.`;
+    if (hour >= 12 && hour < 17) return `Good afternoon, ${firstName}.`;
+    if (hour >= 17 && hour < 21) return `Good evening, ${firstName}.`;
+    return `Good night, ${firstName}.`;
+  };
 
   useEffect(() => {
     pulseAnim.value = withRepeat(
@@ -57,7 +69,10 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
           </View>
         </View>
 
-        {/* Mode Badge */}
+        {/* Personalized Greeting */}
+        <Text style={styles.greeting}>{getGreeting()}</Text>
+
+        {/* Mode Badge */}}
         <View style={[styles.modeBadge, { borderColor: modeColor }]}>
           <Text style={[styles.modeText, { color: modeColor }]}>{data.governanceMode.toUpperCase()}</Text>
         </View>
@@ -179,6 +194,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800', letterSpacing: 1 },
   headerTitleSub: { color: COLORS.textMuted, fontWeight: '400' },
+  greeting: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 12, fontStyle: 'italic' },
   connectionBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)', gap: 8 },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.emerald },
   connectionText: { color: COLORS.emerald, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },

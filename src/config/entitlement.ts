@@ -16,6 +16,7 @@ const BYPASS_EMAILS = [
   'rtaron@bellsouth.net',
   'cryptocreeper94@gmail.com',
   'averymackenna@gmail.com',
+  'barrycline33@gmail.com',
 ];
 
 const FIRESTORE_PROJECT = 'darkwave-auth';
