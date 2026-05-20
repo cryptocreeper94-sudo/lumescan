@@ -3,183 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lume Scan â€” Professional OBD-II Diagnostics</title>
-  <meta name="description" content="Lume Scan: Professional-grade portable OBD-II diagnostic scanner. 42 live signals, predictive maintenance, and fuel governance engine. $29.99.">
-  <meta name="keywords" content="OBD-II scanner, car diagnostics, check engine light, fuel efficiency, automotive diagnostics">
+  <title>Lume Scan — Professional OBD-II Diagnostics | $29.99</title>
+  <meta name="description" content="Lume Scan: 42-signal OBD-II diagnostic engine. Predictive maintenance, fuel coaching, driver scoring. $29.99 one-time. No subscription ever.">
+  <meta name="keywords" content="OBD-II scanner, car diagnostics, check engine light, fuel efficiency, predictive maintenance">
   <link rel="canonical" href="https://lumescan.tech">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #06080e; --surface: #0c1018; --border: rgba(6,182,212,0.12);
-      --accent: #10b981; --accent2: #06b6d4; --text: #f0f4f8; --dim: rgba(255,255,255,0.5);
-      --mono: 'JetBrains Mono', monospace; --sans: 'Inter', -apple-system, sans-serif;
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
-    a { color: var(--accent); text-decoration: none; }
-
-    /* NAV */
-    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; background: rgba(6,8,14,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-    .nav-brand { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-    .nav-brand span { color: var(--accent); }
-    .nav-cta { padding: 8px 20px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #059669); color: #000; font-weight: 700; font-size: 13px; border: none; cursor: pointer; transition: transform 0.2s; }
-    .nav-cta:hover { transform: translateY(-1px); }
-
-    /* HERO */
-    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 100px 24px 60px; position: relative; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%); pointer-events: none; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 24px; }
-    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .hero h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -2px; }
-    .hero h1 .accent { background: linear-gradient(135deg, var(--accent), #34d399, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero-sub { font-size: 18px; color: var(--dim); max-width: 560px; margin: 0 auto 40px; line-height: 1.7; }
-    .hero-price { display: flex; align-items: baseline; gap: 12px; justify-content: center; margin-bottom: 32px; }
-    .hero-price .current { font-size: 48px; font-weight: 900; font-family: var(--mono); color: var(--accent); }
-    .hero-price .original { font-size: 20px; color: var(--dim); text-decoration: line-through; }
-    .hero-price .save { padding: 4px 10px; border-radius: 6px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); font-size: 12px; font-weight: 700; color: var(--accent); }
-    .hero-cta { display: inline-flex; align-items: center; gap: 8px; padding: 16px 40px; border-radius: 14px; background: linear-gradient(135deg, var(--accent), #059669); color: #000; font-weight: 800; font-size: 16px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 24px rgba(16,185,129,0.3); }
-    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(16,185,129,0.4); }
-    .hero-trust { display: flex; gap: 24px; justify-content: center; margin-top: 24px; font-size: 12px; color: var(--dim); }
-    .hero-trust span { display: flex; align-items: center; gap: 4px; }
-
-    /* STATS */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--border); max-width: 800px; margin: -40px auto 0; position: relative; z-index: 10; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
-    .stat { background: var(--surface); padding: 28px 20px; text-align: center; }
-    .stat-value { font-size: 28px; font-weight: 800; font-family: var(--mono); color: var(--accent); }
-    .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-    /* FEATURES */
-    .section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
-    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 12px; }
-    .section h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
-    .section-sub { font-size: 16px; color: var(--dim); max-width: 600px; margin-bottom: 48px; }
-    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .feature { padding: 28px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); transition: all 0.3s; }
-    .feature:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-4px); }
-    .feature-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
-    .feature h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .feature p { font-size: 13px; color: var(--dim); line-height: 1.6; }
-
-    /* ECOSYSTEM */
-    .ecosystem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .eco-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    .eco-card { padding: 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); transition: all 0.3s; display: block; }
-    .eco-card:hover { border-color: rgba(6,182,212,0.3); transform: translateY(-2px); }
-    .eco-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-    .eco-card p { font-size: 12px; color: var(--dim); }
-    .eco-card .eco-icon { font-size: 24px; margin-bottom: 12px; }
-
-    /* CTA */
-    .cta-section { text-align: center; padding: 100px 24px; position: relative; }
-    .cta-section::before { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%); pointer-events: none; }
-
-    /* FOOTER */
-    footer { padding: 40px 24px; text-align: center; border-top: 1px solid var(--border); }
-    footer p { font-size: 12px; color: var(--dim); }
-    footer a { color: var(--accent2); }
-
-    @media (max-width: 640px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .hero h1 { font-size: 2.2rem; }
-      .hero-price .current { font-size: 36px; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <nav class="nav">
     <div class="nav-brand">Lume<span>Scan</span></div>
-    <a href="https://lumeauto.tech/order" class="nav-cta">Order Now â€” $29.99</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#compare">Compare</a>
+      <a href="#signals">42 Signals</a>
+      <a href="#hardware">Hardware</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="https://lumeauto.tech/order" class="nav-cta">Get Lume Scan — $29.99</a>
   </nav>
 
-  <section class="hero">
-    <div class="hero-badge">Professional OBD-II Diagnostics</div>
-    <h1>The <span class="accent">$200 Scanner</span><br>For $29.99.</h1>
-    <p class="hero-sub">Professional-grade OBD-II diagnostics with a 42-signal governance engine. Read codes, predict failures, and optimize fuel economy â€” all from one portable device.</p>
-    <div class="hero-price">
-      <span class="current">$29.99</span>
-      <span class="original">$200</span>
-      <span class="save">Save 85%</span>
+  <!-- KEN BURNS HERO -->
+  <section class="hero" id="top">
+    <div class="hero-slides">
+      <div class="hero-slide active"><img src="img/hero-1.png" alt="OBD-II diagnostic dongle"></div>
+      <div class="hero-slide"><img src="img/hero-2.png" alt="Live diagnostic dashboard"></div>
+      <div class="hero-slide"><img src="img/hero-3.png" alt="Engine diagnostics"></div>
+      <div class="hero-slide"><img src="img/hero-4.png" alt="Smart driving"></div>
     </div>
-    <a href="https://lumeauto.tech/order" class="hero-cta">ðŸ”§ Order Lume Scan Kit</a>
-    <div class="hero-trust">
-      <span>âœ“ Free Shipping</span>
-      <span>âœ“ 30-Day Returns</span>
-      <span>âœ“ No Subscription</span>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Professional OBD-II Diagnostics</div>
+      <h1>The <span class="gr">$200 Scanner</span><br>For $29.99.</h1>
+      <p class="hero-sub">42-signal diagnostic engine with predictive maintenance, fuel coaching, and driver scoring. Software-only — use any BLE adapter.</p>
+      <div class="hero-price">
+        <span class="now">$29.99</span>
+        <span class="was">$200</span>
+        <span class="tag">Save 85%</span>
+      </div>
+      <a href="https://lumeauto.tech/order" class="cta-btn">🔧 Get Lume Scan</a>
+      <div class="hero-trust">
+        <span>✓ One-time purchase</span>
+        <span>✓ No subscription</span>
+        <span>✓ 30-day guarantee</span>
+      </div>
     </div>
   </section>
 
   <div class="stats">
-    <div class="stat"><div class="stat-value">42</div><div class="stat-label">Live Signals</div></div>
-    <div class="stat"><div class="stat-value">100ms</div><div class="stat-label">Scan Interval</div></div>
-    <div class="stat"><div class="stat-value">$180+</div><div class="stat-label">Annual Savings</div></div>
-    <div class="stat"><div class="stat-value">0</div><div class="stat-label">Subscriptions</div></div>
+    <div class="stat"><div class="stat-val">42</div><div class="stat-lbl">Live Signals</div></div>
+    <div class="stat"><div class="stat-val">100ms</div><div class="stat-lbl">Scan Interval</div></div>
+    <div class="stat"><div class="stat-val">$180+</div><div class="stat-lbl">Annual Savings</div></div>
+    <div class="stat"><div class="stat-val">$0</div><div class="stat-lbl">Subscriptions</div></div>
   </div>
 
-  <section class="section">
-    <div class="section-label">Features</div>
+  <!-- BENTO FEATURES -->
+  <section class="sec" id="features">
+    <div class="sec-label">Features</div>
     <h2>Everything a $200 scanner does.<br>And more.</h2>
-    <p class="section-sub">Lume Scan runs a continuous 42-signal diagnostic engine at 100ms intervals. Not just reading codes â€” governing your vehicle's health in real time.</p>
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(16,185,129,0.1)">âš¡</div>
+    <p class="sec-sub">Lume Scan runs a continuous 42-signal diagnostic engine at 100ms intervals. Not just reading codes — governing your vehicle's health.</p>
+    <div class="bento">
+      <div class="card span-2">
+        <div class="icon" style="background:rgba(16,185,129,0.1)">⚡</div>
         <h3>42-Signal Diagnostic Engine</h3>
-        <p>Reads 42 OBD-II signals at 100ms intervals. Continuous monitoring, not just code reading â€” a real-time governance engine for your vehicle.</p>
+        <p>Reads 42 OBD-II signals at 100ms intervals across four domains: combustion, fuel system, health & safety, and governance. Continuous monitoring, not just code reading — a real-time governance engine for your vehicle that never sleeps.</p>
       </div>
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(6,182,212,0.1)">ðŸ”§</div>
+      <div class="card">
+        <div class="icon" style="background:rgba(6,182,212,0.1)">🔧</div>
         <h3>Skip the $150 Shop Visit</h3>
-        <p>Check engine light? Reads the code, translates the technician jargon, and tells you exactly what's wrong in plain English.</p>
+        <p>Check engine light? Reads the code, translates technician jargon, tells you what's wrong in plain English, and links the exact part.</p>
       </div>
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(245,158,11,0.1)">ðŸ›¡ï¸</div>
+      <div class="card">
+        <div class="icon" style="background:rgba(245,158,11,0.1)">🛡️</div>
         <h3>Predictive Maintenance</h3>
-        <p>Detects component degradation 1â€“3% before it becomes a breakdown. Catches problems weeks before your dashboard does.</p>
+        <p>Detects component degradation 1–3% before it becomes a breakdown. Catches problems weeks before your dashboard does.</p>
       </div>
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(239,68,68,0.1)">â›½</div>
+      <div class="card">
+        <div class="icon" style="background:rgba(239,68,68,0.1)">⛽</div>
         <h3>Fuel Governance Engine</h3>
-        <p>At $3.50/gallon and 15,000 miles/year, most drivers save $180â€“$320 annually. The scanner pays for itself in under 3 months.</p>
+        <p>Audio coaching through your car speakers. Most drivers save $180–$320/year. Pays for itself in 2 weeks.</p>
       </div>
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(99,102,241,0.1)">ðŸ“Š</div>
-        <h3>Real-Time Dashboard</h3>
-        <p>Live RPM, coolant temp, intake pressure, timing advance, and 38 more parameters displayed on your phone in real time.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon" style="background:rgba(16,185,129,0.1)">ðŸ”Œ</div>
-        <h3>Universal Compatibility</h3>
-        <p>Works with all OBD-II vehicles (1996+). BLE 5.0 wireless connection. No wires, no apps to pay for, no subscriptions.</p>
+      <div class="card span-2">
+        <div class="icon" style="background:rgba(99,102,241,0.1)">📊</div>
+        <h3>Real-Time Dashboard + Driver Score</h3>
+        <p>42 live gauges updating 10x/second. Driver efficiency scoring, family dashboard, multi-vehicle monitoring. Track your improvement over time with session deltas and historical baselines. Professional-grade telemetry for every driver.</p>
       </div>
     </div>
   </section>
 
   <!-- COMPARISON -->
-  <section class="section" style="border-top:1px solid var(--border)">
-    <div class="section-label">Why Lume Scan</div>
+  <section class="sec" id="compare" style="border-top:1px solid var(--border)">
+    <div class="sec-label">Why Lume Scan</div>
     <h2>The competition charges more<br>and does less.</h2>
-    <p class="section-sub">We compared Lume Scan against every major scanner on the market.</p>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:600px">
-        <thead><tr style="border-bottom:1px solid var(--border)">
-          <th style="text-align:left;padding:12px 16px;color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:1px">Feature</th>
-          <th style="text-align:center;padding:12px;color:var(--accent);font-weight:800">Lume Scan<br><span style="font-size:11px;font-weight:500">$29.99</span></th>
-          <th style="text-align:center;padding:12px;color:var(--dim)">FIXD<br><span style="font-size:11px">$100/yr</span></th>
-          <th style="text-align:center;padding:12px;color:var(--dim)">BlueDriver<br><span style="font-size:11px">$120</span></th>
-          <th style="text-align:center;padding:12px;color:var(--dim)">Autel MX808<br><span style="font-size:11px">$389</span></th>
+    <p class="sec-sub">We compared Lume Scan against every major scanner on the market.</p>
+    <div style="overflow-x:auto;border-radius:16px;border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px)">
+      <table class="cmp">
+        <thead><tr>
+          <th style="text-align:left;padding-left:20px">Feature</th>
+          <th class="hl">Lume Scan<br><span style="font-weight:500">$29.99</span></th>
+          <th>FIXD<br><span style="font-size:10px">$100/yr</span></th>
+          <th>BlueDriver<br><span style="font-size:10px">$120</span></th>
+          <th>Autel MX808<br><span style="font-size:10px">$389</span></th>
         </tr></thead>
         <tbody>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Read/clear codes</td><td style="text-align:center;color:var(--accent)">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Live data signals</td><td style="text-align:center;color:var(--accent);font-weight:700">42</td><td style="text-align:center;color:var(--dim)">~10</td><td style="text-align:center;color:var(--dim)">~15</td><td style="text-align:center;color:var(--dim)">~30</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Scan interval</td><td style="text-align:center;color:var(--accent);font-weight:700">100ms</td><td style="text-align:center;color:var(--dim)">~1s</td><td style="text-align:center;color:var(--dim)">~500ms</td><td style="text-align:center;color:var(--dim)">~300ms</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Fuel coaching</td><td style="text-align:center;color:var(--accent)">✓</td><td style="text-align:center;color:#ef4444">✗</td><td style="text-align:center;color:#ef4444">✗</td><td style="text-align:center;color:#ef4444">✗</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Predictive maintenance</td><td style="text-align:center;color:var(--accent)">✓</td><td style="text-align:center;color:#f59e0b">Premium</td><td style="text-align:center;color:#ef4444">✗</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Driver scoring</td><td style="text-align:center;color:var(--accent)">✓</td><td style="text-align:center;color:#ef4444">✗</td><td style="text-align:center;color:#ef4444">✗</td><td style="text-align:center;color:#ef4444">✗</td></tr>
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:10px 16px">Subscription required</td><td style="text-align:center;color:var(--accent);font-weight:700">Never</td><td style="text-align:center;color:#ef4444">$100/yr</td><td style="text-align:center;color:var(--dim)">No</td><td style="text-align:center;color:#f59e0b">Updates $</td></tr>
-          <tr><td style="padding:10px 16px">BYO adapter</td><td style="text-align:center;color:var(--accent)">✓ ($12)</td><td style="text-align:center;color:#ef4444">Proprietary</td><td style="text-align:center;color:#ef4444">Proprietary</td><td style="text-align:center;color:#ef4444">Built-in</td></tr>
+          <tr><td style="padding-left:20px">Read/clear codes</td><td class="yes" style="text-align:center">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
+          <tr><td style="padding-left:20px">Live signals</td><td class="yes bold" style="text-align:center">42</td><td style="text-align:center;color:var(--dim)">~10</td><td style="text-align:center;color:var(--dim)">~15</td><td style="text-align:center;color:var(--dim)">~30</td></tr>
+          <tr><td style="padding-left:20px">Scan interval</td><td class="yes bold" style="text-align:center">100ms</td><td style="text-align:center;color:var(--dim)">~1s</td><td style="text-align:center;color:var(--dim)">~500ms</td><td style="text-align:center;color:var(--dim)">~300ms</td></tr>
+          <tr><td style="padding-left:20px">Fuel coaching</td><td class="yes" style="text-align:center">✓</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td></tr>
+          <tr><td style="padding-left:20px">Predictive maintenance</td><td class="yes" style="text-align:center">✓</td><td class="warn" style="text-align:center">Premium</td><td class="no" style="text-align:center">✗</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
+          <tr><td style="padding-left:20px">Driver scoring</td><td class="yes" style="text-align:center">✓</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td></tr>
+          <tr><td style="padding-left:20px">Subscription</td><td class="yes bold" style="text-align:center">Never</td><td class="no" style="text-align:center">$100/yr</td><td style="text-align:center;color:var(--dim)">No</td><td class="warn" style="text-align:center">Updates $</td></tr>
+          <tr><td style="padding-left:20px">BYO adapter</td><td class="yes" style="text-align:center">✓ ($12)</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Built-in</td></tr>
         </tbody>
       </table>
     </div>
@@ -187,105 +123,130 @@
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="section" style="border-top:1px solid var(--border)">
-    <div class="section-label">How It Works</div>
+  <section class="sec" style="border-top:1px solid var(--border)">
+    <div class="sec-label">How It Works</div>
     <h2>Three steps. Two minutes.</h2>
-    <div class="features" style="grid-template-columns:repeat(3,1fr)">
-      <div class="feature" style="text-align:center">
-        <div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--accent);margin-bottom:12px">01</div>
-        <h3>Plug In Any OBD-II Adapter</h3>
-        <p>Use any $12 BLE 4.0+ adapter from Amazon. Plug it into the OBD-II port under your dash. Every car since 1996 has one.</p>
-      </div>
-      <div class="feature" style="text-align:center">
-        <div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--accent);margin-bottom:12px">02</div>
-        <h3>Open Lume Scan</h3>
-        <p>Tap "Connect via Bluetooth." The app auto-discovers your adapter, initializes the ELM327 protocol, and starts reading.</p>
-      </div>
-      <div class="feature" style="text-align:center">
-        <div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--accent);margin-bottom:12px">03</div>
-        <h3>Drive</h3>
-        <p>42 signals stream in real time. Fuel coaching, predictive alerts, and driver scoring activate automatically. Save money immediately.</p>
-      </div>
+    <p class="sec-sub">No mechanic. No wiring. No subscription setup.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h3>Plug In Any BLE Adapter</h3><p>Use any $12 BLE 4.0+ adapter from Amazon. Plug it into the OBD-II port under your dash. Every car since 1996 has one.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>Open Lume Scan</h3><p>Tap "Connect via Bluetooth." Auto-discovers your adapter, initializes ELM327 protocol, starts reading within seconds.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Drive</h3><p>42 signals stream in real time. Fuel coaching, predictive alerts, and driver scoring activate automatically.</p></div>
     </div>
   </section>
 
   <!-- 42 SIGNALS -->
-  <section class="section" style="border-top:1px solid var(--border)">
-    <div class="section-label">The 42-Signal Engine</div>
+  <section class="sec" id="signals" style="border-top:1px solid var(--border)">
+    <div class="sec-label">The 42-Signal Engine</div>
     <h2>What we actually read.</h2>
-    <p class="section-sub">Every 100ms, Lume Scan reads and computes across four signal domains.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
-      <div class="feature"><h3 style="color:var(--accent)">🔥 Combustion (10)</h3><p>RPM · MAF · MAP · Throttle · Engine Load · Volumetric Efficiency · Air-Fuel Ratio · Combustion Efficiency · Timing Advance · Barometric Pressure</p></div>
-      <div class="feature"><h3 style="color:var(--accent2)">⛽ Fuel System (10)</h3><p>Fuel Flow Rate · O2 Upstream B1 · O2 Downstream B1 · Short-Term Fuel Trim B1/B2 · Long-Term Fuel Trim B1/B2 · Catalyst Temp · Catalyst Efficiency · MPG Instant</p></div>
-      <div class="feature"><h3 style="color:#f59e0b">🛡️ Health & Safety (11)</h3><p>Coolant Temp · Intake Air Temp · Battery Voltage · Runtime · MIL Status · DTC Count · Speed · Absolute Load · Degradation Index · Driver Score · MPG Recovery</p></div>
-      <div class="feature"><h3 style="color:#ef4444">⚙️ Governance (11)</h3><p>Governance Mode · Flow State Detection · Process Drift Alert · Throughput Alert · Lifecycle Warning · Fuel Coach Signal · Predictive Score · Trend Vector · Anomaly Flag · Session Delta · Historical Baseline</p></div>
+    <p class="sec-sub">Every 100ms, Lume Scan reads and computes across four signal domains.</p>
+    <div class="sig-grid">
+      <div class="sig-card"><h3 style="color:var(--accent)">🔥 Combustion (10)</h3><p>RPM · MAF · MAP · Throttle · Engine Load · Vol. Efficiency · Air-Fuel Ratio · Combustion Eff. · Timing Advance · Baro Pressure</p></div>
+      <div class="sig-card"><h3 style="color:var(--accent2)">⛽ Fuel System (10)</h3><p>Fuel Flow · O2 Upstream B1 · O2 Downstream B1 · STFT B1/B2 · LTFT B1/B2 · Catalyst Temp · Catalyst Eff. · MPG Instant</p></div>
+      <div class="sig-card"><h3 style="color:#f59e0b">🛡️ Health & Safety (11)</h3><p>Coolant · IAT · Battery · Runtime · MIL · DTC Count · Speed · Abs Load · Degradation Index · Driver Score · MPG Recovery</p></div>
+      <div class="sig-card"><h3 style="color:#ef4444">⚙️ Governance (11)</h3><p>Mode · Flow State · Process Drift · Throughput Alert · Lifecycle Warning · Fuel Coach · Predictive Score · Trend · Anomaly · Session Δ · Baseline</p></div>
     </div>
   </section>
 
   <!-- WHAT YOU NEED -->
-  <section class="section" style="border-top:1px solid var(--border)">
-    <div class="section-label">What You Need</div>
+  <section class="sec" style="border-top:1px solid var(--border)">
+    <div class="sec-label">What You Need</div>
     <h2>Software only. BYO adapter.</h2>
-    <p class="section-sub">Lume Scan is a $29.99 software purchase. Pair it with any standard BLE OBD-II adapter.</p>
-    <div class="features" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
-      <div class="feature">
-        <h3>✅ Recommended Adapters</h3>
-        <p><strong>Veepeak BLELink</strong> — $12 on Amazon<br><strong>BAFX BLE</strong> — $15 on Amazon<br><strong>OBDLink MX+</strong> — $35 (premium)<br>Any ELM327 BLE 4.0+ adapter works.</p>
+    <p class="sec-sub">Lume Scan is a $29.99 software purchase. Pair with any standard BLE OBD-II adapter.</p>
+    <div class="bento" style="grid-template-columns:repeat(2,1fr)">
+      <div class="card"><h3>✅ Recommended Adapters</h3><p><strong>Veepeak BLELink</strong> — $12 on Amazon<br><strong>BAFX BLE</strong> — $15 on Amazon<br><strong>OBDLink MX+</strong> — $35 (premium)<br>Any ELM327 BLE 4.0+ adapter works.</p></div>
+      <div class="card"><h3>✅ Compatible Vehicles</h3><p>Every gasoline car, truck, and SUV sold in the US after 1996 with a standard OBD-II port. That's <strong>1.4 billion vehicles worldwide</strong>.</p></div>
+    </div>
+  </section>
+
+  <!-- PROPRIETARY HARDWARE TEASER -->
+  <section class="sec" id="hardware" style="border-top:1px solid var(--border)">
+    <div class="sec-label">Coming Soon</div>
+    <h2>Proprietary hardware.<br>Even deeper diagnostics.</h2>
+    <div class="hw-teaser">
+      <div>
+        <h3>The Lume Scan Dongle</h3>
+        <p>We're developing a purpose-built BLE 5.0 diagnostic dongle with onboard flash storage, hardware-level AES-256 encryption, and extended PID coverage that goes far beyond standard ELM327 adapters.</p>
+        <p><strong style="color:var(--text)">What the proprietary hardware unlocks:</strong></p>
+        <p>• <strong>Extended PID access</strong> — manufacturer-specific codes beyond standard OBD-II<br>
+        • <strong>Vehicle-Carried Mode</strong> — 32MB onboard storage logs diagnostics between sessions<br>
+        • <strong>Hardware-signed packets</strong> — Ed25519 cryptographic verification of every reading<br>
+        • <strong>Faster BLE 5.0</strong> — 2x throughput for true 100ms polling of all 42 signals<br>
+        • <strong>Fleet-grade durability</strong> — automotive-temp-rated, always-on, zero driver intervention</p>
+        <div class="hw-tag">Q4 2026 · Waitlist Open</div>
       </div>
-      <div class="feature">
-        <h3>✅ Compatible Vehicles</h3>
-        <p>Every gasoline car, truck, and SUV sold in the US after 1996 with a standard OBD-II port. That's <strong>1.4 billion vehicles worldwide</strong>.</p>
+      <div style="text-align:center">
+        <div style="width:100%;aspect-ratio:1;border-radius:20px;background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(16,185,129,0.04));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:64px">🔌</div>
+          <div style="font-size:14px;font-weight:700;color:var(--accent2)">LUME SCAN DONGLE</div>
+          <div style="font-size:11px;color:var(--dim)">BLE 5.0 · AES-256 · Ed25519 · 32MB Flash</div>
+          <div style="font-size:11px;color:var(--dim)">US Patent Pending 64/032,339</div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- FAQ -->
-  <section class="section" style="border-top:1px solid var(--border)">
-    <div class="section-label">FAQ</div>
+  <section class="sec" id="faq" style="border-top:1px solid var(--border)">
+    <div class="sec-label">FAQ</div>
     <h2>Questions</h2>
-    <div style="max-width:700px;display:flex;flex-direction:column;gap:12px;margin-top:32px">
-      <div class="feature"><h3>Is there a subscription?</h3><p>No. $29.99 once, yours forever. No trials, no upsells, no recurring billing. Unlike FIXD ($100/yr), we don't monetize your maintenance anxiety.</p></div>
-      <div class="feature"><h3>How much will I actually save?</h3><p>At $3.50/gallon and 15,000 miles/year, most drivers save $180–$320 annually through fuel coaching alone. The app pays for itself in about 2 weeks.</p></div>
-      <div class="feature"><h3>Do I need a mechanic to install it?</h3><p>No. Plug the adapter into the OBD-II port under your steering column. Takes 10 seconds. No wiring, no tools, no modifications.</p></div>
-      <div class="feature"><h3>What's the difference between this and a cheap code reader?</h3><p>A code reader tells you P0420. Lume Scan tells you your catalyst is degrading at 1.2% per month, predicts failure in 6 weeks, and has been coaching you to save $23/month on fuel the entire time.</p></div>
-      <div class="feature"><h3>Is my vehicle data private?</h3><p>Yes. All data stays on your device. We don't collect, sell, or share your driving data. See our <a href="/privacy.html">Privacy Policy</a>.</p></div>
+    <div class="faq" style="margin-top:32px">
+      <div class="faq-item"><div class="faq-q">Is there a subscription?</div><div class="faq-a"><p>No. $29.99 once, yours forever. No trials, no upsells, no recurring billing. Unlike FIXD ($100/yr), we don't monetize your maintenance anxiety.</p></div></div>
+      <div class="faq-item"><div class="faq-q">How much will I actually save?</div><div class="faq-a"><p>At $3.50/gallon and 15,000 miles/year, most drivers save $180–$320 annually through fuel coaching alone. The app pays for itself in about 2 weeks.</p></div></div>
+      <div class="faq-item"><div class="faq-q">Do I need a mechanic to install it?</div><div class="faq-a"><p>No. Plug the adapter into the OBD-II port under your steering column. Takes 10 seconds. No wiring, no tools, no modifications.</p></div></div>
+      <div class="faq-item"><div class="faq-q">What's the difference between this and a cheap code reader?</div><div class="faq-a"><p>A code reader tells you P0420. Lume Scan tells you your catalyst is degrading at 1.2% per month, predicts failure in 6 weeks, and has been coaching you to save $23/month on fuel the entire time.</p></div></div>
+      <div class="faq-item"><div class="faq-q">Is my vehicle data private?</div><div class="faq-a"><p>Yes. All data stays on your device. We don't collect, sell, or share your driving data. See our <a href="/privacy.html">Privacy Policy</a>.</p></div></div>
+      <div class="faq-item"><div class="faq-q">Will the proprietary dongle be required?</div><div class="faq-a"><p>No. Lume Scan will always work with any BLE OBD-II adapter. The proprietary dongle unlocks extended diagnostics and vehicle-carried logging, but the core 42-signal engine works with any $12 adapter.</p></div></div>
     </div>
   </section>
 
-  <section class="section ecosystem">
-    <div style="max-width:1100px; margin:0 auto;">
-      <div class="section-label">Part of the Lume Auto Ecosystem</div>
+  <!-- ECOSYSTEM -->
+  <section class="sec eco">
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="sec-label">Part of the Lume Auto Ecosystem</div>
       <h2>Connected to everything.</h2>
-      <p class="section-sub">Lume Scan is the diagnostic arm of a complete automotive and outdoor technology ecosystem.</p>
+      <p class="sec-sub">Lume Scan is the diagnostic arm of a complete automotive and outdoor technology ecosystem.</p>
       <div class="eco-grid">
-        <a href="https://lumeauto.tech" class="eco-card"><div class="eco-icon">ðŸš—</div><h4>Lume Auto</h4><p>The full automotive intelligence platform</p></a>
-        <a href="https://garagebot.io" class="eco-card"><div class="eco-icon">ðŸ”§</div><h4>GarageBot</h4><p>Smart garage & workshop management</p></a>
-        <a href="https://hydrocore.com" class="eco-card"><div class="eco-icon">ðŸ’§</div><h4>HydroCore</h4><p>Smart water management engine</p></a>
-        <a href="https://meridiancanon.com" class="eco-card"><div class="eco-icon">ðŸ“–</div><h4>Meridian Canon</h4><p>Navigation & positioning framework</p></a>
-        <a href="https://verdara.tlid.io" class="eco-card"><div class="eco-icon">ðŸŒ¿</div><h4>Verdara</h4><p>Plant identification & care engine</p></a>
-        <a href="https://verdaraultra.com" class="eco-card"><div class="eco-icon">ðŸ”ï¸</div><h4>Verdara Ultra</h4><p>Adventure travel & terrain analysis</p></a>
+        <a href="https://lumeauto.tech" class="eco-card"><div class="ico">🚗</div><h4>Lume Auto</h4><p>Full automotive intelligence platform</p></a>
+        <a href="https://garagebot.io" class="eco-card"><div class="ico">🔧</div><h4>GarageBot</h4><p>Smart garage & workshop management</p></a>
+        <a href="https://hydrocore.com" class="eco-card"><div class="ico">💧</div><h4>HydroCore</h4><p>Smart water management engine</p></a>
+        <a href="https://meridiancanon.com" class="eco-card"><div class="ico">🧭</div><h4>Meridian Canon</h4><p>Navigation & positioning framework</p></a>
+        <a href="https://verdara.tlid.io" class="eco-card"><div class="ico">🌿</div><h4>Verdara</h4><p>Plant identification & care engine</p></a>
+        <a href="https://dwtl.io" class="eco-card"><div class="ico">⛓️</div><h4>Trust Layer</h4><p>42-app blockchain ecosystem</p></a>
       </div>
     </div>
   </section>
 
-  <section class="section cta-section">
-    <div class="section-label">Ready?</div>
+  <!-- FINAL CTA -->
+  <section class="sec" style="text-align:center;padding:100px 24px;position:relative">
+    <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(circle,rgba(16,185,129,0.06) 0%,transparent 70%);pointer-events:none"></div>
+    <div class="sec-label">Ready?</div>
     <h2>Professional diagnostics.<br>Consumer price.</h2>
-    <p class="section-sub" style="margin: 16px auto 40px;">Everything a $200 scanner does â€” and a continuous governance engine on top. No subscription. Ever.</p>
-    <a href="https://lumeauto.tech/order" class="hero-cta">ðŸ”§ Order Lume Scan â€” $29.99</a>
-    <div class="hero-trust" style="margin-top: 20px;">
-      <span>âœ“ Free Shipping</span>
-      <span>âœ“ 30-Day Returns</span>
-      <span>✓ Free Shipping</span>
-      <span>✓ 30-Day Returns</span>
-      <span>✓ No Subscription</span>
-    </div>
+    <p class="sec-sub" style="margin:16px auto 40px">42 signals. Predictive maintenance. Fuel coaching. $29.99 once. No subscription. Ever.</p>
+    <a href="https://lumeauto.tech/order" class="cta-btn">🔧 Get Lume Scan — $29.99</a>
+    <div class="hero-trust" style="margin-top:20px"><span>✓ One-time purchase</span><span>✓ 30-day guarantee</span><span>✓ No subscription</span></div>
   </section>
 
   <footer>
     <p>© 2026 DarkWave Studios LLC · <a href="https://lumeauto.tech">Lume Auto</a> · <a href="https://dwtl.io">Trust Layer</a><br>
     <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · US Patent Pending 64/032,339</p>
   </footer>
+
+  <script>
+  // Ken Burns slideshow
+  const slides=document.querySelectorAll('.hero-slide');
+  let cur=0;
+  setInterval(()=>{slides[cur].classList.remove('active');cur=(cur+1)%slides.length;slides[cur].classList.add('active')},5000);
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{const item=q.parentElement;document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});item.classList.toggle('open')})});
+
+  // Intersection observer for fade-in
+  const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:0.1});
+  document.querySelectorAll('.card,.step,.sig-card,.faq-item,.eco-card,.stat').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease, transform 0.6s ease';obs.observe(el)});
+
+  // Smooth nav scroll
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
+  </script>
 
 </body>
 </html>
