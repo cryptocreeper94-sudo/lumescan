@@ -1,0 +1,11 @@
+services:
+  - type: static
+    name: lumescan-site
+    buildCommand: echo "Static site — no build needed"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+    domains:
+      - lumescan.tech
