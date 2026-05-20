@@ -141,6 +141,95 @@
     </div>
   </section>
 
+  <!-- LIVE SCAN DEMO -->
+  <section class="sec" style="border-top:1px solid var(--border)">
+    <div class="sec-label">Live Demo</div>
+    <h2>See it in action.</h2>
+    <p class="sec-sub">This is a simulated diagnostic scan showing exactly what Lume Scan does — reading 42 OBD-II signals at 100ms intervals.</p>
+
+    <div id="scan-demo" style="background:#0a0a0c;border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:800px;margin:0 auto">
+      <!-- Header bar -->
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.015);flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="scan-dot" style="width:10px;height:10px;border-radius:50%;background:var(--dim);transition:all 0.3s"></div>
+          <span id="scan-status" style="font-family:var(--mono);font-size:13px;color:var(--dim)">CONNECTION: STANDBY</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:13px;color:rgba(255,255,255,0.25)">PROTOCOL: CAN ISO 15765-4</div>
+      </div>
+
+      <!-- Main display -->
+      <div style="padding:2rem;min-height:320px;position:relative" id="scan-body">
+        <!-- Start overlay -->
+        <div id="scan-start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,10,12,0.85);backdrop-filter:blur(4px);z-index:10;cursor:pointer" onclick="startScan()">
+          <button style="display:flex;align-items:center;gap:12px;background:rgba(16,185,129,0.1);border:1px solid var(--accent);padding:14px 36px;border-radius:30px;color:var(--accent);font-weight:700;font-size:18px;cursor:pointer;animation:scan-pulse 2s ease infinite;font-family:var(--sans)">
+            ▶ INITIATE LIVE SCAN
+          </button>
+        </div>
+
+        <!-- Scanning view (hidden initially) -->
+        <div id="scan-live" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem" id="scan-grid">
+            <div>
+              <div style="color:rgba(255,255,255,0.25);font-size:11px;letter-spacing:2px;margin-bottom:12px">REAL-TIME TELEMETRY STREAM</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:13px">
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">ENGINE_RPM</span><span id="t-rpm" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">CALC_LOAD</span><span id="t-load" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">O2_VOLTAGE</span><span id="t-o2" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">TIMING_ADV</span><span id="t-timing" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">COOLANT_TEMP</span><span id="t-coolant" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">MAF_RATE</span><span id="t-maf" style="color:var(--accent2)">---</span></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:rgba(255,255,255,0.2)">NODES_ACTIVE</span><span style="color:rgba(255,255,255,0.2)">42</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:rgba(255,255,255,0.2)">LATENCY</span><span style="color:rgba(255,255,255,0.2)">12ms</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="font-size:48px;margin-bottom:12px">⚡</div>
+              <div id="scan-pct" style="font-size:2.5rem;font-weight:700;font-family:var(--mono);color:var(--text)">0%</div>
+              <div style="width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:16px;overflow:hidden">
+                <div id="scan-bar" style="width:0%;height:100%;background:var(--accent);transition:width 0.1s linear;border-radius:2px"></div>
+              </div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-family:var(--mono)">SCANNING 42 SIGNALS @ 100Hz</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complete view (hidden initially) -->
+        <div id="scan-done" style="display:none;text-align:center;padding:1rem 0">
+          <div style="font-size:48px;margin-bottom:12px">🛡️</div>
+          <h3 style="font-size:1.5rem;margin-bottom:16px">Scan Complete</h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+            <div style="padding:16px;background:rgba(16,185,129,0.05);border-radius:10px;border:1px solid rgba(16,185,129,0.2)">
+              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">BATTERY</div>
+              <div style="font-size:1.5rem;font-weight:700;color:var(--accent);font-family:var(--mono)">84%</div>
+            </div>
+            <div style="padding:16px;background:rgba(16,185,129,0.05);border-radius:10px;border:1px solid rgba(16,185,129,0.2)">
+              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">FAULTS</div>
+              <div style="font-size:1.2rem;font-weight:600;color:var(--text)">0 PENDING</div>
+            </div>
+            <div style="padding:16px;background:rgba(16,185,129,0.05);border-radius:10px;border:1px solid rgba(16,185,129,0.2)">
+              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">STATUS</div>
+              <div style="font-size:1.2rem;font-weight:600;color:var(--text)">✓ HEALTHY</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+            <div style="padding:14px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.15)">
+              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">DRIVER SCORE</div>
+              <div style="font-size:1.3rem;font-weight:700;color:var(--accent2);font-family:var(--mono)">87 / 100</div>
+            </div>
+            <div style="padding:14px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.15)">
+              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">FUEL SAVINGS</div>
+              <div style="font-size:1.3rem;font-weight:700;color:var(--accent);font-family:var(--mono)">$23/mo</div>
+            </div>
+          </div>
+          <div style="padding:14px;background:rgba(16,185,129,0.05);border-radius:10px;border:1px dashed rgba(16,185,129,0.4);font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;letter-spacing:0.05em;margin-bottom:16px">
+            LUME_HASH: 0x8f2c3b4a...9d1e<span id="scan-hash"></span>
+          </div>
+          <button onclick="resetScan()" style="background:transparent;border:none;color:var(--dim);cursor:pointer;text-decoration:underline;font-size:14px;font-family:var(--sans)">Reset Demo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- 42 SIGNALS -->
   <section class="sec" id="signals" style="border-top:1px solid var(--border)">
     <div class="sec-label">The 42-Signal Engine</div>
@@ -325,6 +414,63 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
   });
+  // ── Live Scan Simulator ──
+  let scanInterval = null;
+  let scanProgress = 0;
+
+  function startScan() {
+    document.getElementById('scan-start').style.display = 'none';
+    document.getElementById('scan-live').style.display = 'block';
+    document.getElementById('scan-done').style.display = 'none';
+    document.getElementById('scan-dot').style.background = 'var(--accent)';
+    document.getElementById('scan-dot').style.boxShadow = '0 0 10px var(--accent)';
+    document.getElementById('scan-status').textContent = 'CONNECTION: ACTIVE (100Hz)';
+    document.getElementById('scan-status').style.color = 'var(--accent)';
+    scanProgress = 0;
+
+    scanInterval = setInterval(() => {
+      scanProgress += 0.8;
+      if (scanProgress >= 100) {
+        scanProgress = 100;
+        clearInterval(scanInterval);
+        setTimeout(completeScan, 300);
+      }
+      document.getElementById('scan-pct').textContent = Math.floor(scanProgress) + '%';
+      document.getElementById('scan-bar').style.width = scanProgress + '%';
+
+      // Jitter telemetry
+      document.getElementById('t-rpm').textContent = Math.floor(800 + Math.random() * 200);
+      document.getElementById('t-load').textContent = (20 + Math.random() * 15).toFixed(1) + '%';
+      document.getElementById('t-o2').textContent = (0.1 + Math.random() * 0.8).toFixed(2) + 'v';
+      document.getElementById('t-timing').textContent = Math.floor(10 + Math.random() * 5) + '°';
+      document.getElementById('t-coolant').textContent = Math.floor(185 + Math.random() * 15) + '°F';
+      document.getElementById('t-maf').textContent = (3.5 + Math.random() * 4).toFixed(1) + ' g/s';
+    }, 100);
+  }
+
+  function completeScan() {
+    document.getElementById('scan-live').style.display = 'none';
+    document.getElementById('scan-done').style.display = 'block';
+    document.getElementById('scan-dot').style.background = 'var(--accent2)';
+    document.getElementById('scan-dot').style.boxShadow = 'none';
+    document.getElementById('scan-status').textContent = 'CONNECTION: TERMINATED';
+    document.getElementById('scan-status').style.color = 'var(--dim)';
+    document.getElementById('scan-hash').textContent = ' ' + Date.now();
+  }
+
+  function resetScan() {
+    clearInterval(scanInterval);
+    scanProgress = 0;
+    document.getElementById('scan-live').style.display = 'none';
+    document.getElementById('scan-done').style.display = 'none';
+    document.getElementById('scan-start').style.display = 'flex';
+    document.getElementById('scan-dot').style.background = 'var(--dim)';
+    document.getElementById('scan-dot').style.boxShadow = 'none';
+    document.getElementById('scan-status').textContent = 'CONNECTION: STANDBY';
+    document.getElementById('scan-status').style.color = 'var(--dim)';
+    document.getElementById('scan-pct').textContent = '0%';
+    document.getElementById('scan-bar').style.width = '0%';
+  }
   </script>
 
 </body>

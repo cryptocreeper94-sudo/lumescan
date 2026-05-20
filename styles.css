@@ -152,4 +152,7 @@ footer a{color:var(--accent2)}
 .nav-links{display:none}
 .two-col-grid{grid-template-columns:1fr}
 .sig-grid{grid-template-columns:1fr}
+#scan-grid{grid-template-columns:1fr !important}
 }
+
+@keyframes scan-pulse{0%,100%{box-shadow:0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 30px rgba(16,185,129,0.5)}}
