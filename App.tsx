@@ -6,8 +6,7 @@ import ConnectionScreen from './src/screens/ConnectionScreen';
 import ConditionReportScreen from './src/screens/ConditionReportScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import { COLORS } from './src/theme/colors';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from './src/config/firebase';
+import { auth, onAuthStateChanged, type User } from './src/config/firebase';
 
 type Screen = 'login' | 'connection' | 'dashboard' | 'report';
 

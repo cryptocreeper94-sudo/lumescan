@@ -1,34 +1,54 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
-import { ActivitySquare, ShieldCheck, AlertCircle } from 'lucide-react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator,
+  ScrollView,
+} from 'react-native';
+import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { signInWithEmail, registerWithEmail } from '../config/firebase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'login' | 'register'>('login');
 
-  const handleLogin = async () => {
+  const handleSubmit = async () => {
     if (!email || !password) {
       setError("Email and Password are required");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     try {
-      // In a real environment with valid config, this will authenticate
-      // Since we are mocking/waiting for config, we will catch the error
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
-      // If config is missing, this will throw an auth error
-      if (err.code === 'auth/invalid-api-key') {
-         setError("Firebase API Key is missing. Please update config.");
+      if (mode === 'register') {
+        await registerWithEmail(email, password);
       } else {
-         setError(err.message || "Failed to authenticate.");
+        await signInWithEmail(email, password);
+      }
+      // onAuthStateChanged in App.tsx will navigate away on success
+    } catch (err: any) {
+      const msg: string = err?.message || 'Authentication failed.';
+      // Clean up Firebase error codes
+      if (msg.includes('wrong-password') || msg.includes('invalid-credential')) {
+        setError('Invalid email or password.');
+      } else if (msg.includes('email-already-in-use')) {
+        setError('This email is already registered. Try signing in.');
+      } else if (msg.includes('weak-password')) {
+        setError('Password must be at least 6 characters.');
+      } else if (msg.includes('invalid-email')) {
+        setError('Please enter a valid email address.');
+      } else if (msg.includes('user-not-found')) {
+        setError('No account found. Register below.');
+      } else if (msg.includes('Access restricted')) {
+        setError('Access restricted to authorized email addresses.');
+      } else if (msg.includes('invalid-api-key')) {
+        setError('Firebase API Key is missing. Please update config.');
+      } else {
+        setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim());
       }
       setLoading(false);
     }
@@ -36,82 +56,107 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <View style={styles.content}>
-          
-          {/* Logo Header */}
-          <View style={styles.logoContainer}>
-            <View style={styles.iconWrapper}>
-              <ActivitySquare size={48} color={COLORS.cyan} />
-            </View>
-            <Text style={styles.title}>LUME<Text style={styles.titleSub}>AUTO</Text></Text>
-            <Text style={styles.subtitle}>DETERMINISTIC DIAGNOSTIC ENGINE</Text>
-          </View>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.content}>
 
-          {/* Login Form */}
-          <View style={styles.formContainer}>
-            <View style={styles.securityBadge}>
-              <ShieldCheck size={14} color={COLORS.emerald} />
-              <Text style={styles.securityText}>AUTHORIZED PERSONNEL ONLY</Text>
-            </View>
-
-            {error && (
-              <View style={styles.errorBox}>
-                <AlertCircle size={16} color="#ef4444" />
-                <Text style={styles.errorText}>{error}</Text>
+            {/* Logo Header */}
+            <View style={styles.logoContainer}>
+              <View style={styles.iconWrapper}>
+                <ActivitySquare size={48} color={COLORS.cyan} />
               </View>
-            )}
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="inspector@manheim.com"
-                placeholderTextColor={COLORS.textDim}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-                editable={!loading}
-              />
+              <Text style={styles.title}>LUME<Text style={styles.titleSub}>AUTO</Text></Text>
+              <Text style={styles.subtitle}>DETERMINISTIC DIAGNOSTIC ENGINE</Text>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>SECURITY KEY</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="••••••••"
-                placeholderTextColor={COLORS.textDim}
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                editable={!loading}
-              />
-            </View>
+            {/* Login Form */}
+            <View style={styles.formContainer}>
+              <View style={styles.securityBadge}>
+                <ShieldCheck size={14} color={COLORS.emerald} />
+                <Text style={styles.securityText}>AUTHORIZED PERSONNEL ONLY</Text>
+              </View>
 
-            <TouchableOpacity 
-              style={[styles.loginBtn, loading && styles.loginBtnDisabled]} 
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color={COLORS.bgDark} size="small" />
-              ) : (
-                <Text style={styles.loginBtnText}>INITIALIZE SESSION</Text>
+              {error && (
+                <View style={styles.errorBox}>
+                  <AlertCircle size={16} color="#ef4444" />
+                  <Text style={styles.errorText}>{error}</Text>
+                </View>
               )}
-            </TouchableOpacity>
-          </View>
 
-          {/* Footer Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>LUME42 LABS — US PROVISIONAL 64/032,339</Text>
-            <Text style={styles.footerTextSub}>All connections are cryptographically logged.</Text>
-          </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="inspector@manheim.com"
+                  placeholderTextColor={COLORS.textDim}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!loading}
+                />
+              </View>
 
-        </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>SECURITY KEY</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor={COLORS.textDim}
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                  editable={!loading}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color={COLORS.bgDark} size="small" />
+                ) : (
+                  <View style={styles.btnContent}>
+                    {mode === 'register' ? (
+                      <UserPlus size={16} color={COLORS.bgDark} />
+                    ) : (
+                      <LogIn size={16} color={COLORS.bgDark} />
+                    )}
+                    <Text style={styles.loginBtnText}>
+                      {mode === 'register' ? 'CREATE ACCOUNT' : 'INITIALIZE SESSION'}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              {/* Toggle login / register */}
+              <TouchableOpacity
+                style={styles.toggleBtn}
+                onPress={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); }}
+              >
+                <Text style={styles.toggleText}>
+                  {mode === 'login'
+                    ? "Don't have an account? Register"
+                    : 'Already have an account? Sign in'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>LUME42 LABS — US PROVISIONAL 64/032,339</Text>
+              <Text style={styles.footerTextSub}>
+                Authenticated by Firebase · All connections are cryptographically logged.
+              </Text>
+            </View>
+
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -124,6 +169,9 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
@@ -237,11 +285,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.textMuted,
     shadowOpacity: 0,
   },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   loginBtnText: {
     color: COLORS.bgDark,
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 2,
+  },
+  toggleBtn: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  toggleText: {
+    color: COLORS.cyan,
+    fontSize: 11,
+    fontWeight: '600',
   },
   footer: {
     marginTop: 48,
@@ -257,5 +320,6 @@ const styles = StyleSheet.create({
   footerTextSub: {
     color: COLORS.textDim,
     fontSize: 9,
-  }
+    textAlign: 'center',
+  },
 });
