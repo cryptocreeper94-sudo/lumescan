@@ -21,10 +21,7 @@ export default function LoginScreen() {
 
   // ── Google SSO via expo-auth-session ──
   const [_request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: '41307406912-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com',
-    // The web client ID from your Firebase console → Authentication → Sign-in method → Google
-    // You can find this in the Firebase Console under:
-    // Project Settings → General → Your Apps → Web App → OAuth 2.0 Client IDs
+    clientId: '41307406912-f8ofdal9haaa8r468ts48vvimdvfs04i.apps.googleusercontent.com',
   });
 
   useEffect(() => {
