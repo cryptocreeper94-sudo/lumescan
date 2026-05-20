@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "41307406912",
+    "project_id": "darkwave-auth",
+    "storage_bucket": "darkwave-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:41307406912:android:76c6b8f59764c9122a55a5",
+        "android_client_info": {
+          "package_name": "com.darkwavestudios.lumeauto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "41307406912-f8ofdal9haaa8r468ts48vvimdvfs04i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYS5O_sFKrbZdC_5LU8cFDJ_E55kz6V4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "41307406912-f8ofdal9haaa8r468ts48vvimdvfs04i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

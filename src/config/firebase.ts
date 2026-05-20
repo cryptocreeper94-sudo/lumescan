@@ -17,15 +17,14 @@ import {
   type User,
 } from 'firebase/auth';
 
-// ── DarkWave Auth — same project as cox.tlid.io / web app ──
+// ── DarkWave Auth — same project as Trust Hub / web app ──
 const firebaseConfig = {
-  apiKey: "AIzaSyByHm_Zwo9NGZ3DyHtZ5_wCtHlLXcat23Q",
+  apiKey: "AIzaSyBYS5O_sFKrbZdC_5LU8cFDJ_E55kz6V4s",
   authDomain: "darkwave-auth.firebaseapp.com",
   projectId: "darkwave-auth",
   storageBucket: "darkwave-auth.firebasestorage.app",
   messagingSenderId: "41307406912",
-  appId: "1:41307406912:web:9a674f22472924b52a55a5",
-  measurementId: "G-3YHVG8K6L8",
+  appId: "1:41307406912:android:76c6b8f59764c9122a55a5",
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
