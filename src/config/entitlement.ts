@@ -32,24 +32,30 @@ export interface EntitlementStatus {
 }
 
 // ── Free tier limits ──
+// Just enough to prove the app works. Not enough to replace a $20 scanner.
+// Show all 42 gauge slots but blur/lock 39 of them for FOMO.
 export const FREE_TIER_LIMITS = {
-  maxSignals: 6,          // Out of 42
-  maxReportsPerDay: 1,    // Condition reports
-  fuelCoaching: false,
-  predictiveMaintenance: false,
-  driverScoring: false,
-  codeReading: true,      // Always available
-  codeClear: true,        // Always available
+  maxSignals: 3,          // RPM, speed, coolant temp only
+  visibleSignals: 42,     // Show all gauges but lock 39 (blurred)
+  maxReportsPerDay: 0,    // View only — no save/export
+  fuelCoaching: false,    // GATED — this is the $328/yr value prop
+  predictiveMaintenance: false, // GATED — killer differentiator
+  driverScoring: false,   // GATED
+  codeReading: true,      // Gets them in the door
+  codeClear: true,        // Makes them love the app
+  exportEnabled: false,   // No CSV/PDF export on free
 };
 
 export const PRO_TIER_LIMITS = {
   maxSignals: 42,
+  visibleSignals: 42,
   maxReportsPerDay: Infinity,
   fuelCoaching: true,
   predictiveMaintenance: true,
   driverScoring: true,
   codeReading: true,
   codeClear: true,
+  exportEnabled: true,
 };
 
 /**
