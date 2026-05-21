@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity } from 'lucide-react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity, Shield } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { generateConditionReport } from '../telemetry/SimulatedEngine';
+import { sealScanToLedger, buildScanPayload, type ScanRecord } from '../telemetry/TrustLayerLedger';
+import { tick } from '../telemetry/SimulatedEngine';
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   ok: <CheckCircle size={14} color={COLORS.emerald} />,
@@ -20,11 +22,28 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function ConditionReportScreen({ onBack }: { onBack: () => void }) {
   const [report, setReport] = useState<ReturnType<typeof generateConditionReport> | null>(null);
+  const [tllRecord, setTllRecord] = useState<ScanRecord | null>(null);
+  const [sealing, setSealing] = useState(false);
 
   useEffect(() => {
     // Simulate 2-second scan delay
-    const timer = setTimeout(() => {
-      setReport(generateConditionReport());
+    const timer = setTimeout(async () => {
+      const currentSignals = tick();
+      const conditionReport = generateConditionReport();
+      setReport(conditionReport);
+
+      // Seal to Trust Layer Ledger
+      setSealing(true);
+      try {
+        const payload = buildScanPayload(conditionReport, currentSignals, 'consumer');
+        const record = await sealScanToLedger(payload);
+        if (record) {
+          setTllRecord(record);
+        }
+      } catch (err) {
+        console.warn('[TLL] Seal failed:', err);
+      }
+      setSealing(false);
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -106,6 +125,43 @@ export default function ConditionReportScreen({ onBack }: { onBack: () => void }
             US Provisional Patent 64/032,339
           </Text>
         </View>
+
+        {/* TLL Hallmark */}
+        <View style={styles.tllCard}>
+          <View style={styles.tllHeader}>
+            <Shield size={20} color={COLORS.emerald} />
+            <Text style={styles.tllTitle}>TRUST LAYER LEDGER · {tllRecord ? 'VERIFIED' : sealing ? 'SEALING...' : 'PENDING'}</Text>
+          </View>
+          {tllRecord ? (
+            <>
+              {tllRecord.healthNarrative ? (
+                <Text style={styles.tllNarrative}>{tllRecord.healthNarrative}</Text>
+              ) : null}
+              <View style={styles.tllDetails}>
+                <Text style={styles.tllDetailLabel}>Record</Text>
+                <Text style={styles.tllDetailValue}>{tllRecord.scanId}</Text>
+              </View>
+              <View style={styles.tllDetails}>
+                <Text style={styles.tllDetailLabel}>Hash</Text>
+                <Text style={styles.tllHash}>{tllRecord.scanHash?.slice(0, 24)}...</Text>
+              </View>
+              <View style={styles.tllDetails}>
+                <Text style={styles.tllDetailLabel}>Sealed</Text>
+                <Text style={styles.tllDetailValue}>{new Date(tllRecord.hallmark.sealedAt).toLocaleString()}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.tllVerifyBtn}
+                onPress={() => Linking.openURL(tllRecord.explorerUrl)}
+              >
+                <Text style={styles.tllVerifyText}>🛡️ View on Explorer</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.tllPending}>
+              {sealing ? 'Sealing scan to Trust Layer Ledger...' : 'Connect to seal this report'}
+            </Text>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -141,4 +197,16 @@ const styles = StyleSheet.create({
   summaryLabel: { color: COLORS.cyan, fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 8 },
   summaryText: { color: COLORS.textMain, fontSize: 13, lineHeight: 20, marginBottom: 16 },
   summaryFooter: { color: COLORS.textDim, fontSize: 10, lineHeight: 16, textAlign: 'center' },
+  // TLL Hallmark
+  tllCard: { marginTop: 16, borderRadius: 14, padding: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.15)', backgroundColor: 'rgba(16,185,129,0.03)' },
+  tllHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  tllTitle: { color: COLORS.emerald, fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
+  tllNarrative: { color: COLORS.textMain, fontSize: 13, lineHeight: 20, marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(16,185,129,0.08)' },
+  tllDetails: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  tllDetailLabel: { color: COLORS.textDim, fontSize: 10, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' as const },
+  tllDetailValue: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600' },
+  tllHash: { color: 'rgba(16,185,129,0.5)', fontSize: 10, fontFamily: 'monospace' },
+  tllVerifyBtn: { marginTop: 14, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10, backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)', alignItems: 'center' },
+  tllVerifyText: { color: COLORS.emerald, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  tllPending: { color: COLORS.textDim, fontSize: 12, fontStyle: 'italic' },
 });
