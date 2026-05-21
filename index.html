@@ -106,7 +106,9 @@
     <div class="sec-label">Why Lume Scan</div>
     <h2>The competition charges more<br>and does less.</h2>
     <p class="sec-sub">We compared Lume Scan against every major scanner on the market.</p>
-    <div style="overflow-x:auto;border-radius:16px;border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px)">
+
+    <!-- Desktop table (hidden on mobile) -->
+    <div class="cmp-desktop" style="border-radius:16px;border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px);overflow:hidden">
       <table class="cmp">
         <thead><tr>
           <th style="text-align:left;padding-left:20px">Feature</th>
@@ -126,6 +128,21 @@
           <tr><td style="padding-left:20px">BYO adapter</td><td class="yes" style="text-align:center">✓ ($12)</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Built-in</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile cards (hidden on desktop) -->
+    <div class="cmp-mobile">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="cmp-row"><span class="cmp-feat">Read/clear codes</span><span class="cmp-val yes">✓ All scanners</span></div>
+        <div class="cmp-row"><span class="cmp-feat">Live signals</span><span class="cmp-val yes"><strong>42</strong> <span style="color:var(--dim);font-size:10px">vs 10-30</span></span></div>
+        <div class="cmp-row"><span class="cmp-feat">Scan interval</span><span class="cmp-val yes"><strong>100ms</strong> <span style="color:var(--dim);font-size:10px">vs 300ms-1s</span></span></div>
+        <div class="cmp-row"><span class="cmp-feat">Fuel coaching</span><span class="cmp-val yes">✓ Only Lume</span></div>
+        <div class="cmp-row"><span class="cmp-feat">Predictive maintenance</span><span class="cmp-val yes">✓ Included</span></div>
+        <div class="cmp-row"><span class="cmp-feat">Driver scoring</span><span class="cmp-val yes">✓ Only Lume</span></div>
+        <div class="cmp-row"><span class="cmp-feat">Subscription</span><span class="cmp-val yes"><strong>Never.</strong></span></div>
+        <div class="cmp-row"><span class="cmp-feat">BYO adapter</span><span class="cmp-val yes">✓ Any $12 BLE</span></div>
+        <div class="cmp-row" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2)"><span class="cmp-feat" style="color:var(--accent)">Total cost</span><span class="cmp-val yes" style="font-size:16px"><strong>$42 forever</strong></span></div>
+      </div>
     </div>
     <p style="font-size:12px;color:var(--dim);margin-top:20px;text-align:center">Total cost: Lume Scan $29.99 + $12 adapter = <strong style="color:var(--accent)">$42 total, forever</strong> vs FIXD at $100/year or BlueDriver at $120.</p>
   </section>
