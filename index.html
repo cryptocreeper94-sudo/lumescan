@@ -430,6 +430,15 @@
     const isMobile = window.innerWidth <= 768;
     const perPage = isMobile ? 1 : 3;
     const totalPages = Math.ceil(cards.length / perPage);
+    const gap = isMobile ? 0 : 16;
+
+    // Size cards: on mobile each card = 100% of wrapper, on desktop = ~33%
+    const wrapWidth = wrap.offsetWidth;
+    const cardWidth = isMobile ? wrapWidth : (wrapWidth - gap * (perPage - 1)) / perPage;
+    const trackWidth = cardWidth * cards.length + gap * (cards.length - 1);
+    track.style.width = trackWidth + 'px';
+    track.style.gap = gap + 'px';
+    cards.forEach(c => { c.style.flex = '0 0 ' + cardWidth + 'px'; c.style.maxWidth = cardWidth + 'px'; });
 
     // Build dots
     if (dotsContainer) {
@@ -445,18 +454,17 @@
 
     function goTo(p) {
       page = Math.max(0, Math.min(totalPages - 1, p));
-      const offset = page * (100 / totalPages);
-      track.style.transform = 'translateX(-' + offset + '%)';
+      const offset = page * perPage * (cardWidth + gap);
+      // Don't scroll past the end
+      const maxOffset = trackWidth - wrapWidth;
+      const clampedOffset = Math.min(offset, maxOffset);
+      track.style.transform = 'translateX(-' + clampedOffset + 'px)';
       if (dotsContainer) {
         dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
           d.classList.toggle('active', i === page);
         });
       }
     }
-
-    // Set track width so cards lay out correctly
-    track.style.width = (totalPages * 100) + '%';
-    cards.forEach(c => { c.style.flex = '0 0 ' + (100 / cards.length) + '%'; });
 
     // Touch swipe
     let tx = 0;
