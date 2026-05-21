@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LumeScan Explorer — Trust Layer Ledger Verification</title>
+  <meta name="description" content="Verify your LumeScan diagnostic reports on the Trust Layer Ledger. Public scan verification, vehicle health history, and certified condition reports.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#070a0f; color:#e2e8f0; min-height:100vh; }
+    a { color:#22d3ee; text-decoration:none; }
+
+    /* Nav */
+    .nav { display:flex; align-items:center; justify-content:space-between; padding:14px 24px; border-bottom:1px solid rgba(255,255,255,0.04); position:sticky; top:0; z-index:100; background:rgba(7,10,15,0.95); backdrop-filter:blur(20px); }
+    .nav-brand { font-size:1.2rem; font-weight:800; color:#fff; letter-spacing:0.02em; }
+    .nav-brand span { color:#10b981; }
+    .nav-back { font-size:0.8rem; color:rgba(255,255,255,0.4); display:flex; align-items:center; gap:6px; }
+
+    /* Container */
+    .container { max-width:900px; margin:0 auto; padding:40px 20px 80px; }
+
+    /* Header */
+    .header { text-align:center; margin-bottom:40px; }
+    .header-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.15); font-size:0.7rem; font-weight:700; color:#6ee7b7; letter-spacing:0.1em; margin-bottom:16px; }
+    .header h1 { font-size:1.8rem; font-weight:800; margin-bottom:8px; }
+    .header h1 span { color:#10b981; }
+    .header p { color:rgba(255,255,255,0.4); font-size:0.9rem; max-width:500px; margin:0 auto; line-height:1.6; }
+
+    /* Search */
+    .search-box { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:24px; margin-bottom:32px; }
+    .search-tabs { display:flex; gap:4px; margin-bottom:16px; }
+    .search-tab { padding:8px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:rgba(255,255,255,0.4); font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .search-tab.active { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#6ee7b7; }
+    .search-row { display:flex; gap:10px; }
+    .search-input { flex:1; padding:14px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); color:#fff; font-size:0.9rem; font-family:'JetBrains Mono',monospace; outline:none; transition:border-color 0.2s; }
+    .search-input:focus { border-color:rgba(16,185,129,0.4); }
+    .search-input::placeholder { color:rgba(255,255,255,0.15); }
+    .search-btn { padding:14px 28px; border-radius:12px; border:none; background:linear-gradient(135deg,#10b981,#059669); color:#000; font-size:0.85rem; font-weight:800; cursor:pointer; letter-spacing:0.05em; transition:transform 0.15s; font-family:inherit; }
+    .search-btn:hover { transform:scale(1.02); }
+    .search-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* Result card */
+    .result { display:none; margin-bottom:32px; }
+    .result.show { display:block; }
+    .result-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; overflow:hidden; }
+    .result-status { padding:20px 24px; display:flex; align-items:center; gap:14px; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .result-status.verified { background:rgba(16,185,129,0.06); }
+    .result-status.not-found { background:rgba(239,68,68,0.06); }
+    .status-icon { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .status-icon.verified { background:rgba(16,185,129,0.15); }
+    .status-icon.not-found { background:rgba(239,68,68,0.15); }
+    .status-text h3 { font-size:1rem; font-weight:700; margin-bottom:2px; }
+    .status-text p { font-size:0.8rem; color:rgba(255,255,255,0.4); }
+
+    /* Scan details */
+    .scan-body { padding:24px; }
+    .scan-narrative { font-size:0.9rem; color:rgba(255,255,255,0.7); line-height:1.7; margin-bottom:20px; padding:16px; background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.08); border-radius:12px; }
+
+    /* Score gauge */
+    .score-row { display:flex; align-items:center; gap:24px; margin-bottom:20px; flex-wrap:wrap; }
+    .score-ring { position:relative; width:100px; height:100px; flex-shrink:0; }
+    .score-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+    .score-ring circle { fill:none; stroke-width:8; }
+    .score-ring .bg { stroke:rgba(255,255,255,0.04); }
+    .score-ring .fill { stroke:#10b981; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+    .score-ring .value { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+    .score-ring .value .num { font-size:1.8rem; font-weight:900; color:#fff; }
+    .score-ring .value .lbl { font-size:0.55rem; color:rgba(255,255,255,0.3); font-weight:700; letter-spacing:0.12em; }
+    .score-stats { display:flex; flex-direction:column; gap:8px; }
+    .score-stat { display:flex; align-items:center; gap:8px; }
+    .score-stat .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .score-stat span { font-size:0.8rem; color:rgba(255,255,255,0.5); }
+    .score-stat strong { color:rgba(255,255,255,0.85); }
+
+    /* Detail grid */
+    .detail-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+    .detail-item { padding:12px 14px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); border-radius:10px; }
+    .detail-item .lbl { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:rgba(255,255,255,0.2); margin-bottom:4px; }
+    .detail-item .val { font-size:0.85rem; font-weight:600; color:rgba(255,255,255,0.8); font-family:'JetBrains Mono',monospace; word-break:break-all; }
+
+    /* TLL Hallmark */
+    .hallmark { margin-top:24px; padding:20px; border:1px solid rgba(16,185,129,0.12); border-radius:14px; background:linear-gradient(135deg,rgba(16,185,129,0.04),rgba(6,182,212,0.02)); display:flex; align-items:center; gap:16px; }
+    .hallmark-img { width:64px; height:64px; border-radius:12px; object-fit:contain; flex-shrink:0; }
+    .hallmark-info { flex:1; }
+    .hallmark-title { font-size:0.7rem; font-weight:800; letter-spacing:0.14em; color:#6ee7b7; margin-bottom:4px; }
+    .hallmark-details { font-size:0.75rem; color:rgba(255,255,255,0.4); line-height:1.6; }
+    .hallmark-details strong { color:rgba(255,255,255,0.7); }
+    .hallmark-hash { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:rgba(16,185,129,0.5); word-break:break-all; margin-top:4px; }
+
+    /* Actions */
+    .actions { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+    .action-btn { padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.6); font-size:0.8rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:inherit; display:flex; align-items:center; gap:6px; }
+    .action-btn:hover { background:rgba(255,255,255,0.06); color:#fff; }
+    .action-btn.primary { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.2); color:#6ee7b7; }
+
+    /* Loading */
+    .loading { display:none; text-align:center; padding:40px; color:rgba(255,255,255,0.3); }
+    .loading.show { display:block; }
+    .spinner { display:inline-block; width:24px; height:24px; border:2px solid rgba(16,185,129,0.2); border-top-color:#10b981; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* Footer */
+    footer { text-align:center; padding:30px 20px; border-top:1px solid rgba(255,255,255,0.03); font-size:0.7rem; color:rgba(255,255,255,0.15); }
+    footer a { color:rgba(16,185,129,0.4); }
+
+    /* Print styles */
+    @media print {
+      body { background:#fff; color:#111; }
+      .nav, .search-box, .actions, footer, .search-tabs { display:none !important; }
+      .result-card { border:2px solid #ccc; }
+      .hallmark { border:2px solid #10b981; }
+      .score-ring .fill { stroke:#10b981 !important; }
+      .detail-item { border:1px solid #ddd; }
+    }
+
+    @media (max-width:600px) {
+      .container { padding:20px 14px 60px; }
+      .header h1 { font-size:1.4rem; }
+      .search-row { flex-direction:column; }
+      .search-btn { width:100%; }
+      .score-row { justify-content:center; text-align:center; }
+      .hallmark { flex-direction:column; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-brand" href="/">Lume<span>Scan</span></a>
+    <a class="nav-back" href="/">← Back to LumeScan</a>
+  </nav>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-badge">🛡️ TRUST LAYER LEDGER · VERIFIED</div>
+      <h1>Scan <span>Explorer</span></h1>
+      <p>Every LumeScan diagnostic is cryptographically sealed on the Trust Layer Ledger. Verify any scan report instantly.</p>
+    </div>
+
+    <!-- Search -->
+    <div class="search-box">
+      <div class="search-tabs">
+        <button class="search-tab active" data-mode="id">Scan ID</button>
+        <button class="search-tab" data-mode="hash">SHA-256 Hash</button>
+      </div>
+      <div class="search-row">
+        <input type="text" class="search-input" id="searchInput" placeholder="TLL-LS-00000001" spellcheck="false">
+        <button class="search-btn" id="searchBtn" onclick="doSearch()">Verify</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div>Querying Trust Layer Ledger...</div>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="result">
+      <div class="result-card" id="resultCard">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Info section -->
+    <div style="margin-top:40px;padding:24px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px">
+      <h3 style="font-size:1rem;margin-bottom:12px">How Verification Works</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+        <div>
+          <div style="font-size:1.2rem;margin-bottom:6px">📱</div>
+          <h4 style="font-size:0.85rem;margin-bottom:4px">1. Scan</h4>
+          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.5">LumeScan reads 42 signals from your vehicle's OBD-II port at 100ms intervals</p>
+        </div>
+        <div>
+          <div style="font-size:1.2rem;margin-bottom:6px">🔐</div>
+          <h4 style="font-size:0.85rem;margin-bottom:4px">2. Hash</h4>
+          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.5">The raw signal data is hashed with SHA-256 creating a unique fingerprint</p>
+        </div>
+        <div>
+          <div style="font-size:1.2rem;margin-bottom:6px">🛡️</div>
+          <h4 style="font-size:0.85rem;margin-bottom:4px">3. Seal</h4>
+          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.5">The hash is permanently sealed on the Trust Layer Ledger with a TLL Hallmark</p>
+        </div>
+        <div>
+          <div style="font-size:1.2rem;margin-bottom:6px">✅</div>
+          <h4 style="font-size:0.85rem;margin-bottom:4px">4. Verify</h4>
+          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.5">Anyone with the Scan ID can verify the report is authentic and unaltered</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div style="margin-bottom:10px;font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.5)">🇺🇸 Proudly made in Gladeville, TN, USA</div>
+    © 2026 DarkWave Studios LLC · <a href="https://lumeauto.tech">Lume Auto</a> · <a href="https://dwtl.io">Trust Layer Ledger</a><br>
+    <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a> · US Patent Pending 64/032,339
+  </footer>
+
+  <script>
+  const API = 'https://trusthub.tlid.io';
+  let searchMode = 'id';
+
+  // Tab switching
+  document.querySelectorAll('.search-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      searchMode = tab.dataset.mode;
+      const input = document.getElementById('searchInput');
+      input.placeholder = searchMode === 'id' ? 'TLL-LS-00000001' : 'a4f8c2e91b3d7f6a...';
+      input.value = '';
+    });
+  });
+
+  // Enter key
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // Auto-search from URL params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('id')) {
+    document.getElementById('searchInput').value = params.get('id');
+    setTimeout(doSearch, 300);
+  } else if (params.get('hash')) {
+    searchMode = 'hash';
+    document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-mode="hash"]').classList.add('active');
+    document.getElementById('searchInput').value = params.get('hash');
+    setTimeout(doSearch, 300);
+  }
+
+  async function doSearch() {
+    const input = document.getElementById('searchInput').value.trim();
+    if (!input) return;
+
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('searchBtn').disabled = true;
+
+    try {
+      const endpoint = searchMode === 'id'
+        ? `${API}/api/lumescan/scan/${encodeURIComponent(input)}`
+        : `${API}/api/lumescan/verify/${encodeURIComponent(input)}`;
+
+      const res = await fetch(endpoint);
+      const data = await res.json();
+
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('searchBtn').disabled = false;
+
+      if (data.verified) {
+        const scan = data.scan || data;
+        renderVerified(scan);
+      } else {
+        renderNotFound(input);
+      }
+    } catch (err) {
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('searchBtn').disabled = false;
+      renderNotFound(input);
+    }
+  }
+
+  function renderVerified(scan) {
+    const score = scan.healthScore || 0;
+    const circumference = 2 * Math.PI * 42;
+    const offset = circumference - (score / 100) * circumference;
+    const scoreColor = score >= 85 ? '#10b981' : score >= 70 ? '#f59e0b' : '#ef4444';
+
+    const vehicle = scan.vehicle
+      ? `${scan.vehicle.year || ''} ${scan.vehicle.make || ''} ${scan.vehicle.model || ''}`.trim()
+      : 'Vehicle';
+
+    document.getElementById('resultCard').innerHTML = `
+      <div class="result-status verified">
+        <div class="status-icon verified">✅</div>
+        <div class="status-text">
+          <h3>Scan Verified — Authentic</h3>
+          <p>This diagnostic report is sealed on the Trust Layer Ledger and has not been altered.</p>
+        </div>
+      </div>
+      <div class="scan-body">
+        <div class="scan-narrative">${scan.healthNarrative || 'No narrative available'}</div>
+
+        <div class="score-row">
+          <div class="score-ring">
+            <svg viewBox="0 0 100 100">
+              <circle class="bg" cx="50" cy="50" r="42" />
+              <circle class="fill" cx="50" cy="50" r="42"
+                stroke="${scoreColor}"
+                stroke-dasharray="${circumference}"
+                stroke-dashoffset="${offset}" />
+            </svg>
+            <div class="value">
+              <div class="num">${score}</div>
+              <div class="lbl">HEALTH</div>
+            </div>
+          </div>
+          <div class="score-stats">
+            <div class="score-stat"><div class="dot" style="background:#10b981"></div><span>Signals Read: <strong>${scan.signalsRead || 0}/${scan.signalCount || 42}</strong></span></div>
+            <div class="score-stat"><div class="dot" style="background:${scan.dtcCount > 0 ? '#ef4444' : '#10b981'}"></div><span>Trouble Codes: <strong>${scan.dtcCount || 0}</strong></span></div>
+            <div class="score-stat"><div class="dot" style="background:#06b6d4"></div><span>Mode: <strong>${scan.mode === 'mechanic' ? '🔧 Mechanic' : '🏠 Consumer'}</strong></span></div>
+            <div class="score-stat"><div class="dot" style="background:#f59e0b"></div><span>Type: <strong>${scan.snapshotType === 'daily' ? '📅 Daily Snapshot' : '📊 Manual Scan'}</strong></span></div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item"><div class="lbl">Scan ID</div><div class="val">${scan.scanId || '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Vehicle</div><div class="val">${vehicle}</div></div>
+          <div class="detail-item"><div class="lbl">VIN</div><div class="val">${scan.vin || '—'}</div></div>
+          <div class="detail-item"><div class="lbl">Date</div><div class="val">${scan.timestamp ? new Date(scan.timestamp).toLocaleString() : '—'}</div></div>
+        </div>
+
+        ${scan.dtcCodes && scan.dtcCodes.length > 0 ? `
+          <div style="margin-bottom:20px">
+            <div style="font-size:0.65rem;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:0.12em;margin-bottom:8px">ACTIVE TROUBLE CODES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${scan.dtcCodes.map(c => `<span style="padding:4px 10px;border-radius:6px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;font-size:0.75rem;font-weight:700;font-family:'JetBrains Mono',monospace">${c}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="hallmark">
+          <img src="img/tll-hallmark.png" alt="TLL Hallmark" class="hallmark-img">
+          <div class="hallmark-info">
+            <div class="hallmark-title">🛡️ TRUST LAYER LEDGER · VERIFIED</div>
+            <div class="hallmark-details">
+              Sealed: <strong>${scan.hallmark?.sealedAt ? new Date(scan.hallmark.sealedAt).toLocaleString() : '—'}</strong><br>
+              Record: <strong>${scan.hallmark?.recordId || scan.scanId || '—'}</strong><br>
+              Version: <strong>${scan.hallmark?.version || 'TLL-1.0'}</strong>
+            </div>
+            <div class="hallmark-hash">SHA-256: ${scan.scanHash || '—'}</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="action-btn primary" onclick="window.print()">🖨️ Print Certificate</button>
+          <button class="action-btn" onclick="downloadCSV()">📊 Export CSV</button>
+          <button class="action-btn" onclick="copyLink()">🔗 Copy Verify Link</button>
+        </div>
+      </div>
+    `;
+
+    window._currentScan = scan;
+    document.getElementById('result').classList.add('show');
+  }
+
+  function renderNotFound(query) {
+    document.getElementById('resultCard').innerHTML = `
+      <div class="result-status not-found">
+        <div class="status-icon not-found">❌</div>
+        <div class="status-text">
+          <h3>Not Found</h3>
+          <p>No scan record found for "${query}". Check the ID or hash and try again.</p>
+        </div>
+      </div>
+    `;
+    document.getElementById('result').classList.add('show');
+  }
+
+  function copyLink() {
+    const scan = window._currentScan;
+    if (!scan) return;
+    const url = `${window.location.origin}/explorer.html?id=${scan.scanId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Verification link copied to clipboard');
+    });
+  }
+
+  function downloadCSV() {
+    const scan = window._currentScan;
+    if (!scan) return;
+    const rows = [
+      ['Field', 'Value'],
+      ['Scan ID', scan.scanId],
+      ['VIN', scan.vin],
+      ['Vehicle', `${scan.vehicle?.year || ''} ${scan.vehicle?.make || ''} ${scan.vehicle?.model || ''}`],
+      ['Health Score', scan.healthScore],
+      ['DTC Count', scan.dtcCount],
+      ['DTC Codes', (scan.dtcCodes || []).join('; ')],
+      ['Signals Read', `${scan.signalsRead}/${scan.signalCount}`],
+      ['Mode', scan.mode],
+      ['Type', scan.snapshotType],
+      ['Timestamp', scan.timestamp],
+      ['SHA-256 Hash', scan.scanHash],
+      ['TLL Record', scan.hallmark?.recordId],
+      ['TLL Version', scan.hallmark?.version],
+      ['Sealed At', scan.hallmark?.sealedAt],
+      ['Health Narrative', scan.healthNarrative],
+    ];
+    const csv = rows.map(r => r.map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LumeScan_${scan.scanId || 'report'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  </script>
+</body>
+</html>
