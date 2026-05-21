@@ -161,4 +161,14 @@ footer a{color:var(--accent2)}
 .cmp-mobile{display:block !important}
 }
 
+/* MOBILE COMPARISON TABLE */
+.cmp-row-full{padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--border)}
+.cmp-feat-label{font-size:12px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:8px;letter-spacing:0.03em}
+.cmp-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center}
+.cmp-g{font-size:12px;font-weight:600;padding:4px 2px;border-radius:6px}
+.cmp-g.yes{color:var(--accent);background:rgba(16,185,129,0.08)}
+.cmp-g.no{color:#ef4444;background:rgba(239,68,68,0.06)}
+.cmp-g.warn{color:#f59e0b;background:rgba(245,158,11,0.06)}
+.cmp-g.dim{color:var(--dim)}
+
 @keyframes scan-pulse{0%,100%{box-shadow:0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 30px rgba(16,185,129,0.5)}}

@@ -132,16 +132,90 @@
 
     <!-- Mobile cards (hidden on desktop) -->
     <div class="cmp-mobile">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="cmp-row"><span class="cmp-feat">Read/clear codes</span><span class="cmp-val yes">✓ All scanners</span></div>
-        <div class="cmp-row"><span class="cmp-feat">Live signals</span><span class="cmp-val yes"><strong>42</strong> <span style="color:var(--dim);font-size:10px">vs 10-30</span></span></div>
-        <div class="cmp-row"><span class="cmp-feat">Scan interval</span><span class="cmp-val yes"><strong>100ms</strong> <span style="color:var(--dim);font-size:10px">vs 300ms-1s</span></span></div>
-        <div class="cmp-row"><span class="cmp-feat">Fuel coaching</span><span class="cmp-val yes">✓ Only Lume</span></div>
-        <div class="cmp-row"><span class="cmp-feat">Predictive maintenance</span><span class="cmp-val yes">✓ Included</span></div>
-        <div class="cmp-row"><span class="cmp-feat">Driver scoring</span><span class="cmp-val yes">✓ Only Lume</span></div>
-        <div class="cmp-row"><span class="cmp-feat">Subscription</span><span class="cmp-val yes"><strong>Never.</strong></span></div>
-        <div class="cmp-row"><span class="cmp-feat">BYO adapter</span><span class="cmp-val yes">✓ Any $12 BLE</span></div>
-        <div class="cmp-row" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2)"><span class="cmp-feat" style="color:var(--accent)">Total cost</span><span class="cmp-val yes" style="font-size:16px"><strong>$42 forever</strong></span></div>
+      <!-- Competitor header -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;text-align:center">
+        <div style="padding:10px 4px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3)">
+          <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:0.05em">Lume Scan</div>
+          <div style="font-size:10px;color:var(--accent);font-weight:600">$29.99</div>
+        </div>
+        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--dim)">FIXD</div>
+          <div style="font-size:10px;color:var(--dim)">$100/yr</div>
+        </div>
+        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--dim)">BlueDriver</div>
+          <div style="font-size:10px;color:var(--dim)">$120</div>
+        </div>
+        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:700;color:var(--dim)">Autel</div>
+          <div style="font-size:10px;color:var(--dim)">$389</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <!-- Read/clear codes -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Read/clear codes</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes">✓</span><span class="cmp-g dim">✓</span><span class="cmp-g dim">✓</span><span class="cmp-g dim">✓</span>
+          </div>
+        </div>
+        <!-- Live signals -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Live signals</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes"><strong>42</strong></span><span class="cmp-g dim">~10</span><span class="cmp-g dim">~15</span><span class="cmp-g dim">~30</span>
+          </div>
+        </div>
+        <!-- Scan interval -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Scan interval</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes"><strong>100ms</strong></span><span class="cmp-g dim">~1s</span><span class="cmp-g dim">~500ms</span><span class="cmp-g dim">~300ms</span>
+          </div>
+        </div>
+        <!-- Fuel coaching -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Fuel coaching</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes">✓</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span>
+          </div>
+        </div>
+        <!-- Predictive maintenance -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Predictive maintenance</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes">✓</span><span class="cmp-g warn">$$$</span><span class="cmp-g no">✗</span><span class="cmp-g dim">✓</span>
+          </div>
+        </div>
+        <!-- Driver scoring -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Driver scoring</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes">✓</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span>
+          </div>
+        </div>
+        <!-- Subscription -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">Subscription</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes"><strong>Never</strong></span><span class="cmp-g no">$100/yr</span><span class="cmp-g dim">No</span><span class="cmp-g warn">Updates $</span>
+          </div>
+        </div>
+        <!-- BYO adapter -->
+        <div class="cmp-row-full">
+          <div class="cmp-feat-label">BYO adapter</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes">✓ $12</span><span class="cmp-g no">Locked</span><span class="cmp-g no">Locked</span><span class="cmp-g no">Built-in</span>
+          </div>
+        </div>
+        <!-- Total cost highlight -->
+        <div class="cmp-row-full" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2);margin-top:4px">
+          <div class="cmp-feat-label" style="color:var(--accent);font-weight:700">Total cost</div>
+          <div class="cmp-grid4">
+            <span class="cmp-g yes" style="font-size:13px"><strong>$42</strong></span><span class="cmp-g no" style="font-size:11px">$200+</span><span class="cmp-g dim" style="font-size:11px">$120</span><span class="cmp-g dim" style="font-size:11px">$389</span>
+          </div>
+        </div>
       </div>
     </div>
     <p style="font-size:12px;color:var(--dim);margin-top:20px;text-align:center">Total cost: Lume Scan $29.99 + $12 adapter = <strong style="color:var(--accent)">$42 total, forever</strong> vs FIXD at $100/year or BlueDriver at $120.</p>
