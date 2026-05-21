@@ -1,6 +1,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#06080e;--surface:rgba(12,16,24,0.7);--glass:rgba(255,255,255,0.03);--border:rgba(6,182,212,0.12);--accent:#10b981;--accent2:#06b6d4;--text:#f0f4f8;--dim:rgba(255,255,255,0.5);--mono:'JetBrains Mono',monospace;--sans:'Inter',-apple-system,sans-serif}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
 a{color:var(--accent);text-decoration:none}
 
