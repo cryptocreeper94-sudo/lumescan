@@ -25,6 +25,7 @@ export default function App() {
         setScreen('checking');
         const status = await checkEntitlement();
         setEntitlement(status);
+        // Both free and pro users get in — locked only if not authenticated
         if (status.entitled) {
           setScreen('connection');
         } else {
@@ -60,16 +61,10 @@ export default function App() {
       {screen === 'locked' && (
         <View style={styles.center}>
           <Text style={styles.lockIcon}>🔒</Text>
-          <Text style={styles.lockTitle}>Lume Scan License Required</Text>
+          <Text style={styles.lockTitle}>Sign In Required</Text>
           <Text style={styles.lockDesc}>
-            Get full access to 42-signal diagnostics, predictive maintenance, and fuel coaching for a one-time purchase of $29.99.
+            Sign in to access Lume Scan. Free basic scanning is included — upgrade to Pro for the full 42-signal engine.
           </Text>
-          <TouchableOpacity
-            style={styles.buyBtn}
-            onPress={() => Linking.openURL('https://lumeauto.tech/order')}
-          >
-            <Text style={styles.buyBtnText}>🔧 Get Lume Scan — $29.99</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             style={styles.refreshBtn}
             onPress={async () => {
@@ -79,7 +74,7 @@ export default function App() {
               setScreen(status.entitled ? 'connection' : 'locked');
             }}
           >
-            <Text style={styles.refreshBtnText}>I already purchased — refresh</Text>
+            <Text style={styles.refreshBtnText}>Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.signOutBtn}

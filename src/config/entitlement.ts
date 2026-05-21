@@ -1,7 +1,8 @@
 /**
  * LumeAuto Mobile — Entitlement Gating
- * Checks Firebase Firestore for lumescan_purchased flag.
- * Bypasses gate for Cox internal / DarkWave / whitelisted accounts.
+ * Free tier: code reading, 6 signals, 1 report/day
+ * Pro tier: full 42-signal engine, fuel coaching, predictive maintenance, driver scoring
+ * Bypass: DarkWave/Cox internal accounts
  *
  * DarkWave Studios LLC — Copyright 2026
  */
@@ -21,32 +22,56 @@ const BYPASS_EMAILS = [
 
 const FIRESTORE_PROJECT = 'darkwave-auth';
 
+export type Tier = 'pro' | 'free' | 'none';
+
 export interface EntitlementStatus {
   entitled: boolean;
-  reason: 'purchased' | 'bypass_domain' | 'bypass_email' | 'not_purchased' | 'not_authenticated' | 'error';
+  tier: Tier;
+  reason: 'purchased' | 'bypass_domain' | 'bypass_email' | 'free_tier' | 'not_purchased' | 'not_authenticated' | 'error';
   email?: string;
 }
 
+// ── Free tier limits ──
+export const FREE_TIER_LIMITS = {
+  maxSignals: 6,          // Out of 42
+  maxReportsPerDay: 1,    // Condition reports
+  fuelCoaching: false,
+  predictiveMaintenance: false,
+  driverScoring: false,
+  codeReading: true,      // Always available
+  codeClear: true,        // Always available
+};
+
+export const PRO_TIER_LIMITS = {
+  maxSignals: 42,
+  maxReportsPerDay: Infinity,
+  fuelCoaching: true,
+  predictiveMaintenance: true,
+  driverScoring: true,
+  codeReading: true,
+  codeClear: true,
+};
+
 /**
  * Check if the current user is entitled to use Lume Scan.
- * Returns immediately for bypass accounts, queries Firestore for everyone else.
+ * All authenticated users get free tier. Pro requires purchase or bypass.
  */
 export async function checkEntitlement(): Promise<EntitlementStatus> {
   const user = auth.currentUser;
 
   if (!user || !user.email) {
-    return { entitled: false, reason: 'not_authenticated' };
+    return { entitled: false, tier: 'none', reason: 'not_authenticated' };
   }
 
   const email = user.email.toLowerCase();
   const domain = email.split('@')[1];
 
-  // ── Cox / DarkWave bypass ──
+  // ── Cox / DarkWave bypass → Pro ──
   if (BYPASS_DOMAINS.includes(domain)) {
-    return { entitled: true, reason: 'bypass_domain', email };
+    return { entitled: true, tier: 'pro', reason: 'bypass_domain', email };
   }
   if (BYPASS_EMAILS.includes(email)) {
-    return { entitled: true, reason: 'bypass_email', email };
+    return { entitled: true, tier: 'pro', reason: 'bypass_email', email };
   }
 
   // ── Firestore entitlement check ──
@@ -57,25 +82,33 @@ export async function checkEntitlement(): Promise<EntitlementStatus> {
     if (res.ok) {
       const doc = await res.json();
       const purchased = doc?.fields?.lumescan_purchased?.booleanValue === true;
-      return {
-        entitled: purchased,
-        reason: purchased ? 'purchased' : 'not_purchased',
-        email,
-      };
+      if (purchased) {
+        return { entitled: true, tier: 'pro', reason: 'purchased', email };
+      }
+      // Has a document but hasn't purchased → free tier
+      return { entitled: true, tier: 'free', reason: 'free_tier', email };
     }
 
-    // Document doesn't exist = not purchased
+    // Document doesn't exist = free tier (everyone gets in now)
     if (res.status === 404) {
-      return { entitled: false, reason: 'not_purchased', email };
+      return { entitled: true, tier: 'free', reason: 'free_tier', email };
     }
 
-    // Unexpected error — fail open for now (you can change to fail closed)
+    // Unexpected error — allow free tier so app is usable
     console.warn('[Entitlement] Firestore check returned:', res.status);
-    return { entitled: false, reason: 'error', email };
+    return { entitled: true, tier: 'free', reason: 'free_tier', email };
   } catch (err) {
     console.error('[Entitlement] Check failed:', err);
-    return { entitled: false, reason: 'error', email };
+    // Offline or error — allow free tier
+    return { entitled: true, tier: 'free', reason: 'free_tier', email };
   }
+}
+
+/**
+ * Get the feature limits for a given tier.
+ */
+export function getTierLimits(tier: Tier) {
+  return tier === 'pro' ? PRO_TIER_LIMITS : FREE_TIER_LIMITS;
 }
 
 /**

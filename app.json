@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Lume-Auto",
+    "name": "Lume Scan",
     "slug": "lume-auto",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,8 +17,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.darkwavestudios.lumeauto",
       "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
-        "NSBluetoothPeripheralUsageDescription": "Lume-Auto connects to your OBD-II adapter via Bluetooth to read real-time vehicle telemetry.",
+        "NSBluetoothAlwaysUsageDescription": "Lume Scan connects to your OBD-II adapter via Bluetooth to read real-time vehicle diagnostics.",
+        "NSBluetoothPeripheralUsageDescription": "Lume Scan connects to your OBD-II adapter via Bluetooth to read real-time vehicle diagnostics.",
         "UIBackgroundModes": [
           "bluetooth-central"
         ]
@@ -60,7 +60,8 @@
     "extra": {
       "eas": {
         "projectId": "4da0a734-89f0-4618-b41e-2e57abdbf36f"
-      }
+      },
+      "privacyPolicyUrl": "https://lumescan.tech/privacy.html"
     }
   }
 }

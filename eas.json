@@ -26,6 +26,14 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "playstore": {
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {
