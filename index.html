@@ -917,5 +917,99 @@
   });
   </script>
 
-</body>
+    <!-- DarkWave Studios Ecosystem Analytics -->
+    <script>
+      (function(){
+        var appId = document.querySelector('meta[name="dw-app-id"]');
+        var id = appId ? appId.content : window.location.hostname;
+        function track(type, data) {
+          try {
+            navigator.sendBeacon('https://darkwavestudios.io/api/analytics', JSON.stringify({
+              app: id, type: type, url: window.location.href,
+              ref: document.referrer, ts: Date.now(), ...data
+            }));
+          } catch(e) {}
+        }
+        track('pageview');
+        window.addEventListener('popstate', function(){ track('navigate'); });
+        var origPush = history.pushState;
+        history.pushState = function(){ origPush.apply(this, arguments); track('navigate'); };
+      })();
+    </script>
+    <!-- DarkWave Studios Command Center -->
+    <script>
+      (function(){
+        var cc=0,timer=null;
+        function injectShield(){
+          var f=document.querySelector('footer');
+          if(!f)return setTimeout(injectShield,2000);
+          var existing=f.querySelector('[data-dw-shield]');
+          if(existing)return;
+          var s=document.createElement('span');
+          s.setAttribute('data-dw-shield','1');
+          s.textContent='\u25C8';
+          s.style.cssText='cursor:default;opacity:0.2;font-size:14px;user-select:none;margin-left:6px;';
+          s.addEventListener('click',function(){
+            cc++;if(timer)clearTimeout(timer);
+            if(cc>=3){cc=0;showPinModal();}
+            else{timer=setTimeout(function(){cc=0;},2000);}
+          });
+          var copy=f.querySelector('[class*="copyright"],[class*="Copyright"]');
+          if(copy){copy.appendChild(s);}
+          else{var last=f.lastElementChild||f;last.appendChild(s);}
+        }
+        function showPinModal(){
+          var o=document.createElement('div');
+          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;';
+          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
+          var box=document.createElement('div');
+          box.style.cssText='background:#0a0a1a;border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:32px;text-align:center;min-width:280px;font-family:system-ui,sans-serif;';
+          box.innerHTML='<div style="font-size:12px;color:#06b6d4;margin-bottom:16px;letter-spacing:3px;">AUTHENTICATION REQUIRED</div>';
+          var inp=document.createElement('input');
+          inp.type='password';inp.maxLength=4;
+          inp.style.cssText='background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:12px;color:#fff;font-size:24px;text-align:center;width:120px;letter-spacing:8px;outline:none;';
+          inp.addEventListener('keydown',function(e){
+            if(e.key==='Enter'){
+              if(inp.value==='0424'){o.remove();showCommandCenter();}
+              else{inp.style.borderColor='#f43f5e';inp.value='';setTimeout(function(){inp.style.borderColor='rgba(6,182,212,0.2)';},600);}
+            }
+          });
+          box.appendChild(inp);
+          var hint=document.createElement('div');
+          hint.style.cssText='margin-top:12px;font-size:10px;color:rgba(255,255,255,0.3);';
+          hint.textContent='Enter PIN to continue';
+          box.appendChild(hint);
+          o.appendChild(box);document.body.appendChild(o);
+          setTimeout(function(){inp.focus();},100);
+        }
+        function showCommandCenter(){
+          var o=document.createElement('div');
+          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:99999;';
+          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
+          var links=[
+            {l:'Trust Layer Dashboard',u:'https://dwtl.io'},
+            {l:'Axiom Studio',u:'https://axiomstudio.dev'},
+            {l:'TrustGen 3D',u:'https://trustgen.design'},
+            {l:'TrustVault',u:'https://trustvault.studio'},
+            {l:'TrustShield',u:'https://trustshield.tech'},
+            {l:'Lume Auto',u:'https://lumeauto.tech'},
+            {l:'Lume Scan',u:'https://lumescan.tech'},
+            {l:'DarkWave Studios',u:'https://darkwavestudios.io'}
+          ];
+          var html='<div style="background:linear-gradient(135deg,#0a0a1a,#0d1117);border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:40px;max-width:500px;width:90%;font-family:system-ui,sans-serif;">';
+          html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><div style="font-size:14px;color:#06b6d4;letter-spacing:3px;font-weight:700;">\u27D0 COMMAND CENTER</div><span id="cc-close" style="color:#666;font-size:20px;cursor:pointer;">\u2715</span></div>';
+          html+='<div style="display:grid;gap:10px;">';
+          links.forEach(function(lk){
+            html+='<a href="'+lk.u+'" target="_blank" rel="noopener" style="display:block;padding:12px 16px;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:10px;color:#94a3b8;text-decoration:none;font-size:13px;transition:all 0.2s;" onmouseenter="this.style.borderColor=\'rgba(6,182,212,0.3)\';this.style.color=\'#06b6d4\';" onmouseleave="this.style.borderColor=\'rgba(6,182,212,0.1)\';this.style.color=\'#94a3b8\';">'+lk.l+'</a>';
+          });
+          html+='</div><div style="margin-top:20px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center;">\u00A9 2026 DarkWave Studios LLC</div></div>';
+          o.innerHTML=html;
+          document.body.appendChild(o);
+          document.getElementById('cc-close').addEventListener('click',function(){o.remove();});
+        }
+        if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(injectShield,1000);});
+        else setTimeout(injectShield,1000);
+      })();
+    </script>
+  </body>
 </html>
