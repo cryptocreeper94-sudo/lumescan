@@ -2,62 +2,73 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacy Policy — Lume Scan</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#06080e;color:#f0f4f8;line-height:1.8;padding:60px 24px}a{color:#10b981}.container{max-width:720px;margin:0 auto}h1{font-size:2rem;font-weight:800;margin-bottom:8px}h2{font-size:1.2rem;font-weight:700;margin:32px 0 12px;color:#06b6d4}.meta{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:40px}p,li{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:12px}ul{padding-left:20px}</style>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#06080e;color:#f0f4f8;line-height:1.8;padding:60px 24px}a{color:#06b6d4}.container{max-width:720px;margin:0 auto}h1{font-size:2rem;font-weight:800;margin-bottom:8px}h2{font-size:1.2rem;font-weight:700;margin:32px 0 12px;color:#06b6d4}.meta{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:40px}p,li{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:12px}ul{padding-left:20px}strong{color:#f0f4f8}</style>
 </head><body><div class="container">
 <a href="/" style="font-size:13px">← Back to Lume Scan</a>
 <h1>Privacy Policy</h1>
-<p class="meta">Last updated: May 20, 2026</p>
+<p class="meta">Last updated: May 22, 2026</p>
 
 <h2>1. Overview</h2>
-<p>DarkWave Studios LLC ("we," "us") operates Lume Scan. This Privacy Policy explains what data we collect, how we use it, and your rights.</p>
+<p>DarkWave Studios LLC ("we," "us") operates Lume Scan and the Lume-Auto platform. This Privacy Policy explains what data we collect, how we use it, and your rights.</p>
 
 <h2>2. Data We Collect</h2>
-<p><strong>Account Data:</strong> Email address and name (for license activation and purchase receipt via Resend).</p>
-<p><strong>Payment Data:</strong> Processed by Stripe. We never see or store your credit card number, CVV, or billing details.</p>
+<p><strong>Account Data:</strong> Email address and name (for license activation, purchase receipt, and account management via Firebase Authentication).</p>
+<p><strong>Payment Data:</strong> Processed exclusively by Stripe. We never see or store your credit card number, CVV, or billing details. See <a href="https://stripe.com/privacy" target="_blank">Stripe Privacy Policy</a>.</p>
 <p><strong>Vehicle Diagnostic Data:</strong> OBD-II signals (RPM, speed, fuel flow, DTCs, etc.) are processed <strong>entirely on your device</strong>. We do not transmit, collect, or store your vehicle data on any server.</p>
+<p><strong>Device Activation Data:</strong> When you activate Lume Scan Pro, we store a purchase flag and tier status in Firebase Firestore linked to your email. This is used solely for license verification and entitlement management.</p>
 
 <h2>3. Data We Do NOT Collect</h2>
 <ul>
 <li>GPS location or driving routes</li>
-<li>Vehicle identification numbers (VIN)</li>
+<li>Vehicle identification numbers (VIN) — VIN is read by the app but stays on your device</li>
 <li>Personal driving habits or behavior profiles</li>
 <li>Audio, camera, or microphone data</li>
 <li>Contact lists, call logs, or SMS</li>
+<li>Browsing history or app usage analytics</li>
 </ul>
 
 <h2>4. How We Use Your Data</h2>
 <ul>
-<li><strong>Email:</strong> Purchase confirmation, download link, and critical product updates only. No marketing spam.</li>
-<li><strong>License verification:</strong> Your Firebase account stores a purchase flag to unlock the app. No vehicle data is transmitted.</li>
+<li><strong>Email:</strong> Purchase confirmation, download link delivery, subscription billing notifications, and critical product updates only. No marketing spam.</li>
+<li><strong>License verification:</strong> Your Firebase account stores a purchase flag and tier level to unlock Pro features. No vehicle data is transmitted.</li>
+<li><strong>Subscription management:</strong> Stripe manages billing. We receive webhook notifications for subscription status changes (active, cancelled, expired) to update your entitlement.</li>
 </ul>
 
-<h2>5. Third-Party Services</h2>
+<h2>5. Trust Layer Ledger (TLL)</h2>
+<p>When you generate a Condition Report, a SHA-256 hash of the diagnostic data is anchored to the Trust Layer Ledger (<a href="https://dwtl.io" target="_blank">dwtl.io</a>) for independent verification. <strong>Only the cryptographic hash is stored on-chain</strong> — never the underlying diagnostic data, VIN, or personal information. The hash is publicly verifiable but cannot be reversed to recover the original data.</p>
+
+<h2>6. Third-Party Services</h2>
 <ul>
-<li><strong>Stripe:</strong> Payment processing. See <a href="https://stripe.com/privacy" target="_blank">Stripe Privacy Policy</a>.</li>
+<li><strong>Stripe:</strong> Payment processing and subscription management. See <a href="https://stripe.com/privacy" target="_blank">Stripe Privacy Policy</a>.</li>
 <li><strong>Firebase Authentication:</strong> Account management and license gating. See <a href="https://firebase.google.com/support/privacy" target="_blank">Firebase Privacy</a>.</li>
-<li><strong>Resend:</strong> Transactional email delivery. See <a href="https://resend.com/privacy" target="_blank">Resend Privacy Policy</a>.</li>
+<li><strong>Firebase Firestore:</strong> Entitlement storage (purchase flag, tier level, activation date). No vehicle data is stored.</li>
+<li><strong>Resend:</strong> Transactional email delivery (purchase confirmations, download links). See <a href="https://resend.com/privacy" target="_blank">Resend Privacy Policy</a>.</li>
+<li><strong>Amazon Associates / eBay Partner Network:</strong> Affiliate links to recommended adapters and replacement parts. These services may set cookies when you click affiliate links. We earn a commission on qualifying purchases — this does not affect the price you pay.</li>
 </ul>
 
-<h2>6. Data Retention</h2>
-<p>Account data is retained as long as your account is active. You may request deletion at any time by emailing support@lumeauto.tech. Vehicle diagnostic data exists only on your device and is never retained by us.</p>
+<h2>7. Data Retention</h2>
+<p>Account data is retained as long as your account is active. You may request deletion at any time by emailing support@lumescan.tech. Upon deletion, your Firebase account, entitlement records, and any associated data will be permanently removed within 30 days. Vehicle diagnostic data exists only on your device and is never retained by us.</p>
 
-<h2>7. Children's Privacy</h2>
-<p>Lume Scan is not directed at children under 13. We do not knowingly collect data from children.</p>
+<h2>8. Children's Privacy</h2>
+<p>Lume Scan is not directed at children under 13. We do not knowingly collect data from children. If you believe a child has provided us with personal information, contact us immediately.</p>
 
-<h2>8. Your Rights</h2>
+<h2>9. Your Rights</h2>
 <ul>
 <li>Request access to your account data</li>
-<li>Request deletion of your account</li>
+<li>Request correction of inaccurate data</li>
+<li>Request deletion of your account and all associated data</li>
 <li>Opt out of any communications (except critical security notices)</li>
-<li>California residents: CCPA rights apply. We do not sell personal information.</li>
+<li>Export your account data in a portable format</li>
+<li><strong>California residents:</strong> CCPA rights apply. We do not sell personal information. You may request disclosure of data collected and its business purpose.</li>
+<li><strong>EU/EEA residents:</strong> GDPR rights apply where applicable. Contact support@lumescan.tech for data subject requests.</li>
 </ul>
 
-<h2>9. Security</h2>
-<p>Account data is protected by Firebase Authentication with industry-standard encryption. Payment data is handled exclusively by Stripe (PCI DSS Level 1 certified). Vehicle data never leaves your device.</p>
+<h2>10. Security</h2>
+<p>Account data is protected by Firebase Authentication with industry-standard encryption (TLS 1.3 in transit, AES-256 at rest). Payment data is handled exclusively by Stripe (PCI DSS Level 1 certified). Vehicle diagnostic data never leaves your device. Condition Report hashes are signed with SHA-256 and anchored to the Trust Layer Ledger for tamper-proof provenance.</p>
 
-<h2>10. Changes</h2>
-<p>We may update this policy. Material changes will be communicated via email. Continued use constitutes acceptance.</p>
+<h2>11. Changes</h2>
+<p>We may update this policy. Material changes will be communicated via email to all registered users. Continued use of the Services after changes constitutes acceptance.</p>
 
-<h2>11. Contact</h2>
-<p>DarkWave Studios LLC<br>Gladeville, TN, USA<br>support@lumeauto.tech</p>
+<h2>12. Contact</h2>
+<p>DarkWave Studios LLC<br>Gladeville, TN, USA<br><strong>support@lumescan.tech</strong><br><a href="https://lume42.com" target="_blank">Lume42 Labs</a></p>
 </div></body></html>
