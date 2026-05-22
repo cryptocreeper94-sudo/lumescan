@@ -920,20 +920,30 @@
     <!-- DarkWave Studios Ecosystem Analytics -->
     <script>
       (function(){
-        var appId = document.querySelector('meta[name="dw-app-id"]');
-        var id = appId ? appId.content : window.location.hostname;
-        function track(type, data) {
+        var sid = 'xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); });
+        var vid = localStorage.getItem('dw_vid');
+        if (!vid) { vid = 'xxxx-xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); }); localStorage.setItem('dw_vid', vid); }
+        function track() {
           try {
-            navigator.sendBeacon('https://darkwavestudios.io/api/analytics', JSON.stringify({
-              app: id, type: type, url: window.location.href,
-              ref: document.referrer, ts: Date.now(), ...data
+            var ua = navigator.userAgent;
+            var mobile = /Mobile|Android|iPhone/.test(ua);
+            navigator.sendBeacon('https://darkwavestudios.io/api/analytics/pageview', JSON.stringify({
+              path: window.location.pathname,
+              title: document.title,
+              referrer: document.referrer || null,
+              userAgent: ua,
+              sessionId: sid,
+              visitorId: vid,
+              device: mobile ? 'mobile' : 'desktop',
+              browser: /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Other',
+              os: /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'macOS' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : 'Other'
             }));
           } catch(e) {}
         }
-        track('pageview');
-        window.addEventListener('popstate', function(){ track('navigate'); });
+        track();
+        window.addEventListener('popstate', track);
         var origPush = history.pushState;
-        history.pushState = function(){ origPush.apply(this, arguments); track('navigate'); };
+        history.pushState = function(){ origPush.apply(this, arguments); track(); };
       })();
     </script>
     <!-- DarkWave Studios Command Center -->
