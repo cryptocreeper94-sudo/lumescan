@@ -85,13 +85,27 @@ export default function App() {
         </View>
       )}
       {screen === 'connection' && (
-        <ConnectionScreen onConnect={() => setScreen('dashboard')} />
+        <View style={{ flex: 1 }}>
+          {user && (
+            <View style={styles.greetingBar}>
+              <Text style={styles.greetingText}>
+                {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
+                {', '}
+                <Text style={styles.greetingName}>
+                  {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Driver'}
+                </Text>
+                {' 👋'}
+              </Text>
+            </View>
+          )}
+          <ConnectionScreen onConnect={() => setScreen('dashboard')} />
+        </View>
       )}
       {screen === 'dashboard' && (
-        <DashboardScreen onReport={() => setScreen('report')} />
+        <DashboardScreen onReport={() => setScreen('report')} tier={entitlement?.tier || 'free'} />
       )}
       {screen === 'report' && (
-        <ConditionReportScreen onBack={() => setScreen('dashboard')} />
+        <ConditionReportScreen onBack={() => setScreen('dashboard')} tier={entitlement?.tier || 'free'} />
       )}
     </View>
   );
@@ -164,5 +178,22 @@ const styles = StyleSheet.create({
   signOutText: {
     color: 'rgba(255,255,255,0.3)',
     fontSize: 12,
+  },
+  greetingBar: {
+    paddingTop: 56,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    backgroundColor: COLORS.bgDark,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  greetingText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  greetingName: {
+    color: '#10b981',
+    fontWeight: '800',
   },
 });

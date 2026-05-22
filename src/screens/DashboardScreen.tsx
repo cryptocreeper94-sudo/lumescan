@@ -1,17 +1,103 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
-import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText } from 'lucide-react-native';
+import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText, Lock } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
 import { startWiFiTelemetryLoop, getWiFiStatus } from '../telemetry/WiFiConnector';
 import { auth } from '../config/firebase';
+import type { Tier } from '../config/entitlement';
+import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
 
 const { width } = Dimensions.get('window');
 
-export default function DashboardScreen({ onReport }: { onReport?: () => void }) {
+// Free tier gets exactly 3 live signals — everything else is blurred
+const FREE_SIGNAL_KEYS = ['tb6_rpm', 'tb7_speed', 'sl1_coolant'];
+
+// All 42 signal definitions organized by governance node
+const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key: string; label: string; format: (d: TelemetrySnapshot) => string; colorFn?: (d: TelemetrySnapshot) => string }[] }[] = [
+  {
+    group: 'TB — Throughput', icon: Activity, iconColor: COLORS.cyan,
+    signals: [
+      { key: 'tb1_maf', label: 'MAF (TB1)', format: d => `${d.tb1_maf.toFixed(1)} g/s` },
+      { key: 'tb2_fuelFlow', label: 'Fuel Flow (TB2)', format: d => `${d.tb2_fuelFlow.toFixed(0)} cc/min` },
+      { key: 'tb3_map', label: 'MAP (TB3)', format: d => `${d.tb3_map.toFixed(0)} kPa` },
+      { key: 'tb4_iat', label: 'IAT (TB4)', format: d => `${d.tb4_iat.toFixed(1)}°C` },
+      { key: 'tb5_throttle', label: 'Throttle (TB5)', format: d => `${d.tb5_throttle.toFixed(1)}%` },
+      { key: 'tb6_rpm', label: 'RPM (TB6)', format: d => `${d.tb6_rpm.toFixed(0)}` },
+      { key: 'tb7_speed', label: 'Speed (TB7)', format: d => `${(d.tb7_speed * 0.621371).toFixed(0)} mph` },
+      { key: 'tb8_volEff', label: 'Vol.Eff (TB8)', format: d => `${d.tb8_volEff.toFixed(1)}%` },
+      { key: 'tb9_afr', label: 'AFR (TB9)', format: d => `${d.tb9_afr.toFixed(1)}:1`, colorFn: d => d.tb9_afr > 14.5 && d.tb9_afr < 14.9 ? COLORS.emerald : COLORS.cyan },
+      { key: 'tb10_baro', label: 'Baro (TB10)', format: d => `${d.tb10_baro.toFixed(1)} kPa` },
+    ]
+  },
+  {
+    group: 'PR — Process', icon: Zap, iconColor: COLORS.emerald,
+    signals: [
+      { key: 'pr1_timing', label: 'Timing (PR1)', format: d => `${d.pr1_timing.toFixed(1)}°` },
+      { key: 'pr2_stftB1', label: 'STFT B1 (PR2)', format: d => `${d.pr2_stftB1 > 0 ? '+' : ''}${d.pr2_stftB1.toFixed(1)}%` },
+      { key: 'pr3_ltftB1', label: 'LTFT B1 (PR3)', format: d => `${d.pr3_ltftB1 > 0 ? '+' : ''}${d.pr3_ltftB1.toFixed(1)}%` },
+      { key: 'pr4_stftB2', label: 'STFT B2 (PR4)', format: d => `${d.pr4_stftB2 > 0 ? '+' : ''}${d.pr4_stftB2.toFixed(1)}%` },
+      { key: 'pr5_ltftB2', label: 'LTFT B2 (PR5)', format: d => `${d.pr5_ltftB2 > 0 ? '+' : ''}${d.pr5_ltftB2.toFixed(1)}%` },
+      { key: 'pr6_combEff', label: 'Comb.Eff (PR6)', format: d => `${d.pr6_combEff.toFixed(1)}%`, colorFn: d => d.pr6_combEff > 96 ? COLORS.emerald : COLORS.cyan },
+      { key: 'pr7_engLoad', label: 'Load (PR7)', format: d => `${d.pr7_engLoad.toFixed(1)}%` },
+      { key: 'pr8_absLoad', label: 'Abs Load (PR8)', format: d => `${d.pr8_absLoad.toFixed(1)}%` },
+    ]
+  },
+  {
+    group: 'FS — Flow State', icon: Droplets, iconColor: '#38bdf8',
+    signals: [
+      { key: 'fs1_o2UpB1', label: 'O2 Up B1 (FS1)', format: d => `${d.fs1_o2UpB1.toFixed(2)}V` },
+      { key: 'fs2_o2DnB1', label: 'O2 Dn B1 (FS2)', format: d => `${d.fs2_o2DnB1.toFixed(2)}V` },
+      { key: 'fs5_catTempB1', label: 'Cat Temp (FS5)', format: d => `${d.fs5_catTempB1.toFixed(0)}°C` },
+      { key: 'fs7_catEff', label: 'Cat.Eff (FS7)', format: d => `${d.fs7_catEff.toFixed(1)}%`, colorFn: d => d.fs7_catEff > 92 ? COLORS.emerald : '#f59e0b' },
+      { key: 'fs10_driverScore', label: 'Driver (FS10)', format: d => `${d.fs10_driverScore.toFixed(0)}/100`, colorFn: d => d.fs10_driverScore > 80 ? COLORS.emerald : '#f59e0b' },
+    ]
+  },
+  {
+    group: 'SL — Lifecycle', icon: ShieldCheck, iconColor: '#f59e0b',
+    signals: [
+      { key: 'sl1_coolant', label: 'Coolant (SL1)', format: d => `${d.sl1_coolant.toFixed(1)}°C`, colorFn: d => d.sl1_coolant < 100 ? COLORS.emerald : '#ef4444' },
+      { key: 'sl3_battery', label: 'Battery (SL3)', format: d => `${d.sl3_battery.toFixed(1)}V`, colorFn: d => d.sl3_battery > 13.5 ? COLORS.emerald : '#f59e0b' },
+      { key: 'sl7_mil', label: 'MIL (SL7)', format: d => d.sl7_mil ? 'ON' : 'OFF', colorFn: d => d.sl7_mil ? '#ef4444' : COLORS.emerald },
+      { key: 'sl8_dtcCount', label: 'DTC Count (SL8)', format: d => `${d.sl8_dtcCount}`, colorFn: d => d.sl8_dtcCount > 0 ? '#ef4444' : COLORS.emerald },
+      { key: 'sl11_degradation', label: 'Health (SL11)', format: d => `${d.sl11_degradation.toFixed(0)}%`, colorFn: d => d.sl11_degradation > 80 ? COLORS.emerald : '#f59e0b' },
+      { key: 'sl4_runtime', label: 'Runtime (SL4)', format: d => `${d.sl4_runtime}s` },
+    ]
+  },
+];
+
+// Generate simulated failure alerts from telemetry
+function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
+  const alerts: FailureAlert[] = [];
+  if (data.sl7_mil && data.sl8_dtcCount > 0) {
+    alerts.push({
+      type: 'active', code: 'P0420', system: 'Catalyst System',
+      interpretation: 'Catalyst System Efficiency Below Threshold',
+      severity: 'Moderate — safe to drive short term',
+      action: 'Replace catalytic converter',
+      partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
+      vehicle: '2019 Ford F-150',
+    });
+  }
+  if (data.fs7_catEff < 93) {
+    alerts.push({
+      type: 'imminent', system: 'Catalyst System',
+      interpretation: 'Catalyst efficiency degrading — approaching failure threshold',
+      severity: 'Watch — not yet critical',
+      timeline: '~6 weeks', degradationRate: '1.2%/month',
+      action: 'Schedule catalytic converter inspection',
+      partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
+      vehicle: '2019 Ford F-150',
+    });
+  }
+  return alerts;
+}
+
+export default function DashboardScreen({ onReport, tier }: { onReport?: () => void; tier: Tier }) {
   const [data, setData] = useState<TelemetrySnapshot | null>(null);
   const pulseAnim = useSharedValue(1);
+  const isPro = tier === 'pro';
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -32,11 +118,7 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
       ),
       -1, true
     );
-
-    // Telemetry loop — uses real WiFi adapter data or falls back to simulated
-    const stop = startWiFiTelemetryLoop((snapshot) => {
-      setData(snapshot);
-    }, 150);
+    const stop = startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 150);
     return () => stop();
   }, []);
 
@@ -50,6 +132,9 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
   const modeColor = data.governanceMode === 'Flow State' ? COLORS.emerald
     : data.governanceMode === 'Throughput Alert' ? '#f59e0b'
     : COLORS.cyan;
+
+  const alerts = getActiveAlerts(data);
+  const totalSignals = ALL_SIGNALS.reduce((sum, g) => sum + g.signals.length, 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -72,7 +157,20 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
         {/* Personalized Greeting */}
         <Text style={styles.greeting}>{getGreeting()}</Text>
 
-        {/* Mode Badge */}}
+        {/* Tier Badge */}
+        {!isPro && (
+          <TouchableOpacity
+            style={styles.tierBadge}
+            onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+            activeOpacity={0.7}
+          >
+            <Lock size={12} color={COLORS.cyan} />
+            <Text style={styles.tierBadgeText}>FREE TIER — 3 of {totalSignals} signals live</Text>
+            <Text style={styles.tierUpgrade}>Upgrade →</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Mode Badge */}
         <View style={[styles.modeBadge, { borderColor: modeColor }]}>
           <Text style={[styles.modeText, { color: modeColor }]}>{data.governanceMode.toUpperCase()}</Text>
         </View>
@@ -86,7 +184,7 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
           </View>
         </View>
 
-        {/* Live Stats Bar */}
+        {/* Live Stats Bar — always visible (free signals) */}
         <View style={styles.statsBar}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{data.tb6_rpm.toFixed(0)}</Text>
@@ -97,70 +195,76 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
             <Text style={styles.statLabel}>MPH</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{data.mpgInstant > 0 ? data.mpgInstant.toFixed(1) : '—'}</Text>
+            <Text style={[styles.statValue, !isPro && styles.blurredText]}>
+              {data.mpgInstant > 0 ? data.mpgInstant.toFixed(1) : '—'}
+            </Text>
             <Text style={styles.statLabel}>MPG</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: data.fs10_driverScore > 80 ? COLORS.emerald : '#f59e0b' }]}>
+            <Text style={[styles.statValue, { color: data.fs10_driverScore > 80 ? COLORS.emerald : '#f59e0b' }, !isPro && styles.blurredText]}>
               {data.fs10_driverScore.toFixed(0)}
             </Text>
             <Text style={styles.statLabel}>SCORE</Text>
           </View>
         </View>
 
-        {/* 4/42 Governance Nodes */}
-        <Text style={styles.sectionTitle}>GOVERNANCE NODES — 42 ACTIVE</Text>
+        {/* Failure Alert Banners */}
+        {alerts.length > 0 && (
+          <View style={styles.alertSection}>
+            <Text style={styles.sectionTitle}>⚠ ALERTS — {alerts.length} DETECTED</Text>
+            {alerts.map((alert, i) => (
+              <FailureAlertBanner key={i} alert={alert} tier={tier} />
+            ))}
+          </View>
+        )}
+
+        {/* Governance Nodes — All 42 visible, 39 blurred for free */}
+        <Text style={styles.sectionTitle}>
+          GOVERNANCE NODES — {totalSignals} {isPro ? 'ACTIVE' : 'VISIBLE'} {!isPro ? `(${FREE_SIGNAL_KEYS.length} LIVE)` : ''}
+        </Text>
+
         <View style={styles.grid}>
-          
-          {/* Throughput Base */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Activity size={16} color={COLORS.cyan} />
-              <Text style={styles.cardTitle}>TB — Throughput</Text>
-            </View>
-            <DataRow label="MAF (TB1)" value={`${data.tb1_maf.toFixed(1)} g/s`} />
-            <DataRow label="RPM (TB6)" value={`${data.tb6_rpm.toFixed(0)}`} />
-            <DataRow label="Throttle (TB5)" value={`${data.tb5_throttle.toFixed(1)}%`} />
-            <DataRow label="Vol.Eff (TB8)" value={`${data.tb8_volEff.toFixed(1)}%`} />
-            <DataRow label="AFR (TB9)" value={`${data.tb9_afr.toFixed(1)}:1`} color={data.tb9_afr > 14.5 && data.tb9_afr < 14.9 ? COLORS.emerald : COLORS.cyan} />
-          </View>
+          {ALL_SIGNALS.map((group) => {
+            const IconComp = group.icon;
+            return (
+              <View key={group.group} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <IconComp size={16} color={group.iconColor} />
+                  <Text style={styles.cardTitle}>{group.group}</Text>
+                </View>
+                {group.signals.map((sig) => {
+                  const isFree = FREE_SIGNAL_KEYS.includes(sig.key);
+                  const isLocked = !isPro && !isFree;
+                  const color = sig.colorFn ? sig.colorFn(data) : COLORS.cyan;
 
-          {/* Process Rate */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Zap size={16} color={COLORS.emerald} />
-              <Text style={styles.cardTitle}>PR — Process</Text>
-            </View>
-            <DataRow label="Timing (PR1)" value={`${data.pr1_timing.toFixed(1)}°`} />
-            <DataRow label="Comb.Eff (PR6)" value={`${data.pr6_combEff.toFixed(1)}%`} color={data.pr6_combEff > 96 ? COLORS.emerald : COLORS.cyan} />
-            <DataRow label="Load (PR7)" value={`${data.pr7_engLoad.toFixed(1)}%`} />
-            <DataRow label="STFT B1 (PR2)" value={`${data.pr2_stftB1 > 0 ? '+' : ''}${data.pr2_stftB1.toFixed(1)}%`} />
-            <DataRow label="LTFT B1 (PR3)" value={`${data.pr3_ltftB1 > 0 ? '+' : ''}${data.pr3_ltftB1.toFixed(1)}%`} />
-          </View>
-
-          {/* Flow State */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Droplets size={16} color={'#38bdf8'} />
-              <Text style={styles.cardTitle}>FS — Flow State</Text>
-            </View>
-            <DataRow label="O2 Up B1 (FS1)" value={`${data.fs1_o2UpB1.toFixed(2)}V`} />
-            <DataRow label="O2 Dn B1 (FS2)" value={`${data.fs2_o2DnB1.toFixed(2)}V`} />
-            <DataRow label="Cat.Eff (FS7)" value={`${data.fs7_catEff.toFixed(1)}%`} color={data.fs7_catEff > 92 ? COLORS.emerald : '#f59e0b'} />
-            <DataRow label="Driver (FS10)" value={`${data.fs10_driverScore.toFixed(0)}/100`} color={data.fs10_driverScore > 80 ? COLORS.emerald : '#f59e0b'} />
-          </View>
-
-          {/* System Lifecycle */}
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <ShieldCheck size={16} color={'#f59e0b'} />
-              <Text style={styles.cardTitle}>SL — Lifecycle</Text>
-            </View>
-            <DataRow label="Coolant (SL1)" value={`${data.sl1_coolant.toFixed(1)}°C`} color={data.sl1_coolant < 100 ? COLORS.emerald : '#ef4444'} />
-            <DataRow label="Battery (SL3)" value={`${data.sl3_battery.toFixed(1)}V`} color={data.sl3_battery > 13.5 ? COLORS.emerald : '#f59e0b'} />
-            <DataRow label="MIL (SL7)" value={data.sl7_mil ? 'ON' : 'OFF'} color={data.sl7_mil ? '#ef4444' : COLORS.emerald} />
-            <DataRow label="Health (SL11)" value={`${data.sl11_degradation.toFixed(0)}%`} color={data.sl11_degradation > 80 ? COLORS.emerald : '#f59e0b'} />
-          </View>
+                  return (
+                    <View key={sig.key} style={styles.dataRow}>
+                      <Text style={styles.dataLabel}>{sig.label}</Text>
+                      {isLocked ? (
+                        <View style={styles.lockedValue}>
+                          <View style={styles.blurPill} />
+                          <Lock size={8} color={COLORS.textDim} />
+                        </View>
+                      ) : (
+                        <Text style={[styles.dataValue, { color }]}>{sig.format(data)}</Text>
+                      )}
+                    </View>
+                  );
+                })}
+                {/* Lock overlay for cards with all-locked signals */}
+                {!isPro && group.signals.every(s => !FREE_SIGNAL_KEYS.includes(s.key)) && (
+                  <TouchableOpacity
+                    style={styles.cardLockOverlay}
+                    onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+                    activeOpacity={0.8}
+                  >
+                    <Lock size={14} color={COLORS.cyan} />
+                    <Text style={styles.cardLockText}>Upgrade to Pro</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Condition Report Button */}
@@ -172,18 +276,9 @@ export default function DashboardScreen({ onReport }: { onReport?: () => void })
         )}
 
         {/* Runtime */}
-        <Text style={styles.runtime}>Runtime: {data.sl4_runtime}s · 42 nodes · 100ms polling · Deterministic</Text>
+        <Text style={styles.runtime}>Runtime: {data.sl4_runtime}s · {totalSignals} nodes · 100ms polling · Deterministic</Text>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function DataRow({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <View style={styles.dataRow}>
-      <Text style={styles.dataLabel}>{label}</Text>
-      <Text style={[styles.dataValue, color ? { color } : null]}>{value}</Text>
-    </View>
   );
 }
 
@@ -198,6 +293,9 @@ const styles = StyleSheet.create({
   connectionBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)', gap: 8 },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.emerald },
   connectionText: { color: COLORS.emerald, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  tierBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(6,182,212,0.06)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.15)', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, marginBottom: 12 },
+  tierBadgeText: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
+  tierUpgrade: { color: COLORS.cyan, fontSize: 11, fontWeight: '800' },
   modeBadge: { alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, borderWidth: 1, marginBottom: 24 },
   modeText: { fontSize: 11, fontWeight: '700', letterSpacing: 2 },
   telemetryContainer: { alignItems: 'center', justifyContent: 'center', height: 220, marginBottom: 24 },
@@ -209,14 +307,20 @@ const styles = StyleSheet.create({
   statItem: { alignItems: 'center' },
   statValue: { color: COLORS.cyan, fontSize: 20, fontWeight: '700', fontFamily: 'monospace' },
   statLabel: { color: COLORS.textDim, fontSize: 10, fontWeight: '600', letterSpacing: 1, marginTop: 4 },
+  blurredText: { opacity: 0.15 },
+  alertSection: { marginBottom: 16 },
   sectionTitle: { fontSize: 12, color: COLORS.textMuted, fontWeight: '700', letterSpacing: 1.5, marginBottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-  card: { width: (width - 40 - 12) / 2, backgroundColor: COLORS.bgPanel, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: COLORS.borderLight },
+  card: { width: (width - 40 - 12) / 2, backgroundColor: COLORS.bgPanel, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: COLORS.borderLight, position: 'relative', overflow: 'hidden' },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight, paddingBottom: 10 },
   cardTitle: { color: COLORS.textMain, fontSize: 11, fontWeight: '700' },
-  dataRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  dataRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   dataLabel: { color: COLORS.textMuted, fontSize: 10 },
   dataValue: { color: COLORS.cyan, fontSize: 10, fontWeight: '700', fontFamily: 'monospace' },
+  lockedValue: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  blurPill: { height: 10, width: 36, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 5 },
+  cardLockOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, backgroundColor: 'rgba(10,10,12,0.85)', borderTopWidth: 1, borderTopColor: 'rgba(6,182,212,0.15)' },
+  cardLockText: { color: COLORS.cyan, fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
   reportBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: 'rgba(6,182,212,0.1)', borderWidth: 1, borderColor: COLORS.cyan, borderRadius: 30, padding: 16, marginTop: 24 },
   reportBtnText: { color: COLORS.cyan, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
   runtime: { color: COLORS.textDim, fontSize: 10, textAlign: 'center', marginTop: 16, letterSpacing: 0.5 },
