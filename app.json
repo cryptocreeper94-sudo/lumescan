@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "Lume Scan",
+    "slug": "lume-auto",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "scheme": "lumeauto",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a0c"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.darkwavestudios.lumeauto",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Lume Scan connects to your OBD-II adapter via Bluetooth to read real-time vehicle diagnostics.",
+        "NSBluetoothPeripheralUsageDescription": "Lume Scan connects to your OBD-II adapter via Bluetooth to read real-time vehicle diagnostics.",
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.darkwavestudios.lumeauto",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a0c"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": [
+            "peripheral",
+            "central"
+          ]
+        }
+      ],
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4da0a734-89f0-4618-b41e-2e57abdbf36f"
+      },
+      "privacyPolicyUrl": "https://lumescan.tech/privacy.html"
+    }
+  }
+}
