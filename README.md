@@ -1,10 +1,11 @@
-# Lume Scan — Native Android App
+# Lume Scan — Native Mobile App
 
 The **Lume Scan** mobile application — a professional OBD-II diagnostic tool built on the Lume 4/42 deterministic diagnostic engine.
 
 ## Download
 
-**Latest APK**: [Download LumeScan v1.0.0](https://expo.dev/artifacts/eas/swv6JsxEjzQkSbDjyBJN8e.apk)
+**Android APK**: [Download LumeScan v1.0.0](https://expo.dev/artifacts/eas/swv6JsxEjzQkSbDjyBJN8e.apk)
+**iOS App Store**: *Pending App Store Review.* (Requires an active $99/yr Apple Developer Program account to distribute via TestFlight or App Store).
 
 ## Features
 
@@ -48,6 +49,7 @@ npx expo start
 
 ```bash
 npx eas build --platform android --profile preview
+npx eas build --platform ios --profile production
 ```
 
 ## Deployment
