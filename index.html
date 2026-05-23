@@ -20,7 +20,7 @@
       <a href="#compare">Compare</a>
       <a href="#signals">42 Signals</a>
       <a href="#hardware">Hardware</a>
-      <a href="#download" style="color:#06b6d4;font-weight:700">ðŸ“± Download</a>
+      <a href="/download.html" style="color:#06b6d4;font-weight:700">ðŸ“± Download</a>
       <a href="#faq">FAQ</a>
       <a href="/whitepaper.html">ðŸ“„ Whitepaper</a>
       <a href="/explorer.html" style="color:#06b6d4;font-weight:700">ðŸ›¡ï¸ Explorer</a>
@@ -554,19 +554,19 @@
       <h2>Every scan is sealed.<br>Every report is verifiable.</h2>
       <p class="sec-sub" style="margin-bottom:32px">LumeScan is the first consumer product integrated with the Trust Layer Ledger. Every diagnostic scan is cryptographically hashed and permanently sealed â€” creating an unalterable record of your vehicle's health.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px">
-        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px">
-          <div style="font-size:1.4rem;margin-bottom:8px">ðŸ </div>
-          <h4 style="font-size:0.9rem;margin-bottom:6px">Consumer Mode</h4>
+        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
+            <img src="img/mode-consumer.png" alt="Consumer Mode" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
+            <h4 style="font-size:0.9rem;margin-bottom:6px">Consumer Mode</h4>
           <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Keep your adapter plugged in for daily health snapshots. Every night, Lume Scan summarizes your vehicle's condition in plain English â€” verified and sealed on the Trust Layer Ledger.</p>
         </div>
-        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px">
-          <div style="font-size:1.4rem;margin-bottom:8px">ðŸ”§</div>
-          <h4 style="font-size:0.9rem;margin-bottom:6px">Mechanic Mode</h4>
+        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
+            <img src="img/mode-mechanic.png" alt="Mechanic Mode" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
+            <h4 style="font-size:0.9rem;margin-bottom:6px">Mechanic Mode</h4>
           <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Generate a verified Scan Certificate for your customer. Timestamped, hashed, and independently verifiable. Build credibility with every diagnosis.</p>
         </div>
-        <div style="padding:20px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.08);border-radius:14px">
-          <div style="font-size:1.4rem;margin-bottom:8px">ðŸ“„</div>
-          <h4 style="font-size:0.9rem;margin-bottom:6px">Print &amp; Download</h4>
+        <div style="padding:20px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
+            <img src="img/mode-print.png" alt="Print & Download" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
+            <h4 style="font-size:0.9rem;margin-bottom:6px">Print &amp; Download</h4>
           <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Download PDF certificates, export CSV data, or print verified reports with the TLL Hallmark. Perfect for insurance, resale, or shop records.</p>
         </div>
       </div>
@@ -619,40 +619,7 @@
   </section>
 
   <!-- DOWNLOAD APP -->
-  <section class="sec" id="download" style="border-top:1px solid var(--border);position:relative;overflow:hidden">
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(6,182,212,0.05) 0%,transparent 70%);pointer-events:none"></div>
-    <div style="position:relative;z-index:1;max-width:600px;margin:0 auto;text-align:center">
-      <div class="sec-label">Download</div>
-      <h2>Get the Android App.</h2>
-      <p class="sec-sub" style="margin-bottom:24px">Native BLE + WiFi OBD-II connectivity. Direct APK â€” no Play Store needed.</p>
-      <div id="dl-greeting" style="display:none;margin-bottom:16px">
-        <p style="color:#06b6d4;font-size:1.1rem;font-weight:600" id="dl-greeting-text"></p>
-      </div>
-      <div id="dl-gate" style="max-width:400px;margin:0 auto 24px">
-        <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:16px">Enter your purchase email to unlock the download</p>
-        <input type="email" id="dl-email" placeholder="your@email.com" style="width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;font-family:var(--sans)">
-        <div id="dl-error" style="display:none;color:#ef4444;font-size:0.75rem;margin-bottom:10px;text-align:left"></div>
-        <button onclick="verifyDownload()" id="dl-btn" style="width:100%;padding:14px 24px;border-radius:30px;background:var(--accent);border:none;color:#000;font-size:0.85rem;font-weight:800;letter-spacing:0.1em;cursor:pointer;font-family:var(--sans);transition:all 0.2s">ðŸ”“ VERIFY &amp; DOWNLOAD</button>
-        <p style="font-size:0.7rem;color:rgba(255,255,255,0.2);margin-top:12px">Don't have a license? <a href="https://lumeauto.tech/order" style="color:var(--accent);text-decoration:underline">Get Lume Scan Pro â†’</a></p>
-      </div>
-      <div id="dl-ready" style="display:none;max-width:400px;margin:0 auto 24px">
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--accent2);font-size:0.85rem;margin-bottom:16px"><span>âœ“</span> License verified â€” download ready</div>
-        <a id="dl-link" href="#" download style="display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:30px;background:var(--accent);color:#000;font-size:0.9rem;font-weight:800;letter-spacing:0.1em;text-decoration:none;transition:all 0.2s">â¬‡ï¸ DOWNLOAD APK</a>
-        <div style="margin-top:20px;display:flex;flex-direction:column;gap:6px;text-align:left;max-width:300px;margin-left:auto;margin-right:auto">
-          <p style="color:rgba(255,255,255,0.2);font-size:0.65rem;font-weight:700;letter-spacing:0.1em">INSTALL STEPS</p>
-          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">1.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Download the APK file</span></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">2.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Open it â€” tap "Install" when prompted</span></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">3.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">If blocked: Settings â†’ allow from this source</span></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">4.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Open Lume Scan and connect your adapter</span></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:20px">
-        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.4)">Android 8.0+ Â· ~25MB</div>
-        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.4)">BLE + WiFi OBD-II</div>
-        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.35)">ðŸŽ iOS â€” Coming Soon</div>
-      </div>
-    </div>
-  </section>
+  
 
   <!-- FINAL CTA -->
   <section class="sec" style="text-align:center;padding:100px 24px;position:relative">

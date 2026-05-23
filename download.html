@@ -1,0 +1,442 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Lume Scan App</title>
+  <meta name="description" content="Lume Scan: 42-signal OBD-II diagnostic engine. Predictive maintenance, fuel coaching, driver scoring. From $9.99 + affordable monthly service. Updates included.">
+  <meta name="keywords" content="OBD-II scanner, car diagnostics, check engine light, fuel efficiency, predictive maintenance">
+  <link rel="canonical" href="https://lumescan.tech">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-brand">Lume<span>Scan</span></div>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/#compare">Compare</a>
+      <a href="/#signals">42 Signals</a>
+      <a href="/#hardware">Hardware</a>
+      <a href="#" style="color:#06b6d4;font-weight:700">ðŸ“± Download</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/whitepaper.html">ðŸ“„ Whitepaper</a>
+      <a href="/explorer.html" style="color:#06b6d4;font-weight:700">ðŸ›¡ï¸ Explorer</a>
+    </div>
+    <a href="https://lumeauto.tech/order" class="nav-cta">Get Lume Scan</a>
+  </nav>
+
+  <!-- KEN BURNS HERO -->
+  
+<div style="padding-top: 100px;"></div>
+<section class="sec" id="download" style="border-top:1px solid var(--border);position:relative;overflow:hidden">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(6,182,212,0.05) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1;max-width:600px;margin:0 auto;text-align:center">
+      <div class="sec-label">Download</div>
+      <h2>Get the Android App.</h2>
+      <p class="sec-sub" style="margin-bottom:24px">Native BLE + WiFi OBD-II connectivity. Direct APK â€” no Play Store needed.</p>
+      <div id="dl-greeting" style="display:none;margin-bottom:16px">
+        <p style="color:#06b6d4;font-size:1.1rem;font-weight:600" id="dl-greeting-text"></p>
+      </div>
+      <div id="dl-gate" style="max-width:400px;margin:0 auto 24px">
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:16px">Enter your purchase email to unlock the download</p>
+        <input type="email" id="dl-email" placeholder="your@email.com" style="width:100%;padding:14px 18px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff;font-size:0.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;font-family:var(--sans)">
+        <div id="dl-error" style="display:none;color:#ef4444;font-size:0.75rem;margin-bottom:10px;text-align:left"></div>
+        <button onclick="verifyDownload()" id="dl-btn" style="width:100%;padding:14px 24px;border-radius:30px;background:var(--accent);border:none;color:#000;font-size:0.85rem;font-weight:800;letter-spacing:0.1em;cursor:pointer;font-family:var(--sans);transition:all 0.2s">ðŸ”“ VERIFY &amp; DOWNLOAD</button>
+        <p style="font-size:0.7rem;color:rgba(255,255,255,0.2);margin-top:12px">Don't have a license? <a href="https://lumeauto.tech/order" style="color:var(--accent);text-decoration:underline">Get Lume Scan Pro â†’</a></p>
+      </div>
+      <div id="dl-ready" style="display:none;max-width:400px;margin:0 auto 24px">
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--accent2);font-size:0.85rem;margin-bottom:16px"><span>âœ“</span> License verified â€” download ready</div>
+        <a id="dl-link" href="/#" download style="display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:30px;background:var(--accent);color:#000;font-size:0.9rem;font-weight:800;letter-spacing:0.1em;text-decoration:none;transition:all 0.2s">â¬‡ï¸ DOWNLOAD APK</a>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:6px;text-align:left;max-width:300px;margin-left:auto;margin-right:auto">
+          <p style="color:rgba(255,255,255,0.2);font-size:0.65rem;font-weight:700;letter-spacing:0.1em">INSTALL STEPS</p>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">1.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Download the APK file</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">2.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Open it â€” tap "Install" when prompted</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">3.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">If blocked: Settings â†’ allow from this source</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent);font-size:0.7rem;font-weight:700">4.</span><span style="color:rgba(255,255,255,0.5);font-size:0.75rem">Open Lume Scan and connect your adapter</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.4)">Android 8.0+ Â· ~25MB</div>
+        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.4)">BLE + WiFi OBD-II</div>
+        <div style="padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:0.75rem;color:rgba(255,255,255,0.35)">ðŸŽ iOS â€” Coming Soon</div>
+      </div>
+    </div>
+  </section>
+<section class="sec eco" style="padding:60px 24px 40px;border-top:1px solid rgba(255,255,255,0.04)">
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="sec-label">Part of the DarkWave Ecosystem</div>
+      <h2 style="font-size:1.6rem;margin-bottom:8px">Built on a connected platform.</h2>
+      <p class="sec-sub" style="margin-bottom:24px">Lume Scan is the diagnostic arm of a 42-app technology ecosystem.</p>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:12px">
+        <div style="display:flex;gap:14px;min-width:max-content;padding:0 4px">
+
+          <a href="https://lumeauto.tech" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-lumeauto.png" alt="Lume Auto" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸš— Lume Auto</h4><p style="margin:0">The parent platform for all things automotive â€” trust-layer verified diagnostics, fleet governance &amp; vehicle intelligence by DarkWave Studios</p></div>
+          </a>
+
+          <a href="https://garagebot.io" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-garagebot.png" alt="GarageBot" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ”§ GarageBot</h4><p style="margin:0">AI-assisted parts sourcing for everything from RC products to aviation â€” home of the Torque mechanic suite</p></div>
+          </a>
+
+          <a href="https://hydrocore.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-hydrocore.png" alt="HydroCore" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ’§ HydroCore</h4><p style="margin:0">The first proposed closed-loop hydrogen engine â€” clean propulsion research &amp; development</p></div>
+          </a>
+
+          <a href="https://meridiancanon.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-meridian.png" alt="Meridian Canon" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">âš¡ Meridian Canon</h4><p style="margin:0">Wireless energy internet â€” next-generation power distribution &amp; transmission infrastructure</p></div>
+          </a>
+
+          <a href="https://verdaraultra.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-verdara.png" alt="Verdara Ultra" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ”ï¸ Verdara Ultra</h4><p style="margin:0">Outdoor travel &amp; adventure â€” 42-node deterministic engine for terrain analysis, safety &amp; ultra-distance planning</p></div>
+          </a>
+
+          <a href="https://dwtl.io" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
+            <img src="img/eco-trustlayer.png" alt="Trust Layer Ledger" style="width:100%;height:130px;object-fit:cover;display:block">
+            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ›¡ï¸ Trust Layer Ledger</h4><p style="margin:0">Verified identity, Signal token, decentralized governance &amp; the connective tissue for all 42 apps</p></div>
+          </a>
+
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:0.65rem;color:rgba(255,255,255,0.2);letter-spacing:0.1em">SWIPE TO EXPLORE â†’</div>
+    </div>
+  </section>
+
+  <footer>
+    <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:#e2e8f0;letter-spacing:0.5px">ðŸ‡ºðŸ‡¸ Proudly made in Gladeville, TN, USA</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:20px">
+      <a href="https://x.com/TrustSignal26" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.7);font-size:0.85rem;font-weight:500;text-decoration:none;transition:all 0.2s">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        @TrustSignal26
+      </a>
+      <a href="/#download" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);border-radius:8px;color:rgba(6,182,212,0.9);font-size:0.8rem;font-weight:500;text-decoration:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 2H6.477L0 17.346l3.477 4.308L12 15.116l8.523 6.538L24 17.346zM4.193 16.5L8 6h8l3.807 10.5L12 11.192z"/></svg>
+        Android â€” Download Now
+      </a>
+      <span style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.35);font-size:0.8rem;font-weight:500">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        iOS â€” Coming Soon
+      </span>
+    </div>
+    <p style="font-size:0.65rem;color:rgba(255,255,255,0.2);margin-bottom:12px">Google Play and the Google Play logo are trademarks of Google LLC. Apple and the Apple logo are trademarks of Apple Inc.</p>
+    <p>Â© 2026 DarkWave Studios LLC Â· <a href="https://lume42.com">Lume42 Labs</a> Â· <a href="https://lumeauto.tech">Lume Auto</a> Â· <a href="https://dwtl.io">Trust Layer</a> Â· <a href="/whitepaper.html">Whitepaper</a><br>
+    <a href="/terms.html">Terms of Service</a> Â· <a href="/privacy.html">Privacy Policy</a> Â· <a href="https://lume42.com/#/invest" style="color:#38bdf8">Signal Holdings</a> Â· US Patent Pending 64/032,339</p>
+    <p style="font-size:0.65rem;color:rgba(255,255,255,0.2);max-width:700px;margin:12px auto 0;line-height:1.6">Lume Scan Pro subscriptions are billed monthly via Stripe. Your payment method is charged automatically at the start of each billing cycle. Cancel anytime â€” no contracts, no cancellation fees. Software purchase is non-refundable after 7 days. See <a href="/terms.html" style="color:var(--accent);font-size:0.65rem">Terms</a> and <a href="/privacy.html" style="color:var(--accent);font-size:0.65rem">Privacy</a> for details.</p>
+  </footer>
+
+  <script>
+  // Ken Burns slideshow
+  const slides=document.querySelectorAll('.hero-slide');
+  let cur=0;
+  setInterval(()=>{slides[cur].classList.remove('active');cur=(cur+1)%slides.length;slides[cur].classList.add('active')},5000);
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{const item=q.parentElement;document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});item.classList.toggle('open')})});
+
+  // Intersection observer for fade-in
+  const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:0.1});
+  document.querySelectorAll('.carousel-card,.equal-card,.step,.sig-card,.faq-item,.eco-card,.stat').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease, transform 0.6s ease';obs.observe(el)});
+
+  // Smooth nav scroll
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
+
+  // â”€â”€ Carousel engine â”€â”€
+  function initCarousel(id) {
+    const wrap = document.getElementById(id);
+    if (!wrap) return;
+    const track = wrap.querySelector('.carousel-track');
+    const cards = wrap.querySelectorAll('.carousel-card');
+    const dotsContainer = wrap.querySelector('.carousel-dots');
+    if (!cards.length) return;
+
+    let page = 0;
+    const isMobile = window.innerWidth <= 768;
+    const perPage = isMobile ? 1 : 3;
+    const totalPages = Math.ceil(cards.length / perPage);
+    const gap = isMobile ? 0 : 16;
+
+    // Size cards: on mobile each card = 100% of wrapper, on desktop = ~33%
+    const wrapWidth = wrap.offsetWidth;
+    const cardWidth = isMobile ? wrapWidth : (wrapWidth - gap * (perPage - 1)) / perPage;
+    const trackWidth = cardWidth * cards.length + gap * (cards.length - 1);
+    track.style.width = trackWidth + 'px';
+    track.style.gap = gap + 'px';
+    cards.forEach(c => { c.style.flex = '0 0 ' + cardWidth + 'px'; c.style.maxWidth = cardWidth + 'px'; });
+
+    // Build dots
+    if (dotsContainer) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Page ' + (i + 1));
+        dot.onclick = () => goTo(i);
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function goTo(p) {
+      page = Math.max(0, Math.min(totalPages - 1, p));
+      const offset = page * perPage * (cardWidth + gap);
+      // Don't scroll past the end
+      const maxOffset = trackWidth - wrapWidth;
+      const clampedOffset = Math.min(offset, maxOffset);
+      track.style.transform = 'translateX(-' + clampedOffset + 'px)';
+      if (dotsContainer) {
+        dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === page);
+        });
+      }
+    }
+
+    // Touch swipe
+    let tx = 0;
+    wrap.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    wrap.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tx;
+      if (dx < -40) goTo(page + 1);
+      else if (dx > 40) goTo(page - 1);
+    }, { passive: true });
+
+    // Expose for arrow buttons
+    wrap._goTo = goTo;
+    wrap._getPage = () => page;
+    wrap._totalPages = totalPages;
+  }
+
+  function scrollCarousel(id, dir) {
+    const wrap = document.getElementById(id);
+    if (!wrap || !wrap._goTo) return;
+    wrap._goTo(wrap._getPage() + dir);
+  }
+
+  // Init all carousels
+  initCarousel('feat-carousel');
+
+  // Re-init on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
+  });
+  // â”€â”€ Live Scan Simulator â”€â”€
+  let scanInterval = null;
+  let scanProgress = 0;
+
+  function startScan() {
+    document.getElementById('scan-start').style.display = 'none';
+    document.getElementById('scan-live').style.display = 'block';
+    document.getElementById('scan-done').style.display = 'none';
+    document.getElementById('scan-dot').style.background = 'var(--accent)';
+    document.getElementById('scan-dot').style.boxShadow = '0 0 10px var(--accent)';
+    document.getElementById('scan-status').textContent = 'CONNECTION: ACTIVE (100Hz)';
+    document.getElementById('scan-status').style.color = 'var(--accent)';
+    scanProgress = 0;
+
+    scanInterval = setInterval(() => {
+      scanProgress += 0.8;
+      if (scanProgress >= 100) {
+        scanProgress = 100;
+        clearInterval(scanInterval);
+        setTimeout(completeScan, 300);
+      }
+      document.getElementById('scan-pct').textContent = Math.floor(scanProgress) + '%';
+      document.getElementById('scan-bar').style.width = scanProgress + '%';
+
+      // Jitter telemetry
+      document.getElementById('t-rpm').textContent = Math.floor(800 + Math.random() * 200);
+      document.getElementById('t-load').textContent = (20 + Math.random() * 15).toFixed(1) + '%';
+      document.getElementById('t-o2').textContent = (0.1 + Math.random() * 0.8).toFixed(2) + 'v';
+      document.getElementById('t-timing').textContent = Math.floor(10 + Math.random() * 5) + 'Â°';
+      document.getElementById('t-coolant').textContent = Math.floor(185 + Math.random() * 15) + 'Â°F';
+      document.getElementById('t-maf').textContent = (3.5 + Math.random() * 4).toFixed(1) + ' g/s';
+    }, 100);
+  }
+
+  function completeScan() {
+    document.getElementById('scan-live').style.display = 'none';
+    document.getElementById('scan-done').style.display = 'block';
+    document.getElementById('scan-dot').style.background = 'var(--accent2)';
+    document.getElementById('scan-dot').style.boxShadow = 'none';
+    document.getElementById('scan-status').textContent = 'CONNECTION: TERMINATED';
+    document.getElementById('scan-status').style.color = 'var(--dim)';
+    document.getElementById('scan-hash').textContent = ' ' + Date.now();
+  }
+
+  function resetScan() {
+    clearInterval(scanInterval);
+    scanProgress = 0;
+    document.getElementById('scan-live').style.display = 'none';
+    document.getElementById('scan-done').style.display = 'none';
+    document.getElementById('scan-start').style.display = 'flex';
+    document.getElementById('scan-dot').style.background = 'var(--dim)';
+    document.getElementById('scan-dot').style.boxShadow = 'none';
+    document.getElementById('scan-status').textContent = 'CONNECTION: STANDBY';
+    document.getElementById('scan-status').style.color = 'var(--dim)';
+    document.getElementById('scan-pct').textContent = '0%';
+    document.getElementById('scan-bar').style.width = '0%';
+  }
+  // â”€â”€ Download Verification â”€â”€
+  async function verifyDownload() {
+    const emailEl = document.getElementById('dl-email');
+    const errEl = document.getElementById('dl-error');
+    const btnEl = document.getElementById('dl-btn');
+    const email = (emailEl.value || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      errEl.textContent = 'Please enter the email you used to purchase.';
+      errEl.style.display = 'block';
+      return;
+    }
+    btnEl.textContent = 'â³ VERIFYING...';
+    btnEl.disabled = true;
+    errEl.style.display = 'none';
+    try {
+      const res = await fetch('https://lumeauto.tech/api/account/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.subscription_active) {
+        const h = new Date().getHours();
+        const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+        const name = email.split('@')[0];
+        const capName = name.charAt(0).toUpperCase() + name.slice(1);
+        document.getElementById('dl-greeting-text').textContent = greeting + ', ' + capName + '! ðŸ‘‹';
+        document.getElementById('dl-greeting').style.display = 'block';
+        document.getElementById('dl-link').href = 'https://lumeauto.tech/download/apk?email=' + encodeURIComponent(email);
+        document.getElementById('dl-gate').style.display = 'none';
+        document.getElementById('dl-ready').style.display = 'block';
+      } else {
+        errEl.textContent = data.error || 'No active Pro license found for this email.';
+        errEl.style.display = 'block';
+        btnEl.textContent = 'ðŸ”“ VERIFY & DOWNLOAD';
+        btnEl.disabled = false;
+      }
+    } catch (e) {
+      errEl.textContent = 'Network error. Please try again.';
+      errEl.style.display = 'block';
+      btnEl.textContent = 'ðŸ”“ VERIFY & DOWNLOAD';
+      btnEl.disabled = false;
+    }
+  }
+  document.getElementById('dl-email')?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyDownload();
+  });
+  </script>
+
+    <!-- DarkWave Studios Ecosystem Analytics -->
+    <script>
+      (function(){
+        var sid = 'xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); });
+        var vid = localStorage.getItem('dw_vid');
+        if (!vid) { vid = 'xxxx-xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); }); localStorage.setItem('dw_vid', vid); }
+        function track() {
+          try {
+            var ua = navigator.userAgent;
+            var mobile = /Mobile|Android|iPhone/.test(ua);
+            navigator.sendBeacon('https://darkwavestudios.io/api/analytics/pageview', JSON.stringify({
+              path: window.location.pathname,
+              title: document.title,
+              referrer: document.referrer || null,
+              userAgent: ua,
+              sessionId: sid,
+              visitorId: vid,
+              device: mobile ? 'mobile' : 'desktop',
+              browser: /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Other',
+              os: /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'macOS' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : 'Other'
+            }));
+          } catch(e) {}
+        }
+        track();
+        window.addEventListener('popstate', track);
+        var origPush = history.pushState;
+        history.pushState = function(){ origPush.apply(this, arguments); track(); };
+      })();
+    </script>
+    <!-- DarkWave Studios Command Center -->
+    <script>
+      (function(){
+        var cc=0,timer=null;
+        function injectShield(){
+          var f=document.querySelector('footer');
+          if(!f)return setTimeout(injectShield,2000);
+          var existing=f.querySelector('[data-dw-shield]');
+          if(existing)return;
+          var s=document.createElement('span');
+          s.setAttribute('data-dw-shield','1');
+          s.textContent='\u25C8';
+          s.style.cssText='cursor:default;opacity:0.2;font-size:14px;user-select:none;margin-left:6px;';
+          s.addEventListener('click',function(){
+            cc++;if(timer)clearTimeout(timer);
+            if(cc>=3){cc=0;showPinModal();}
+            else{timer=setTimeout(function(){cc=0;},2000);}
+          });
+          var copy=f.querySelector('[class*="copyright"],[class*="Copyright"]');
+          if(copy){copy.appendChild(s);}
+          else{var last=f.lastElementChild||f;last.appendChild(s);}
+        }
+        function showPinModal(){
+          var o=document.createElement('div');
+          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;';
+          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
+          var box=document.createElement('div');
+          box.style.cssText='background:#0a0a1a;border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:32px;text-align:center;min-width:280px;font-family:system-ui,sans-serif;';
+          box.innerHTML='<div style="font-size:12px;color:#06b6d4;margin-bottom:16px;letter-spacing:3px;">AUTHENTICATION REQUIRED</div>';
+          var inp=document.createElement('input');
+          inp.type='password';inp.maxLength=4;
+          inp.style.cssText='background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:12px;color:#fff;font-size:24px;text-align:center;width:120px;letter-spacing:8px;outline:none;';
+          inp.addEventListener('keydown',function(e){
+            if(e.key==='Enter'){
+              if(inp.value==='0424'){o.remove();showCommandCenter();}
+              else{inp.style.borderColor='#f43f5e';inp.value='';setTimeout(function(){inp.style.borderColor='rgba(6,182,212,0.2)';},600);}
+            }
+          });
+          box.appendChild(inp);
+          var hint=document.createElement('div');
+          hint.style.cssText='margin-top:12px;font-size:10px;color:rgba(255,255,255,0.3);';
+          hint.textContent='Enter PIN to continue';
+          box.appendChild(hint);
+          o.appendChild(box);document.body.appendChild(o);
+          setTimeout(function(){inp.focus();},100);
+        }
+        function showCommandCenter(){
+          var o=document.createElement('div');
+          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:99999;';
+          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
+          var links=[
+            {l:'Trust Layer Dashboard',u:'https://dwtl.io'},
+            {l:'Axiom Studio',u:'https://axiomstudio.dev'},
+            {l:'TrustGen 3D',u:'https://trustgen.design'},
+            {l:'TrustVault',u:'https://trustvault.studio'},
+            {l:'TrustShield',u:'https://trustshield.tech'},
+            {l:'Lume Auto',u:'https://lumeauto.tech'},
+            {l:'Lume Scan',u:'https://lumescan.tech'},
+            {l:'DarkWave Studios',u:'https://darkwavestudios.io'}
+          ];
+          var html='<div style="background:linear-gradient(135deg,#0a0a1a,#0d1117);border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:40px;max-width:500px;width:90%;font-family:system-ui,sans-serif;">';
+          html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><div style="font-size:14px;color:#06b6d4;letter-spacing:3px;font-weight:700;">\u27D0 COMMAND CENTER</div><span id="cc-close" style="color:#666;font-size:20px;cursor:pointer;">\u2715</span></div>';
+          html+='<div style="display:grid;gap:10px;">';
+          links.forEach(function(lk){
+            html+='<a href="'+lk.u+'" target="_blank" rel="noopener" style="display:block;padding:12px 16px;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:10px;color:#94a3b8;text-decoration:none;font-size:13px;transition:all 0.2s;" onmouseenter="this.style.borderColor=\'rgba(6,182,212,0.3)\';this.style.color=\'#06b6d4\';" onmouseleave="this.style.borderColor=\'rgba(6,182,212,0.1)\';this.style.color=\'#94a3b8\';">'+lk.l+'</a>';
+          });
+          html+='</div><div style="margin-top:20px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center;">\u00A9 2026 DarkWave Studios LLC</div></div>';
+          o.innerHTML=html;
+          document.body.appendChild(o);
+          document.getElementById('cc-close').addEventListener('click',function(){o.remove();});
+        }
+        if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(injectShield,1000);});
+        else setTimeout(injectShield,1000);
+      })();
+    </script>
+  </body>
+</html>
+
+
