@@ -23,6 +23,7 @@ export default function LoginScreen() {
   // ── Google SSO via expo-auth-session ──
   const [_request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: '41307406912-f8ofdal9haaa8r468ts48vvimdvfs04i.apps.googleusercontent.com',
+    androidClientId: '41307406912-39s3bf65rfls3i40208hmbjq0vf7m0cd.apps.googleusercontent.com',
   });
 
   useEffect(() => {
@@ -114,8 +115,7 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              {/* Google SSO requires Native Client IDs (Android/iOS) in Expo. 
-                  Temporarily hidden to prevent "Error 400: Custom scheme URIs" until Native IDs are added. 
+              {/* Google SSO */}
               <TouchableOpacity
                 style={styles.googleBtn}
                 onPress={() => promptAsync()}
@@ -125,12 +125,12 @@ export default function LoginScreen() {
                 <Text style={styles.googleBtnText}>Continue with Google</Text>
               </TouchableOpacity>
 
+              {/* Divider */}
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
                 <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.dividerLine} />
               </View>
-              */}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
