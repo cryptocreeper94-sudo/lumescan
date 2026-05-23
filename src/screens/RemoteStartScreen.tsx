@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Vibration } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Vibration, Linking } from 'react-native';
 import { Radio, ShieldCheck, AlertTriangle, Square, Play, Gauge, Thermometer, Battery, Clock, Lock, ExternalLink } from 'lucide-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence, Easing } from 'react-native-reanimated';
 import { COLORS } from '../theme/colors';
@@ -207,7 +207,7 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
                 </View>
               ))}
             </View>
-            <TouchableOpacity style={styles.upgradeBtn} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.upgradeBtn} activeOpacity={0.8} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
               <Text style={styles.upgradeBtnText}>Subscribe — $9.99/mo</Text>
               <ExternalLink size={16} color="#000" />
             </TouchableOpacity>
