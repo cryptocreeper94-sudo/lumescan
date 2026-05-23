@@ -24,6 +24,7 @@ export default function LoginScreen() {
   const [_request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: '41307406912-f8ofdal9haaa8r468ts48vvimdvfs04i.apps.googleusercontent.com',
     androidClientId: '41307406912-39s3bf65rfls3i40208hmbjq0vf7m0cd.apps.googleusercontent.com',
+    iosClientId: '41307406912-p56jnhfq3jdld05cqid3hff4r99drgka.apps.googleusercontent.com',
   });
 
   useEffect(() => {
