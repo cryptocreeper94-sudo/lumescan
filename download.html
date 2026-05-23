@@ -139,7 +139,7 @@
   </section>
 
   <footer>
-    <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:#e2e8f0;letter-spacing:0.5px">ðŸ‡ºðŸ‡¸ Proudly made in Gladeville, TN, USA</div>
+    <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:#e2e8f0;letter-spacing:0.5px">🇺🇸 Proudly made in Gladeville, TN, USA</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:20px">
       <a href="https://x.com/TrustSignal26" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.7);font-size:0.85rem;font-weight:500;text-decoration:none;transition:all 0.2s">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -176,7 +176,7 @@
   // Smooth nav scroll
   document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
 
-  // â”€â”€ Carousel engine â”€â”€
+  // ── Carousel engine ──
   function initCarousel(id) {
     const wrap = document.getElementById(id);
     if (!wrap) return;
@@ -255,7 +255,7 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
   });
-  // â”€â”€ Live Scan Simulator â”€â”€
+  // ── Live Scan Simulator ──
   let scanInterval = null;
   let scanProgress = 0;
 
@@ -312,7 +312,7 @@
     document.getElementById('scan-pct').textContent = '0%';
     document.getElementById('scan-bar').style.width = '0%';
   }
-  // â”€â”€ Download Verification â”€â”€
+  // ── Download Verification ──
   async function verifyDownload() {
     const emailEl = document.getElementById('dl-email');
     const errEl = document.getElementById('dl-error');

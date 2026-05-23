@@ -347,7 +347,7 @@
         <!-- Start overlay -->
         <div id="scan-start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,10,12,0.85);backdrop-filter:blur(4px);z-index:10;cursor:pointer" onclick="startScan()">
           <button style="display:flex;align-items:center;gap:12px;background:rgba(6,182,212,0.1);border:1px solid var(--accent);padding:14px 36px;border-radius:30px;color:var(--accent);font-weight:700;font-size:18px;cursor:pointer;animation:scan-pulse 2s ease infinite;font-family:var(--sans)">
-            â–¶ INITIATE LIVE SCAN
+            ▶ INITIATE LIVE SCAN
           </button>
         </div>
 
@@ -424,7 +424,7 @@
       <div class="sig-card"><h3 style="color:var(--accent)">🔥 Combustion (10)</h3><p>RPM · MAF · MAP · Throttle · Engine Load · Vol. Efficiency · Air-Fuel Ratio · Combustion Eff. · Timing Advance · Baro Pressure</p></div>
       <div class="sig-card"><h3 style="color:var(--accent2)">⛽ Fuel System (10)</h3><p>Fuel Flow · O2 Upstream B1 · O2 Downstream B1 · STFT B1/B2 · LTFT B1/B2 · Catalyst Temp · Catalyst Eff. · MPG Instant</p></div>
       <div class="sig-card"><h3 style="color:#f59e0b">ðŸ›¡ï¸ Health & Safety (11)</h3><p>Coolant · IAT · Battery · Runtime · MIL · DTC Count · Speed · Abs Load · Degradation Index · Driver Score · MPG Recovery</p></div>
-      <div class="sig-card"><h3 style="color:#ef4444">âš™ï¸ Governance (11)</h3><p>Mode · Flow State · Process Drift · Throughput Alert · Lifecycle Warning · Fuel Coach · Predictive Score · Trend · Anomaly · Session Î” · Baseline</p></div>
+      <div class="sig-card"><h3 style="color:#ef4444">âš™ï¸ Governance (11)</h3><p>Mode · Flow State · Process Drift · Throughput Alert · Lifecycle Warning · Fuel Coach · Predictive Score · Trend · Anomaly · Session Δ · Baseline</p></div>
     </div>
   </section>
 
@@ -509,11 +509,11 @@
         <h3>The Lume Scan Dongle</h3>
         <p>We're developing a purpose-built BLE 5.0 diagnostic dongle with onboard flash storage, hardware-level AES-256 encryption, and extended PID coverage that goes far beyond standard ELM327 adapters.</p>
         <p><strong style="color:var(--text)">What the proprietary hardware unlocks:</strong></p>
-        <p>â€¢ <strong>Extended PID access</strong> — manufacturer-specific codes beyond standard OBD-II<br>
-        â€¢ <strong>Vehicle-Carried Mode</strong> — 32MB onboard storage logs diagnostics between sessions<br>
-        â€¢ <strong>Hardware-signed packets</strong> — Ed25519 cryptographic verification of every reading<br>
-        â€¢ <strong>Faster BLE 5.0</strong> — 2x throughput for true 100ms polling of all 42 signals<br>
-        â€¢ <strong>Fleet-grade durability</strong> — automotive-temp-rated, always-on, zero driver intervention</p>
+        <p>• <strong>Extended PID access</strong> — manufacturer-specific codes beyond standard OBD-II<br>
+        • <strong>Vehicle-Carried Mode</strong> — 32MB onboard storage logs diagnostics between sessions<br>
+        • <strong>Hardware-signed packets</strong> — Ed25519 cryptographic verification of every reading<br>
+        • <strong>Faster BLE 5.0</strong> — 2x throughput for true 100ms polling of all 42 signals<br>
+        • <strong>Fleet-grade durability</strong> — automotive-temp-rated, always-on, zero driver intervention</p>
         <div class="hw-tag">Q4 2026 · Waitlist Open</div>
       </div>
       <div style="text-align:center">
@@ -712,7 +712,7 @@
   // Smooth nav scroll
   document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
 
-  // â”€â”€ Carousel engine â”€â”€
+  // ── Carousel engine ──
   function initCarousel(id) {
     const wrap = document.getElementById(id);
     if (!wrap) return;
@@ -791,7 +791,7 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
   });
-  // â”€â”€ Live Scan Simulator â”€â”€
+  // ── Live Scan Simulator ──
   let scanInterval = null;
   let scanProgress = 0;
 
@@ -848,7 +848,7 @@
     document.getElementById('scan-pct').textContent = '0%';
     document.getElementById('scan-bar').style.width = '0%';
   }
-  // â”€â”€ Download Verification â”€â”€
+  // ── Download Verification ──
   async function verifyDownload() {
     const emailEl = document.getElementById('dl-email');
     const errEl = document.getElementById('dl-error');
