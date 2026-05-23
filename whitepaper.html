@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lume Scan Whitepaper â€” Technical Architecture & Product Specification</title>
+<title>Lume Scan Whitepaper — Technical Architecture & Product Specification</title>
 <meta name="description" content="The complete technical whitepaper for Lume Scan: 42-signal deterministic diagnostic engine, predictive maintenance, fuel coaching, and Trust Layer verification.">
 <link rel="canonical" href="https://lumescan.tech/whitepaper.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,14 +103,14 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <a href="/explorer.html">Explorer</a>
     <a href="https://lumeauto.tech/order">Get Lume Scan</a>
   </div>
-  <button class="wp-dl no-print" onclick="window.print()">ðŸ“„ Save as PDF</button>
+  <button class="wp-dl no-print" onclick="window.print()">📄 Save as PDF</button>
 </nav>
 
 <div class="wp">
 
 <!-- COVER -->
 <div class="wp-cover">
-  <div class="wp-hallmark">ðŸ›¡ï¸ Trust Layer Verified Â· TLL Hallmark</div>
+  <div class="wp-hallmark">ðŸ›¡ï¸ Trust Layer Verified · TLL Hallmark</div>
   <h1>Lume Scan<br><span class="gr">Technical Whitepaper</span></h1>
   <p class="wp-cover-sub">The complete architecture, security model, and product specification for the Lume Scan 42-signal deterministic diagnostic engine.</p>
   <div class="wp-meta">
@@ -119,7 +119,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <span><strong>Date</strong> May 2026</span>
     <span><strong>Patent</strong> US 64/032,339 Pending</span>
   </div>
-  <button class="wp-dl no-print" onclick="window.print()" style="margin:0 auto;padding:14px 28px;border-radius:12px;font-size:14px">ðŸ“„ Download as PDF</button>
+  <button class="wp-dl no-print" onclick="window.print()" style="margin:0 auto;padding:14px 28px;border-radius:12px;font-size:14px">📄 Download as PDF</button>
 </div>
 
 <!-- TOC -->
@@ -143,8 +143,8 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <div class="wp-sec" id="s1">
   <div class="wp-sec-num">Section 01</div>
   <h2>Executive Summary</h2>
-  <p>Lume Scan is a professional OBD-II diagnostic tool that reads 42 real-time vehicle signals at 100ms intervals, provides deterministic fuel coaching, predictive maintenance alerts, and driver scoring â€” all from a standard $15 Bluetooth adapter and any modern smartphone.</p>
-  <p>Unlike conventional scan tools that read trouble codes and stop, Lume Scan continuously monitors the full engine state, detects efficiency degradation before it triggers a check engine light, and provides actionable coaching that saves the average driver <strong>$180â€“$320 per year</strong> in fuel costs alone â€” with potential savings of <strong>$800â€“$2,400+</strong> when preventive maintenance catches failures early.</p>
+  <p>Lume Scan is a professional OBD-II diagnostic tool that reads 42 real-time vehicle signals at 100ms intervals, provides deterministic fuel coaching, predictive maintenance alerts, and driver scoring — all from a standard $15 Bluetooth adapter and any modern smartphone.</p>
+  <p>Unlike conventional scan tools that read trouble codes and stop, Lume Scan continuously monitors the full engine state, detects efficiency degradation before it triggers a check engine light, and provides actionable coaching that saves the average driver <strong>$180–$320 per year</strong> in fuel costs alone — with potential savings of <strong>$800–$2,400+</strong> when preventive maintenance catches failures early.</p>
   <div class="wp-stats">
     <div class="wp-stat"><div class="wp-stat-val">42</div><div class="wp-stat-lbl">Live Signals</div></div>
     <div class="wp-stat"><div class="wp-stat-val">100ms</div><div class="wp-stat-lbl">Refresh Rate</div></div>
@@ -153,7 +153,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   </div>
   <div class="wp-callout green">
     <div class="wp-callout-title">Key Differentiator</div>
-    <p>Lume Scan is fully deterministic â€” no AI, no cloud processing, no machine learning. Same inputs produce the same outputs on any device, every time. Every scan result is cryptographically hashed and anchored to the Trust Layer Ledger (TLL) for independent verification.</p>
+    <p>Lume Scan is fully deterministic — no AI, no cloud processing, no machine learning. Same inputs produce the same outputs on any device, every time. Every scan result is cryptographically hashed and anchored to the Trust Layer Ledger (TLL) for independent verification.</p>
   </div>
 </div>
 
@@ -161,17 +161,17 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <div class="wp-sec" id="s2">
   <div class="wp-sec-num">Section 02</div>
   <h2>The 4/42 Architecture</h2>
-  <p>Lume Scan is powered by a <strong>deterministic diagnostic engine</strong> â€” a software architecture where four irreducible flow primitives govern forty-two operational nodes. This is not a marketing construct; it is a mathematical architecture with formal properties.</p>
+  <p>Lume Scan is powered by a <strong>deterministic diagnostic engine</strong> — a software architecture where four irreducible flow primitives govern forty-two operational nodes. This is not a marketing construct; it is a mathematical architecture with formal properties.</p>
 
   <h3>Four Flow Primitives</h3>
   <p>Every vehicle's engine state can be decomposed into four independent measurement domains:</p>
   <table class="wp-tbl">
     <thead><tr><th>Primitive</th><th>Nodes</th><th>Domain</th></tr></thead>
     <tbody>
-      <tr><td><strong>Combustion Efficiency</strong></td><td>CE1â€“CE12 (12)</td><td>Fuel trims, O2 sensors, MAF/MAP, timing advance, catalyst efficiency</td></tr>
-      <tr><td><strong>Thermal Regulation</strong></td><td>TR1â€“TR10 (10)</td><td>Coolant temp, intake air temp, catalyst temp, thermal drift</td></tr>
-      <tr><td><strong>Mechanical Integrity</strong></td><td>MI1â€“MI10 (10)</td><td>RPM stability, misfire counts, engine load, vibration signatures</td></tr>
-      <tr><td><strong>Electrical Systems</strong></td><td>ES1â€“ES10 (10)</td><td>Battery voltage, alternator output, sensor reliability, control module health</td></tr>
+      <tr><td><strong>Combustion Efficiency</strong></td><td>CE1–CE12 (12)</td><td>Fuel trims, O2 sensors, MAF/MAP, timing advance, catalyst efficiency</td></tr>
+      <tr><td><strong>Thermal Regulation</strong></td><td>TR1–TR10 (10)</td><td>Coolant temp, intake air temp, catalyst temp, thermal drift</td></tr>
+      <tr><td><strong>Mechanical Integrity</strong></td><td>MI1–MI10 (10)</td><td>RPM stability, misfire counts, engine load, vibration signatures</td></tr>
+      <tr><td><strong>Electrical Systems</strong></td><td>ES1–ES10 (10)</td><td>Battery voltage, alternator output, sensor reliability, control module health</td></tr>
     </tbody>
   </table>
 
@@ -180,11 +180,11 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
   <h3>Five Operating Modes</h3>
   <ol>
-    <li><strong>SAFETY</strong> â€” Any critical-band node detected. Immediate alert. No interpretation.</li>
-    <li><strong>RECOVERY</strong> â€” Multiple caution-band nodes across two or more primitives.</li>
-    <li><strong>BALANCE</strong> â€” Mixed state. Some nodes optimal, others degrading.</li>
-    <li><strong>EFFICIENCY</strong> â€” All nodes nominal. Fuel coaching active for maximum economy.</li>
-    <li><strong>STABILITY</strong> â€” Default. Steady-state monitoring. Baseline establishment.</li>
+    <li><strong>SAFETY</strong> — Any critical-band node detected. Immediate alert. No interpretation.</li>
+    <li><strong>RECOVERY</strong> — Multiple caution-band nodes across two or more primitives.</li>
+    <li><strong>BALANCE</strong> — Mixed state. Some nodes optimal, others degrading.</li>
+    <li><strong>EFFICIENCY</strong> — All nodes nominal. Fuel coaching active for maximum economy.</li>
+    <li><strong>STABILITY</strong> — Default. Steady-state monitoring. Baseline establishment.</li>
   </ol>
 
   <div class="wp-callout cyan">
@@ -256,11 +256,11 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
   <h3>How It Works</h3>
   <ol>
-    <li><strong>Baseline Establishment</strong> â€” During the first 5 minutes of driving, the engine establishes a fuel consumption baseline by averaging MAF, fuel trims, engine load, and throttle position across steady-state intervals.</li>
-    <li><strong>Efficiency Scoring</strong> â€” Each second, the engine computes an efficiency score from 0â€“100 by comparing current combustion parameters against the established baseline. Scores above 75 indicate optimal driving.</li>
-    <li><strong>Visual Feedback</strong> â€” A color-coded indicator (green/yellow/red) provides instant feedback without requiring the driver to read numbers or interpret gauges.</li>
-    <li><strong>Audio Coaching</strong> â€” Optional audio tones alert the driver when acceleration patterns, idling duration, or throttle behavior fall outside the efficiency envelope.</li>
-    <li><strong>Session Summary</strong> â€” At trip end, Lume Scan produces a fuel efficiency report with estimated savings, efficiency score, and specific improvement recommendations.</li>
+    <li><strong>Baseline Establishment</strong> — During the first 5 minutes of driving, the engine establishes a fuel consumption baseline by averaging MAF, fuel trims, engine load, and throttle position across steady-state intervals.</li>
+    <li><strong>Efficiency Scoring</strong> — Each second, the engine computes an efficiency score from 0–100 by comparing current combustion parameters against the established baseline. Scores above 75 indicate optimal driving.</li>
+    <li><strong>Visual Feedback</strong> — A color-coded indicator (green/yellow/red) provides instant feedback without requiring the driver to read numbers or interpret gauges.</li>
+    <li><strong>Audio Coaching</strong> — Optional audio tones alert the driver when acceleration patterns, idling duration, or throttle behavior fall outside the efficiency envelope.</li>
+    <li><strong>Session Summary</strong> — At trip end, Lume Scan produces a fuel efficiency report with estimated savings, efficiency score, and specific improvement recommendations.</li>
   </ol>
 
   <h3>Savings Methodology</h3>
@@ -268,33 +268,33 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   <table class="wp-tbl">
     <thead><tr><th>Category</th><th>Mechanism</th><th>Annual Savings</th></tr></thead>
     <tbody>
-      <tr><td><strong>Driving Behavior</strong></td><td>Throttle smoothing, idle reduction, cruise optimization</td><td>$100â€“$180</td></tr>
-      <tr><td><strong>Maintenance Timing</strong></td><td>O2 sensor degradation, air filter, spark plugs detected before failure</td><td>$50â€“$90</td></tr>
-      <tr><td><strong>Fuel Trim Monitoring</strong></td><td>Rich/lean drift alerts enabling proactive service</td><td>$30â€“$50</td></tr>
+      <tr><td><strong>Driving Behavior</strong></td><td>Throttle smoothing, idle reduction, cruise optimization</td><td>$100–$180</td></tr>
+      <tr><td><strong>Maintenance Timing</strong></td><td>O2 sensor degradation, air filter, spark plugs detected before failure</td><td>$50–$90</td></tr>
+      <tr><td><strong>Fuel Trim Monitoring</strong></td><td>Rich/lean drift alerts enabling proactive service</td><td>$30–$50</td></tr>
     </tbody>
   </table>
-  <p><strong>Total estimated annual savings: $180â€“$320</strong> in fuel costs alone. Combined with preventive maintenance savings (Section 5), total value reaches <strong>$800â€“$2,400+</strong> per year.</p>
+  <p><strong>Total estimated annual savings: $180–$320</strong> in fuel costs alone. Combined with preventive maintenance savings (Section 5), total value reaches <strong>$800–$2,400+</strong> per year.</p>
 </div>
 
 <!-- 5. PREDICTIVE MAINTENANCE -->
 <div class="wp-sec" id="s5">
   <div class="wp-sec-num">Section 05</div>
   <h2>Predictive Maintenance</h2>
-  <p>Lume Scan detects component degradation <strong>before</strong> it triggers a diagnostic trouble code (DTC) or illuminates the check engine light. This is achieved through continuous threshold monitoring across all 42 signals â€” not through machine learning or statistical prediction.</p>
+  <p>Lume Scan detects component degradation <strong>before</strong> it triggers a diagnostic trouble code (DTC) or illuminates the check engine light. This is achieved through continuous threshold monitoring across all 42 signals — not through machine learning or statistical prediction.</p>
 
   <h3>Detection Categories</h3>
   <ul>
-    <li><strong>Catalyst Degradation</strong> â€” Cross-validates upstream vs. downstream O2 sensors to detect efficiency loss weeks before P0420/P0430 triggers. Estimated savings: $800â€“$1,500 (early catalyst replacement vs. emergency failure).</li>
-    <li><strong>Fuel System Drift</strong> â€” Monitors short-term and long-term fuel trims simultaneously. Persistent drift beyond Â±8% triggers an alert before the ECU sets a misfire or fuel system DTC. Savings: $200â€“$600.</li>
-    <li><strong>Cooling System Degradation</strong> â€” Tracks coolant temperature stabilization time and thermal cycling patterns. Detects failing thermostats, low coolant, or head gasket seepage. Savings: $150â€“$3,000+.</li>
-    <li><strong>Ignition System Wear</strong> â€” RPM stability analysis and misfire pattern detection identify coil pack and spark plug degradation. Savings: $100â€“$400.</li>
-    <li><strong>Emissions Readiness</strong> â€” Monitors all 8 OBD-II readiness monitors continuously. Alerts if any monitor resets or fails, preventing surprise state inspection failures.</li>
-    <li><strong>Electrical System Health</strong> â€” Battery voltage trend analysis detects alternator degradation and parasitic drain patterns before a no-start event.</li>
+    <li><strong>Catalyst Degradation</strong> — Cross-validates upstream vs. downstream O2 sensors to detect efficiency loss weeks before P0420/P0430 triggers. Estimated savings: $800–$1,500 (early catalyst replacement vs. emergency failure).</li>
+    <li><strong>Fuel System Drift</strong> — Monitors short-term and long-term fuel trims simultaneously. Persistent drift beyond Â±8% triggers an alert before the ECU sets a misfire or fuel system DTC. Savings: $200–$600.</li>
+    <li><strong>Cooling System Degradation</strong> — Tracks coolant temperature stabilization time and thermal cycling patterns. Detects failing thermostats, low coolant, or head gasket seepage. Savings: $150–$3,000+.</li>
+    <li><strong>Ignition System Wear</strong> — RPM stability analysis and misfire pattern detection identify coil pack and spark plug degradation. Savings: $100–$400.</li>
+    <li><strong>Emissions Readiness</strong> — Monitors all 8 OBD-II readiness monitors continuously. Alerts if any monitor resets or fails, preventing surprise state inspection failures.</li>
+    <li><strong>Electrical System Health</strong> — Battery voltage trend analysis detects alternator degradation and parasitic drain patterns before a no-start event.</li>
   </ul>
 
   <div class="wp-callout amber">
     <div class="wp-callout-title">No False Positives by Design</div>
-    <p>Unlike AI-based predictive systems, Lume Scan's threshold-based detection produces zero false positives. An alert is issued only when a measured value crosses a defined threshold â€” not when a probability model suggests it might. If the engine says "caution," the sensor data proves it.</p>
+    <p>Unlike AI-based predictive systems, Lume Scan's threshold-based detection produces zero false positives. An alert is issued only when a measured value crosses a defined threshold — not when a probability model suggests it might. If the engine says "caution," the sensor data proves it.</p>
   </div>
 </div>
 
@@ -302,21 +302,21 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <div class="wp-sec" id="s6">
   <div class="wp-sec-num">Section 06</div>
   <h2>Security & Verification</h2>
-  <p>Every Lume Scan diagnostic session produces a cryptographically verifiable record. This is not optional â€” it is architecturally embedded in every scan.</p>
+  <p>Every Lume Scan diagnostic session produces a cryptographically verifiable record. This is not optional — it is architecturally embedded in every scan.</p>
 
   <h3>Encryption</h3>
   <ul>
-    <li><strong>At Rest</strong> â€” AES-256-GCM encryption for all stored diagnostic data on the device.</li>
-    <li><strong>In Transit</strong> â€” TLS 1.3 for any network communication (license verification, optional telemetry export).</li>
-    <li><strong>Packet Signing</strong> â€” Ed25519 digital signatures on every diagnostic packet, ensuring data integrity from adapter to output.</li>
+    <li><strong>At Rest</strong> — AES-256-GCM encryption for all stored diagnostic data on the device.</li>
+    <li><strong>In Transit</strong> — TLS 1.3 for any network communication (license verification, optional telemetry export).</li>
+    <li><strong>Packet Signing</strong> — Ed25519 digital signatures on every diagnostic packet, ensuring data integrity from adapter to output.</li>
   </ul>
 
   <h3>Trust Layer Ledger (TLL) Hallmark</h3>
-  <p>Every completed scan produces a <strong>SHA-256 hash</strong> of the full diagnostic output. This hash is anchored to the <a href="https://dwtl.io" target="_blank">Trust Layer Ledger</a> â€” a public, immutable verification chain operated by DarkWave Studios.</p>
+  <p>Every completed scan produces a <strong>SHA-256 hash</strong> of the full diagnostic output. This hash is anchored to the <a href="https://dwtl.io" target="_blank">Trust Layer Ledger</a> — a public, immutable verification chain operated by DarkWave Studios.</p>
 
   <div class="wp-callout green">
     <div class="wp-callout-title">Verified but Private</div>
-    <p>The TLL stores only the cryptographic hash â€” not the diagnostic data itself. Anyone can verify that a scan result has not been altered by comparing their copy's hash against the ledger. But no one can extract the original data from the hash. Your vehicle data stays on your device. The ledger proves it hasn't been tampered with.</p>
+    <p>The TLL stores only the cryptographic hash — not the diagnostic data itself. Anyone can verify that a scan result has not been altered by comparing their copy's hash against the ledger. But no one can extract the original data from the hash. Your vehicle data stays on your device. The ledger proves it hasn't been tampered with.</p>
   </div>
 
   <h3>The TLL Explorer</h3>
@@ -346,23 +346,23 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <li>3 live signals: RPM, Vehicle Speed, Coolant Temperature</li>
     <li>39 additional gauges visible but blurred (demonstrating capability)</li>
     <li>Failure alerts visible but content blurred</li>
-    <li>Full UI experience â€” no artificial limitations on navigation or layout</li>
+    <li>Full UI experience — no artificial limitations on navigation or layout</li>
   </ul>
 
-  <h3>Pro Tier â€” Launch Pricing</h3>
+  <h3>Pro Tier — Launch Pricing</h3>
   <p>Full access to all 42 signals, fuel coaching, predictive maintenance, driver scoring, and TLL verification.</p>
   <table class="wp-tbl">
     <thead><tr><th>Phase</th><th>Users</th><th>Price</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td><strong>Founders Edition</strong></td><td>First 100</td><td style="color:#10b981;font-weight:700">$9.99</td><td>ðŸŸ¢ Active</td></tr>
-      <tr><td><strong>Early Adopter</strong></td><td>101 â€“ 1,000</td><td style="color:#06b6d4;font-weight:700">$19.99</td><td>Upcoming</td></tr>
+      <tr><td><strong>Early Adopter</strong></td><td>101 – 1,000</td><td style="color:#06b6d4;font-weight:700">$19.99</td><td>Upcoming</td></tr>
       <tr><td><strong>Standard</strong></td><td>501+</td><td style="font-weight:700">$39.99</td><td>Future</td></tr>
     </tbody>
   </table>
 
   <div class="wp-callout green">
-    <div class="wp-callout-title">Founders Edition â€” New Release Promotion</div>
-    <p>The $9.99 Founders Edition is a limited new-release promotion for the First 100 users. This is a one-time price that will not be available again. Early adopters who help establish the product through honest reviews are the foundation of the Lume Scan community â€” and this pricing reflects that partnership.</p>
+    <div class="wp-callout-title">Founders Edition — New Release Promotion</div>
+    <p>The $9.99 Founders Edition is a limited new-release promotion for the First 100 users. This is a one-time price that will not be available again. Early adopters who help establish the product through honest reviews are the foundation of the Lume Scan community — and this pricing reflects that partnership.</p>
   </div>
 
   <h3>What Pro Includes</h3>
@@ -383,7 +383,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   </ul>
 
   <h3>Hardware Bundle (Optional)</h3>
-  <p>Lume Scan is software-only â€” use any ELM327-compatible Bluetooth adapter you already own. For users who need an adapter, a recommended BLE dongle is available through Amazon at approximately $15. The adapter is not required if you already have one.</p>
+  <p>Lume Scan is software-only — use any ELM327-compatible Bluetooth adapter you already own. For users who need an adapter, a recommended BLE dongle is available through Amazon at approximately $15. The adapter is not required if you already have one.</p>
 </div>
 
 <!-- 8. HARDWARE COMPATIBILITY -->
@@ -402,10 +402,10 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   <h3>Vehicle Compatibility</h3>
   <p>Lume Scan works with any vehicle manufactured after 1996 (OBD-II mandate year) that supports the standard OBD-II diagnostic protocols:</p>
   <ul>
-    <li>CAN (ISO 15765) â€” Most vehicles 2008+</li>
-    <li>ISO 9141-2 â€” European vehicles</li>
-    <li>ISO 14230 (KWP2000) â€” Asian vehicles</li>
-    <li>SAE J1850 (PWM/VPW) â€” Older American vehicles</li>
+    <li>CAN (ISO 15765) — Most vehicles 2008+</li>
+    <li>ISO 9141-2 — European vehicles</li>
+    <li>ISO 14230 (KWP2000) — Asian vehicles</li>
+    <li>SAE J1850 (PWM/VPW) — Older American vehicles</li>
   </ul>
 
   <h3>Platform Support</h3>
@@ -413,14 +413,14 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <thead><tr><th>Platform</th><th>Type</th><th>BLE</th><th>WiFi</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td><strong>Android</strong></td><td>APK</td><td>âœ…</td><td>âœ…</td><td>Available</td></tr>
-      <tr><td><strong>Chrome / Edge</strong></td><td>PWA</td><td>âœ…</td><td>â€”</td><td>Available</td></tr>
-      <tr><td><strong>iOS</strong></td><td>PWA</td><td>â€”</td><td>â€”</td><td>Planned</td></tr>
+      <tr><td><strong>Chrome / Edge</strong></td><td>PWA</td><td>âœ…</td><td>—</td><td>Available</td></tr>
+      <tr><td><strong>iOS</strong></td><td>PWA</td><td>—</td><td>—</td><td>Planned</td></tr>
     </tbody>
   </table>
 
   <div class="wp-callout cyan">
     <div class="wp-callout-title">Dual-Connectivity Architecture</div>
-    <p>Both BLE and WiFi adapters connect to the same 42-node diagnostic engine. The transport layer is abstracted â€” the diagnostic output is identical regardless of connection method. The engine doesn't care how the data arrives; it cares that the data is complete and deterministic.</p>
+    <p>Both BLE and WiFi adapters connect to the same 42-node diagnostic engine. The transport layer is abstracted — the diagnostic output is identical regardless of connection method. The engine doesn't care how the data arrives; it cares that the data is complete and deterministic.</p>
   </div>
 </div>
 
@@ -432,7 +432,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   <table class="wp-tbl">
     <thead><tr><th>Paper</th><th>DOI</th><th>Relevance</th></tr></thead>
     <tbody>
-      <tr><td><strong>Lume: A Deterministic Programming Language for Governance-Critical Systems</strong></td><td><a href="https://doi.org/10.5281/zenodo.19382282" target="_blank">10.5281/zenodo.19382282</a></td><td>Core language specification â€” deterministic execution model</td></tr>
+      <tr><td><strong>Lume: A Deterministic Programming Language for Governance-Critical Systems</strong></td><td><a href="https://doi.org/10.5281/zenodo.19382282" target="_blank">10.5281/zenodo.19382282</a></td><td>Core language specification — deterministic execution model</td></tr>
       <tr><td><strong>Lume-V: Deterministic Governance Wrapper for Legacy Enterprise Modernization</strong></td><td><a href="https://doi.org/10.5281/zenodo.19645097" target="_blank">10.5281/zenodo.19645097</a></td><td>Governance wrapper architecture</td></tr>
       <tr><td><strong>DAIGS: Deterministic AI Governance System</strong></td><td><a href="https://doi.org/10.5281/zenodo.19491784" target="_blank">10.5281/zenodo.19491784</a></td><td>AI governance within deterministic constraints</td></tr>
       <tr><td><strong>The Enterprise Mesh: Sovereign-Chain Architecture</strong></td><td><a href="https://doi.org/10.5281/zenodo.20251916" target="_blank">10.5281/zenodo.20251916</a></td><td>Trust Layer Ledger verification architecture</td></tr>
@@ -451,11 +451,11 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
   <h3>Contact</h3>
   <ul>
-    <li><strong>Product Site</strong> â€” <a href="https://lumescan.tech" target="_blank">lumescan.tech</a></li>
-    <li><strong>Order Portal</strong> â€” <a href="https://lumeauto.tech/order" target="_blank">lumeauto.tech/order</a></li>
-    <li><strong>Lume42 Labs</strong> â€” <a href="https://lume42.com" target="_blank">lume42.com</a></li>
-    <li><strong>Trust Layer</strong> â€” <a href="https://dwtl.io" target="_blank">dwtl.io</a></li>
-    <li><strong>Email</strong> â€” <a href="mailto:team@dwsc.io">team@dwsc.io</a></li>
+    <li><strong>Product Site</strong> — <a href="https://lumescan.tech" target="_blank">lumescan.tech</a></li>
+    <li><strong>Order Portal</strong> — <a href="https://lumeauto.tech/order" target="_blank">lumeauto.tech/order</a></li>
+    <li><strong>Lume42 Labs</strong> — <a href="https://lume42.com" target="_blank">lume42.com</a></li>
+    <li><strong>Trust Layer</strong> — <a href="https://dwtl.io" target="_blank">dwtl.io</a></li>
+    <li><strong>Email</strong> — <a href="mailto:team@dwsc.io">team@dwsc.io</a></li>
   </ul>
 
   <div style="margin-top:40px;padding:24px;border-radius:12px;border:1px solid var(--border);text-align:center">
@@ -469,8 +469,8 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
 <!-- FOOTER -->
 <div class="wp-footer">
-  <p>Â© 2026 DarkWave Studios LLC / <a href="https://lume42.com">Lume42 Labs</a> Â· US Provisional Patent 64/032,339 Â· All Rights Reserved</p>
-  <p style="margin-top:8px"><a href="https://lumescan.tech">lumescan.tech</a> Â· <a href="https://lumeauto.tech">lumeauto.tech</a> Â· <a href="https://lume42.com">lume42.com</a> Â· <a href="https://dwtl.io">dwtl.io</a></p>
+  <p>© 2026 DarkWave Studios LLC / <a href="https://lume42.com">Lume42 Labs</a> · US Provisional Patent 64/032,339 · All Rights Reserved</p>
+  <p style="margin-top:8px"><a href="https://lumescan.tech">lumescan.tech</a> · <a href="https://lumeauto.tech">lumeauto.tech</a> · <a href="https://lume42.com">lume42.com</a> · <a href="https://dwtl.io">dwtl.io</a></p>
 </div>
 
 </div><!-- /.wp -->
