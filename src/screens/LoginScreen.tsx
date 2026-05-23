@@ -114,7 +114,8 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              {/* Google SSO */}
+              {/* Google SSO requires Native Client IDs (Android/iOS) in Expo. 
+                  Temporarily hidden to prevent "Error 400: Custom scheme URIs" until Native IDs are added. 
               <TouchableOpacity
                 style={styles.googleBtn}
                 onPress={() => promptAsync()}
@@ -124,12 +125,12 @@ export default function LoginScreen() {
                 <Text style={styles.googleBtnText}>Continue with Google</Text>
               </TouchableOpacity>
 
-              {/* Divider */}
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
                 <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.dividerLine} />
               </View>
+              */}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
