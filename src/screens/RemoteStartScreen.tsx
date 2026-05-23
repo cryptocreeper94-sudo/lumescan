@@ -174,19 +174,32 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
             <Text style={styles.upgradeTitle}>Remote Start</Text>
             <Text style={styles.upgradeSubtitle}>MODE 06</Text>
             <Text style={styles.upgradeDesc}>
-              CAN-bus remote start using your dongle's registered IMMO credential. No aftermarket wiring. No telematics module. No OEM subscription.
+              Proximity remote start — your phone becomes a smart key fob. CAN-bus start using your dongle's registered IMMO credential. No aftermarket wiring. No OEM subscription.
             </Text>
             <View style={styles.upgradePricing}>
               <Text style={styles.upgradePrice}>$9.99</Text>
               <Text style={styles.upgradePriceSub}>per month</Text>
             </View>
+            {/* Range disclosure */}
+            <View style={styles.rangeBox}>
+              <Text style={styles.rangeTitle}>PROXIMITY RANGE</Text>
+              <View style={styles.comparisonRow}>
+                <Text style={styles.comparisonName}>BLE Adapter</Text>
+                <Text style={[styles.comparisonName, { color: COLORS.cyan }]}>~100 ft / 30m</Text>
+              </View>
+              <View style={styles.comparisonRow}>
+                <Text style={styles.comparisonName}>WiFi Adapter</Text>
+                <Text style={[styles.comparisonName, { color: COLORS.emerald }]}>~300 ft / 90m</Text>
+              </View>
+              <Text style={{ fontSize: 10, color: COLORS.textDim, marginTop: 6, textAlign: 'center' }}>Same range as a key fob — start from your house, office, or store</Text>
+            </View>
             <View style={styles.comparisonBox}>
               <Text style={styles.comparisonTitle}>REPLACES</Text>
               {[
-                { name: 'GM OnStar', price: '$25/mo' },
-                { name: 'FordPass', price: '$30/mo' },
-                { name: 'Mopar Connect', price: '$35/mo' },
-                { name: 'Compustar Install', price: '$400-800' },
+                { name: 'Aftermarket key fob', price: '$200-400' },
+                { name: 'Compustar install', price: '$400-800' },
+                { name: 'Viper SmartStart', price: '$300 + $60/yr' },
+                { name: 'Dealer remote start', price: '$300-500' },
               ].map((c, i) => (
                 <View key={i} style={styles.comparisonRow}>
                   <Text style={styles.comparisonName}>{c.name}</Text>
@@ -373,7 +386,7 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
         )}
 
         <Text style={styles.disclaimer}>
-          Ford (2017+), GM (2015+), Stellantis (2018+) supported. Do not use in enclosed spaces. Dongle must remain plugged in. Every start/stop event is permanently recorded.
+          Proximity remote start — BLE ~100ft, WiFi ~300ft range. Ford (2017+), GM (2015+), Stellantis (2018+) supported. Do not use in enclosed spaces. Dongle must remain plugged in. Every start/stop event is permanently recorded. Cellular remote start available with Tri-Mode dongle (coming soon).
         </Text>
       </ScrollView>
     </View>
@@ -438,6 +451,8 @@ const styles = StyleSheet.create({
   upgradePricing: { alignItems: 'center', marginBottom: 24 },
   upgradePrice: { color: COLORS.emerald, fontSize: 48, fontWeight: '800' },
   upgradePriceSub: { color: COLORS.textDim, fontSize: 13, marginTop: 2 },
+  rangeBox: { width: '100%', maxWidth: 280, padding: 16, borderRadius: 12, backgroundColor: 'rgba(6,182,212,0.04)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.1)', marginBottom: 12 },
+  rangeTitle: { fontSize: 9, color: COLORS.cyan, fontWeight: '700', letterSpacing: 1.5, marginBottom: 10, textAlign: 'center' },
   comparisonBox: { width: '100%', maxWidth: 280, padding: 16, borderRadius: 12, backgroundColor: 'rgba(239,68,68,0.04)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.1)', marginBottom: 24 },
   comparisonTitle: { fontSize: 9, color: '#ef4444', fontWeight: '700', letterSpacing: 1.5, marginBottom: 10, textAlign: 'center' },
   comparisonRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
