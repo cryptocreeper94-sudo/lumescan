@@ -10,6 +10,11 @@ import type { Tier } from '../config/entitlement';
 import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
 
 const { width } = Dimensions.get('window');
+const isTablet = width >= 600;
+const COLUMNS = isTablet ? 3 : 2;
+const CARD_WIDTH = isTablet
+  ? (Math.min(width, 700) - 40 - 12 * (COLUMNS - 1)) / COLUMNS
+  : (width - 40 - 12) / 2;
 
 // Free tier gets exactly 3 live signals — everything else is blurred
 const FREE_SIGNAL_KEYS = ['tb6_rpm', 'tb7_speed', 'sl1_coolant'];
@@ -284,7 +289,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 20 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800', letterSpacing: 1 },
@@ -311,7 +316,7 @@ const styles = StyleSheet.create({
   alertSection: { marginBottom: 16 },
   sectionTitle: { fontSize: 12, color: COLORS.textMuted, fontWeight: '700', letterSpacing: 1.5, marginBottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-  card: { width: (width - 40 - 12) / 2, backgroundColor: COLORS.bgPanel, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: COLORS.borderLight, position: 'relative', overflow: 'hidden' },
+  card: { width: CARD_WIDTH, backgroundColor: COLORS.bgPanel, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: COLORS.borderLight, position: 'relative', overflow: 'hidden' },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight, paddingBottom: 10 },
   cardTitle: { color: COLORS.textMain, fontSize: 11, fontWeight: '700' },
   dataRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },

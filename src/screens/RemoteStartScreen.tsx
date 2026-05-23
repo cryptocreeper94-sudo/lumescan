@@ -395,7 +395,7 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800' },

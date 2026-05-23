@@ -181,7 +181,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800' },
   sectionTitle: { fontSize: 11, color: COLORS.textMuted, fontWeight: '700', letterSpacing: 1.5, marginBottom: 8, marginTop: 16 },

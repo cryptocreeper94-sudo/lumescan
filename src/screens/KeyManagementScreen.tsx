@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import { Key, Plus, Trash2, ShieldCheck, Radio, Lock, ExternalLink } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { readIMOKeys, programIMOKey, registerDongleAsKey, deleteIMOKey, type KeyInfo } from '../telemetry/OBDCommands';
 import { getWiFiStatus } from '../telemetry/WiFiConnector';
+
+const { width: screenWidth } = Dimensions.get('window');
+const isTablet = screenWidth >= 600;
 
 interface Props {
   tier: string;
@@ -239,7 +242,7 @@ export default function KeyManagementScreen({ tier, mode05Purchased }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800' },
