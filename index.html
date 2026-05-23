@@ -25,8 +25,7 @@
       <a href="/whitepaper.html">ðŸ“„ Whitepaper</a>
       <a href="/explorer.html" style="color:#06b6d4;font-weight:700">ðŸ›¡ï¸ Explorer</a>
     </div>
-    <a href="https://lumeauto.tech/order" class="nav-cta">Get Lume Scan</a>
-  </nav>
+    </nav>
 
   <!-- KEN BURNS HERO -->
   <section class="hero" id="top">
@@ -40,17 +39,13 @@
     <div class="hero-content">
       <div class="hero-badge">Professional OBD-II Diagnostics</div>
       <h1><span class="gr">Better than a $5,500 Scan Tool.</span><br>From $9.99.</h1>
+      <span class="tag" style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:24px">Diagnostics + Keys</span>
       <p class="hero-sub">42-signal diagnostics, predictive maintenance, fuel coaching, driver scoring, remote start — plus Mode 05 key management and Mode 06 remote start. Software-only on any BLE adapter. All updates included.</p>
-      <div class="hero-price">
-        <span class="now">From $9.99</span>
-        <span class="was" style="color:rgba(255,255,255,0.3); text-decoration-color:rgba(239,68,68,0.7); font-size:24px">$5,500</span>
-        <span class="tag">Diagnostics + Keys</span>
-      </div>
       <a href="https://lumeauto.tech/order" class="cta-btn">Get Lume Scan</a>
       <div class="hero-trust">
-        <span>Software is yours to keep</span>
-        <span>Updates included</span>
-        <span>7-day satisfaction guarantee</span>
+        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-software')">Software is yours to keep</span>
+        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-updates')">Updates included</span>
+        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-guarantee')">7-day satisfaction guarantee</span>
       </div>
     </div>
   </section>
@@ -1005,7 +1000,49 @@
         else setTimeout(injectShield,1000);
       })();
     </script>
-  </body>
+  
+  <!-- MODAL SYSTEM -->
+  <div class="modal-overlay" id="global-modal" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const modalData = {
+      'modal-software': {
+        title: 'Perpetual License',
+        body: 'When you purchase Lume Scan, the core 42-signal diagnostic engine is yours forever. No arbitrary lockouts, no forced upgrades. We believe professional tools should be owned, not just rented.'
+      },
+      'modal-updates': {
+        title: 'Continuous Evolution',
+        body: 'The automotive landscape changes rapidly. Your Lume Scan software includes over-the-air (OTA) payload updates, ensuring your diagnostic definitions, predictive algorithms, and Mode 06 capabilities are always state-of-the-art.'
+      },
+      'modal-guarantee': {
+        title: 'Risk-Free Trial',
+        body: 'We are confident in our engineering. Try Lume Scan for 7 days on your own vehicles. If the 42-signal engine doesn\'t immediately prove its value over generic code readers, we will refund your software purchase—no questions asked.'
+      }
+    };
+
+    function openModal(id) {
+      const data = modalData[id];
+      if (data) {
+        document.getElementById('modal-title').innerText = data.title;
+        document.getElementById('modal-body').innerText = data.body;
+        document.getElementById('global-modal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal(event) {
+      document.getElementById('global-modal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  </script>
+
+</body>
 </html>
 
 
