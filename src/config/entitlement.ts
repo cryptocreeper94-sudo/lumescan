@@ -29,6 +29,8 @@ export interface EntitlementStatus {
   tier: Tier;
   reason: 'purchased' | 'bypass_domain' | 'bypass_email' | 'free_tier' | 'not_purchased' | 'not_authenticated' | 'error';
   email?: string;
+  mode05Purchased?: boolean;
+  mode06Active?: boolean;
 }
 
 // ── Free tier limits ──
@@ -74,10 +76,10 @@ export async function checkEntitlement(): Promise<EntitlementStatus> {
 
   // ── Cox / DarkWave bypass → Pro ──
   if (BYPASS_DOMAINS.includes(domain)) {
-    return { entitled: true, tier: 'pro', reason: 'bypass_domain', email };
+    return { entitled: true, tier: 'pro', reason: 'bypass_domain', email, mode05Purchased: true, mode06Active: true };
   }
   if (BYPASS_EMAILS.includes(email)) {
-    return { entitled: true, tier: 'pro', reason: 'bypass_email', email };
+    return { entitled: true, tier: 'pro', reason: 'bypass_email', email, mode05Purchased: true, mode06Active: true };
   }
 
   // ── Firestore entitlement check ──
@@ -88,16 +90,18 @@ export async function checkEntitlement(): Promise<EntitlementStatus> {
     if (res.ok) {
       const doc = await res.json();
       const purchased = doc?.fields?.lumescan_purchased?.booleanValue === true;
+      const mode05 = doc?.fields?.lumescan_mode05_purchased?.booleanValue === true;
+      const mode06 = doc?.fields?.lumescan_mode06_active?.booleanValue === true;
       if (purchased) {
-        return { entitled: true, tier: 'pro', reason: 'purchased', email };
+        return { entitled: true, tier: 'pro', reason: 'purchased', email, mode05Purchased: mode05, mode06Active: mode06 };
       }
       // Has a document but hasn't purchased → free tier
-      return { entitled: true, tier: 'free', reason: 'free_tier', email };
+      return { entitled: true, tier: 'free', reason: 'free_tier', email, mode05Purchased: false, mode06Active: false };
     }
 
     // Document doesn't exist = free tier (everyone gets in now)
     if (res.status === 404) {
-      return { entitled: true, tier: 'free', reason: 'free_tier', email };
+      return { entitled: true, tier: 'free', reason: 'free_tier', email, mode05Purchased: false, mode06Active: false };
     }
 
     // Unexpected error — allow free tier so app is usable
