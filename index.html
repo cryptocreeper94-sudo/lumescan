@@ -1,1333 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>\n
-<style id="premium-blackout-style">
-  /* PREMIUM BLACKOUT OVERLAY STYLES */
-  #root, #app, main, .main-content {
-    display: none !important;
-  }
-  body, html {
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: #020617 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-  #premium-blackout-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #020617;
-    z-index: 2147483647; /* Max z-index */
-    display: flex;
-    flex-direction: row;
-    font-family: 'Inter', 'Nunito', sans-serif;
-    color: #fff;
-    overflow: hidden;
-  }
-  .blackout-left {
-    flex: 1;
-    padding: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(2,6,23,1) 100%);
-    box-shadow: 20px 0 50px rgba(0,0,0,0.8);
-    z-index: 2;
-  }
-  .blackout-right {
-    flex: 1.2;
-    position: relative;
-    background: #000;
-  }
-  .blackout-right video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
-  }
-  .blackout-right::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(90deg, rgba(2,6,23,1) 0%, rgba(2,6,23,0) 20%);
-    pointer-events: none;
-  }
-  .bo-title {
-    font-size: 56px;
-    font-weight: 900;
-    color: #22d3ee;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 0 0 20px 0;
-    text-shadow: 0 0 30px rgba(34,211,238,0.4);
-  }
-  .bo-subtitle {
-    font-size: 24px;
-    font-weight: 700;
-    color: #94a3b8;
-    margin: 0 0 30px 0;
-  }
-  .bo-desc {
-    font-size: 18px;
-    line-height: 1.6;
-    color: #cbd5e1;
-    margin-bottom: 50px;
-    max-width: 600px;
-  }
-  .bo-timer {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 50px;
-  }
-  .bo-time-box {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(34,211,238,0.2);
-    border-radius: 16px;
-    padding: 20px 30px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
-  }
-  .bo-time-box .num {
-    font-size: 48px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    margin-bottom: 5px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-  }
-  .bo-time-box .lbl {
-    font-size: 14px;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-  }
-  .bo-cta-box {
-    background: rgba(34,211,238,0.05);
-    border: 1px solid rgba(34,211,238,0.3);
-    border-radius: 16px;
-    padding: 30px;
-    max-width: 500px;
-  }
-  .bo-cta-box h3 {
-    margin: 0 0 15px 0;
-    font-size: 20px;
-    color: #22d3ee;
-  }
-  .bo-cta-form {
-    display: flex;
-    gap: 10px;
-  }
-  .bo-cta-form input {
-    flex: 1;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-    font-size: 16px;
-  }
-  .bo-cta-form button {
-    padding: 15px 25px;
-    border-radius: 8px;
-    border: none;
-    background: #22d3ee;
-    color: #020617;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .bo-cta-form button:hover {
-    background: #fff;
-  }
-  @media (max-width: 1024px) {
-    #premium-blackout-overlay { flex-direction: column; overflow-y: auto; }
-    .blackout-left { padding: 40px 20px; }
-    .blackout-right { min-height: 300px; flex: none; height: 300px; }
-    .blackout-right video { object-position: center top; }
-    .blackout-right::after { background: linear-gradient(180deg, rgba(2,6,23,1) 0%, rgba(2,6,23,0) 20%); }
-    .bo-timer { flex-wrap: wrap; }
-    .bo-title { font-size: 40px; }
-  }
-</style>
-
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lume Scan — Professional OBD-II Diagnostics | From $9.99</title>
-  <meta name="description" content="Lume Scan: 42-signal OBD-II diagnostic engine. Predictive maintenance, fuel coaching, driver scoring. From $9.99 + affordable monthly service. Updates included.">
-  <meta name="keywords" content="OBD-II scanner, car diagnostics, check engine light, fuel efficiency, predictive maintenance">
-  <link rel="canonical" href="https://lumescan.tech">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <title>Lume Scan — Coming Soon | DarkWave Studios</title>
+  <meta name="description" content="Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live e...">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--accent:#06b6d4;--accent-rgb:6,182,212;--bg:#030712;--text:#f0f4f8;--text-dim:rgba(240,244,248,.55);--text-muted:rgba(240,244,248,.28);--border:rgba(255,255,255,.06);--border-accent:rgba(var(--accent-rgb),.18)}
+    html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+    .bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .orb{position:absolute;border-radius:50%;filter:blur(140px);opacity:.1;animation:drift 28s ease-in-out infinite alternate}
+    .orb-1{width:600px;height:600px;background:var(--accent);top:-200px;left:-100px}
+    .orb-2{width:500px;height:500px;background:#8b5cf6;bottom:-200px;right:-100px;animation-delay:8s}
+    @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(50px,-30px) scale(1.05)}}
+    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px}
+
+    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 60px;max-width:800px;margin:0 auto}
+
+    .topbar{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:48px}
+    .dw-logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;opacity:.7;transition:opacity .2s}
+    .dw-logo:hover{opacity:1}
+    .dw-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000}
+    .dw-text{font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);font-size:9px;font-weight:800;color:#f9a8d4;letter-spacing:.1em;text-transform:uppercase;text-decoration:none}
+    .badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#ec4899;animation:blink 1.2s ease-in-out infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+    .hero{text-align:center;width:100%;margin-bottom:40px}
+    .app-icon{font-size:4rem;margin-bottom:16px;display:block;filter:drop-shadow(0 0 30px rgba(var(--accent-rgb),.25));animation:float 4s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .chip{display:inline-flex;padding:4px 14px;border-radius:999px;background:rgba(var(--accent-rgb),.08);border:1px solid var(--border-accent);font-size:10px;font-weight:800;color:var(--accent);margin-bottom:16px;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
+    h1{font-size:clamp(2.2rem,6vw,3.5rem);font-weight:900;letter-spacing:-.04em;line-height:1.08;margin-bottom:12px;background:linear-gradient(135deg,var(--text) 0%,var(--accent) 60%,#8b5cf6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .tagline{font-size:1.05rem;color:var(--text-dim);line-height:1.7;margin-bottom:24px}
+
+    .countdown{display:flex;align-items:flex-start;justify-content:center;gap:8px;margin-bottom:32px}
+    .cd-block{display:flex;flex-direction:column;align-items:center}
+    .cd-num{font-size:clamp(1.8rem,4.5vw,2.4rem);font-weight:900;font-family:'JetBrains Mono',monospace;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.12);border-radius:10px;padding:10px 14px;min-width:64px;text-align:center;line-height:1}
+    .cd-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.14em;margin-top:5px;font-weight:600}
+    .cd-sep{font-size:1.6rem;font-weight:900;color:var(--accent);opacity:.3;padding:10px 0}
+
+    .section{width:100%;margin-bottom:40px}
+    .section-title{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.16em;margin-bottom:16px;text-align:center}
+
+    .desc-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin-bottom:32px}
+    .desc-card p{font-size:15px;color:var(--text-dim);line-height:1.8}
+
+    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:32px}
+    .feat{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);font-weight:500;padding:10px 14px;background:rgba(var(--accent-rgb),.03);border:1px solid rgba(var(--accent-rgb),.08);border-radius:10px}
+    .feat-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+    .video-section{width:100%;margin-bottom:40px}
+
+    .notify-wrap{text-align:center;margin-bottom:40px;width:100%}
+    .notify-label{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+    .capture{display:flex;gap:8px;max-width:420px;margin:0 auto}
+    .capture input{flex:1;min-width:0;background:rgba(255,255,255,.04);border:1px solid var(--border-accent);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text);font-family:inherit;outline:none;transition:all .2s}
+    .capture input:focus{border-color:var(--accent);box-shadow:0 0 16px rgba(var(--accent-rgb),.1)}
+    .capture input::placeholder{color:var(--text-muted)}
+    .capture button{padding:12px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent),rgba(var(--accent-rgb),.7));color:#000;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s;flex-shrink:0}
+    .capture button:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(var(--accent-rgb),.25)}
+    .capture button.done{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.25);pointer-events:none}
+
+    .presale-card{background:linear-gradient(135deg,rgba(var(--accent-rgb),.04),rgba(139,92,246,.04));border:1px solid rgba(var(--accent-rgb),.12);border-radius:16px;padding:24px;text-align:center;position:relative;overflow:hidden;margin-bottom:32px}
+    .presale-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#8b5cf6,#ec4899)}
+    .presale-card h3{font-size:1.1rem;font-weight:800;margin-bottom:6px}
+    .presale-card p{font-size:12px;color:var(--text-dim);margin-bottom:16px;line-height:1.6}
+    .btn-presale{display:block;width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;transition:all .3s;margin-bottom:8px}
+    .btn-presale:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(var(--accent-rgb),.2)}
+    .btn-secondary{display:block;width:100%;padding:10px;border-radius:10px;border:1px solid var(--border-accent);background:transparent;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;transition:all .2s}
+
+    .footer{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+    .footer a{font-size:10px;color:var(--text-muted);text-decoration:none;transition:color .2s}
+    .footer a:hover{color:var(--accent)}
+    .footer span{color:var(--border)}
+
+    @media(max-width:540px){
+      .features{grid-template-columns:1fr}
+      .capture{flex-direction:column}
+      .capture button{width:100%}
+      .countdown{gap:4px}
+      .cd-num{padding:8px 8px;min-width:52px;font-size:1.4rem}
+      .topbar{flex-direction:column;gap:12px;text-align:center}
+    }
+  </style>
 </head>
-<body>\n
-<div id="premium-blackout-overlay">
-  <div class="blackout-left">
-    <h1 class="bo-title">Lume Scan</h1>
-    <div class="bo-subtitle">Ecosystem Unlock: June 23, 2026</div>
-    <div class="bo-desc">The premier bidirectional diagnostic and fleet management suite. From real-time telemetry to Mode 06 remote start execution, Lume provides hardware-agnostic, enterprise-grade vehicle intelligence.</div>
-    
-    <div class="bo-timer">
-      <div class="bo-time-box"><div class="num" id="bo-days">28</div><div class="lbl">Days</div></div>
-      <div class="bo-time-box"><div class="num" id="bo-hours">00</div><div class="lbl">Hours</div></div>
-      <div class="bo-time-box"><div class="num" id="bo-mins">00</div><div class="lbl">Mins</div></div>
-      <div class="bo-time-box"><div class="num" id="bo-secs">00</div><div class="lbl">Secs</div></div>
+<body>
+  <div class="bg-canvas"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+  <div class="bg-grid"></div>
+
+  <div class="page">
+    <div class="topbar">
+      <a href="https://tlid.io" class="dw-logo">
+        <div class="dw-mark">DW</div>
+        <span class="dw-text">DarkWave Studios</span>
+      </a>
+      <a href="https://dwtl.io/presale" class="badge" target="_blank">Signal Presale Live</a>
     </div>
-    
-    <div class="bo-cta-box">
-      <h3>Priority Day-1 Access</h3>
-      <div class="bo-cta-form">
-        <input type="email" placeholder="Enter your enterprise email">
-        <button onclick="this.innerText='Secured!'; this.style.background='#10b981'; this.style.color='#fff';">Notify Me</button>
+
+    <div class="hero">
+      <span class="app-icon">🔧</span>
+      <div class="chip">LAUNCHING JUNE 23, 2026</div>
+      <h1>Lume Scan</h1>
+      <p class="tagline">Deterministic OBD-II Diagnostic Engine</p>
+
+      <div class="countdown">
+        <div class="cd-block"><span class="cd-num" id="cd-d">--</span><span class="cd-label">Days</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-h">--</span><span class="cd-label">Hours</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-m">--</span><span class="cd-label">Mins</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-s">--</span><span class="cd-label">Secs</span></div>
       </div>
     </div>
-  </div>
-  
-  <div class="blackout-right">
-    <video src="./promo.mp4" autoplay loop muted playsinline></video>
-  </div>
 
-  <script>
-    const targetDate = new Date('June 23, 2026 00:00:00').getTime();
-    setInterval(() => {
-      const now = new Date().getTime();
-      const dist = targetDate - now;
-      if (dist < 0) return;
-      document.getElementById('bo-days').innerText = Math.floor(dist / (1000 * 60 * 60 * 24));
-      document.getElementById('bo-hours').innerText = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-      document.getElementById('bo-mins').innerText = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-      document.getElementById('bo-secs').innerText = Math.floor((dist % (1000 * 60)) / 1000).toString().padStart(2, '0');
-    }, 1000);
-  </script>
-</div>
-\n
-  <!-- THE BLACKOUT OVERLAY -->
-  <div id="ecosystem-blackout-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#020617; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Nunito', sans-serif; overflow-y:auto; padding:20px;">
-    <div style="text-align:center; max-width:800px; width:100%;">
-      <h1 style="color:#22d3ee; font-size:48px; margin-bottom:10px; font-weight:900; text-transform:uppercase; text-shadow:0 0 30px rgba(34,211,238,0.5);">Lume Scan</h1>
-      <div style="color:#cbd5e1; font-size:24px; font-weight:700; margin-bottom:30px; letter-spacing:2px;">COMING JUNE 23, 2026</div>
+    <div class="section">
+      <div class="section-title">About Lume Scan</div>
+      <div class="desc-card">
+        <p>Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, intelligent fault code interpretation, severity analysis, and predictive maintenance timelines. No subscription required for basic diagnostics. Available on Android with iOS coming soon.</p>
+      </div>
+
+      <div class="features">
+        <div class="feat"><span class="feat-dot"></span>42 Live Engine Signals</div>
+            <div class="feat"><span class="feat-dot"></span>Intelligent Code Interpretation</div>
+            <div class="feat"><span class="feat-dot"></span>Severity Analysis</div>
+            <div class="feat"><span class="feat-dot"></span>Predictive Maintenance</div>
+            <div class="feat"><span class="feat-dot"></span>BLE & WiFi Adapters</div>
+            <div class="feat"><span class="feat-dot"></span>Zero-Subscription Diagnostics</div>
+      </div>
+    </div>
+
+    <div class="video-section">
+      <div class="section-title">See It In Action</div>
       
-      <!-- Video Teaser -->
-      <div style="position:relative; width:100%; padding-top:56.25%; border-radius:12px; overflow:hidden; box-shadow:0 0 50px rgba(34,211,238,0.2); border:1px solid rgba(34,211,238,0.3); margin-bottom:30px; background:#000;">
-        <iframe style="position:absolute; top:0; left:0; width:100%; height:100%;" src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID_HERE" title="Teaser" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-      
-      <!-- Countdown -->
-      <div style="display:flex; justify-content:center; gap:20px; margin-bottom:40px;">
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); min-width:100px;">
-          <div id="cd-days" style="color:#fff; font-size:40px; font-weight:900;">28</div>
-          <div style="color:#94a3b8; font-size:14px; text-transform:uppercase;">Days</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); min-width:100px;">
-          <div id="cd-hours" style="color:#fff; font-size:40px; font-weight:900;">00</div>
-          <div style="color:#94a3b8; font-size:14px; text-transform:uppercase;">Hours</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); min-width:100px;">
-          <div id="cd-minutes" style="color:#fff; font-size:40px; font-weight:900;">00</div>
-          <div style="color:#94a3b8; font-size:14px; text-transform:uppercase;">Minutes</div>
-        </div>
-      </div>
-      
-      <!-- CTA & Email -->
-      <div style="background:rgba(34,211,238,0.05); border:1px solid rgba(34,211,238,0.2); padding:30px; border-radius:16px;">
-        <h3 style="color:#22d3ee; font-size:24px; margin-bottom:15px; font-weight:800;">Secure Early Access</h3>
-        <a href="https://dwtl.io/presale" target="_blank" style="display:inline-block; background:linear-gradient(135deg, #22d3ee, #0284c7); color:#fff; text-decoration:none; padding:15px 30px; border-radius:8px; font-size:18px; font-weight:bold; box-shadow:0 5px 20px rgba(34,211,238,0.4); margin-bottom:20px; transition:transform 0.2s;">Join the Presale</a>
-        <div style="color:#cbd5e1; margin-bottom:10px;">or join the Day 1 Access List:</div>
-        <div style="display:flex; max-width:400px; margin:0 auto; gap:10px;">
-          <input type="email" placeholder="Enter your email" style="flex:1; padding:12px 15px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; font-size:16px;">
-          <button style="background:#475569; color:#fff; border:none; padding:12px 20px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="this.innerText='Subscribed!'; this.style.background='#10b981';">Notify Me</button>
-        </div>
+          <video controls playsinline preload="metadata" poster="" style="width:100%;border-radius:16px;border:1px solid rgba(6,182,212,.2);box-shadow:0 8px 40px rgba(0,0,0,.5);">
+            <source src="videos/demo.mp4" type="video/mp4">
+          </video>
+    </div>
+
+    <div class="notify-wrap">
+      <p class="notify-label">Get notified when Lume Scan goes live.</p>
+      <div class="capture">
+        <input type="email" id="teaser-email" placeholder="Enter your enterprise email" autocomplete="email">
+        <button id="teaser-btn" onclick="submitEmail()">Notify Me</button>
       </div>
     </div>
 
-    <script>
-      const launchDate = new Date('June 23, 2026 00:00:00').getTime();
-      setInterval(() => {
-        const now = new Date().getTime();
-        const distance = launchDate - now;
-        if (distance < 0) return;
-        document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
-        document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-        document.getElementById('cd-minutes').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-      }, 1000);
-    </script>
-  </div>
-
-
-  <nav class="nav">
-    <div class="nav-brand">Lume<span>Scan</span></div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#compare">Compare</a>
-      <a href="#signals">42 Signals</a>
-      <a href="#hardware">Hardware</a>
-      <a href="/download.html" style="color:#06b6d4;font-weight:700">📱 Download</a>
-      <a href="#faq">FAQ</a>
-      <a href="/whitepaper.html">📄 Whitepaper</a>
-      <a href="/explorer.html" style="color:#06b6d4;font-weight:700">ðŸ›¡ï¸ Explorer</a>
-    </div>
-    </nav>
-
-  <!-- KEN BURNS HERO -->
-  <section class="hero" id="top">
-    <div class="hero-slides">
-      <div class="hero-slide active"><img src="img/hero-1.png" alt="OBD-II diagnostic dongle"></div>
-      <div class="hero-slide"><img src="img/hero-2.png" alt="Live diagnostic dashboard"></div>
-      <div class="hero-slide"><img src="img/hero-3.png" alt="Engine diagnostics"></div>
-      <div class="hero-slide"><img src="img/hero-4.png" alt="Smart driving"></div>
-    </div>
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <div class="hero-badge">Professional OBD-II Diagnostics</div>
-      <h1><span class="gr">Better than a $5,500 Scan Tool.</span><br>From $9.99*</h1>
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:-8px;margin-bottom:16px;letter-spacing:0.02em">*Founders Price. Limited to the first 100 users.</div>
-      <span class="tag" style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:24px">Diagnostics + Keys</span>
-      <p class="hero-sub">42-signal diagnostics, predictive maintenance, fuel coaching, driver scoring, remote start — plus Mode 05 key management and Mode 06 remote start. Software-only on any BLE adapter. All updates included.</p>
-      <a href="https://lumeauto.tech/order" class="cta-btn">Get Lume Scan</a>
-      <div class="hero-trust">
-        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-software')">Software is yours to keep</span>
-        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-updates')">Updates included</span>
-        <span style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.3);padding-bottom:2px" onclick="openModal('modal-guarantee')">7-day satisfaction guarantee</span>
-      </div>
-    </div>
-  </section>
-
-  <div class="stats">
-    <div class="stat"><div class="stat-val">42</div><div class="stat-lbl">Live Signals</div></div>
-    <div class="stat"><div class="stat-val">100ms</div><div class="stat-lbl">Scan Interval</div></div>
-    <div class="stat"><div class="stat-val">$2,880+</div><div class="stat-lbl">Annual Savings</div></div>
-    <div class="stat"><div class="stat-val" style="position:relative">$1.99<span style="position:absolute;top:-10px;right:-5px;font-size:9px;color:var(--accent);background:rgba(6,182,212,0.15);padding:2px 4px;border-radius:4px;font-weight:700">FOUNDERS</span></div><div class="stat-lbl">/mo · Users 1–100*</div></div>
-  </div>
-
-  <!-- BENTO FEATURES -->
-  <section class="sec" id="features">
-    <div class="sec-label">Features</div>
-    <h2>Better than a $5,500 scan tool.<br>For less than a tank of gas.</h2>
-    <p class="sec-sub">Lume Scan runs a continuous 42-signal diagnostic engine at 100ms intervals. Not just reading codes — governing your vehicle's health.</p>
-    <div class="carousel-wrap" id="feat-carousel">
-      <div class="carousel-track">
-        <div class="carousel-card">
-            <img src="img/feat_engine_1779557736286.png" alt="42-Signal Engine" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3>42-Signal Diagnostic Engine</h3>
-          <p>Reads 42 OBD-II signals at 100ms intervals across four domains: combustion, fuel system, health &amp; safety, and governance. Continuous monitoring — a real-time governance engine for your vehicle.</p>
-        </div>
-        <div class="carousel-card">
-            <img src="img/feat_repair_1779557750684.png" alt="Shop Visit" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3>Skip the $150 Shop Visit</h3>
-          <p>Check engine light? Reads the code, translates technician jargon, tells you what's wrong in plain English, and links the exact part on Amazon.</p>
-        </div>
-        <div class="carousel-card">
-            <img src="img/feat_predictive_1779557764250.png" alt="Predictive Maintenance" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3>Predictive Maintenance</h3>
-          <p>Detects component degradation 1–3% before it becomes a breakdown. Catches problems weeks before your dashboard warns you.</p>
-        </div>
-        <div class="carousel-card">
-            <img src="img/feat_fuel_1779557783580.png" alt="Fuel Governance" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3>Fuel Governance Engine</h3>
-          <p>Audio coaching through your car speakers. Most drivers save $180–$320/year on fuel. The app pays for itself in about 2 weeks.</p>
-        </div>
-        <div class="carousel-card">
-            <img src="img/feat_score_1779557797683.png" alt="Dashboard Score" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3>Dashboard + Driver Score</h3>
-          <p>42 live gauges updating 10x/second. Efficiency scoring, family dashboard, multi-vehicle monitoring. Professional-grade telemetry for every driver.</p>
-        </div>
-      </div>
-      <div class="carousel-controls">
-        <button class="carousel-arrow" onclick="scrollCarousel('feat-carousel',-1)" aria-label="Previous">‹</button>
-        <div class="carousel-dots" id="feat-dots"></div>
-        <button class="carousel-arrow" onclick="scrollCarousel('feat-carousel',1)" aria-label="Next">›</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- COMPARISON -->
-  <section class="sec" id="compare" style="border-top:1px solid var(--border)">
-    <div class="sec-label">Why Lume Scan</div>
-    <h2>The competition charges more<br>and does less.</h2>
-    <p class="sec-sub">We compared Lume Scan against every major scanner on the market.</p>
-
-    <!-- Desktop table (hidden on mobile) -->
-    <div class="cmp-desktop" style="border-radius:16px;border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px);overflow:hidden">
-      <table class="cmp">
-        <thead><tr>
-          <th style="text-align:left;padding-left:20px">Feature</th>
-          <th class="hl">Lume Scan<br><span style="font-weight:500">From $9.99</span></th>
-          <th>FIXD<br><span style="font-size:10px">$100/yr</span></th>
-          <th>BlueDriver<br><span style="font-size:10px">$120</span></th>
-          <th>Autel MX808<br><span style="font-size:10px">$389</span></th>
-        </tr></thead>
-        <tbody>
-          <tr><td style="padding-left:20px">Read/clear codes</td><td class="yes" style="text-align:center">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
-          <tr><td style="padding-left:20px">Live signals</td><td class="yes bold" style="text-align:center">42</td><td style="text-align:center;color:var(--dim)">~10</td><td style="text-align:center;color:var(--dim)">~15</td><td style="text-align:center;color:var(--dim)">~30</td></tr>
-          <tr><td style="padding-left:20px">Scan interval</td><td class="yes bold" style="text-align:center">100ms</td><td style="text-align:center;color:var(--dim)">~1s</td><td style="text-align:center;color:var(--dim)">~500ms</td><td style="text-align:center;color:var(--dim)">~300ms</td></tr>
-          <tr><td style="padding-left:20px">Fuel coaching</td><td class="yes" style="text-align:center">✓</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td></tr>
-          <tr><td style="padding-left:20px">Predictive maintenance</td><td class="yes" style="text-align:center">✓</td><td class="warn" style="text-align:center">Premium</td><td class="no" style="text-align:center">✗</td><td style="text-align:center;color:var(--dim)">✓</td></tr>
-          <tr><td style="padding-left:20px">Driver scoring</td><td class="yes" style="text-align:center">✓</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td><td class="no" style="text-align:center">✗</td></tr>
-          <tr><td style="padding-left:20px">Monthly service</td><td class="yes" style="text-align:center">$1.99/mo</td><td class="no" style="text-align:center">$100/yr</td><td style="text-align:center;color:var(--dim)">No</td><td class="warn" style="text-align:center">Updates $</td></tr>
-          <tr><td style="padding-left:20px">BYO adapter</td><td class="yes" style="text-align:center">✓ ($15-$30)</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Proprietary</td><td class="no" style="text-align:center">Built-in</td></tr>
-        </tbody>
-      </table>
+    <div class="presale-card">
+      <h3>Signal Presale — Live Now</h3>
+      <p>Early supporters earn up to <strong style="color:var(--accent)">+25% bonus Signal ($SIG)</strong> — the token that powers access across every app in the ecosystem.</p>
+      <a href="https://dwtl.io/presale" target="_blank" class="btn-presale">Join the Presale — From $10</a>
+      <a href="https://dwtl.io" target="_blank" class="btn-secondary">Explore the Trust Layer</a>
     </div>
 
-    <!-- Mobile cards (hidden on desktop) -->
-    <div class="cmp-mobile">
-      <!-- Competitor header -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;text-align:center">
-        <div style="padding:10px 4px;border-radius:10px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3)">
-          <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:0.05em">Lume Scan</div>
-          <div style="font-size:10px;color:var(--accent);font-weight:600">From $9.99</div>
-        </div>
-        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;color:var(--dim)">FIXD</div>
-          <div style="font-size:10px;color:var(--dim)">$100/yr</div>
-        </div>
-        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;color:var(--dim)">BlueDriver</div>
-          <div style="font-size:10px;color:var(--dim)">$120</div>
-        </div>
-        <div style="padding:10px 4px;border-radius:10px;background:var(--glass);border:1px solid var(--border)">
-          <div style="font-size:11px;font-weight:700;color:var(--dim)">Autel</div>
-          <div style="font-size:10px;color:var(--dim)">$389</div>
-        </div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <!-- Read/clear codes -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Read/clear codes</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">✓</span><span class="cmp-g dim">✓</span><span class="cmp-g dim">✓</span><span class="cmp-g dim">✓</span>
-          </div>
-        </div>
-        <!-- Live signals -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Live signals</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes"><strong>42</strong></span><span class="cmp-g dim">~10</span><span class="cmp-g dim">~15</span><span class="cmp-g dim">~30</span>
-          </div>
-        </div>
-        <!-- Scan interval -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Scan interval</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes"><strong>100ms</strong></span><span class="cmp-g dim">~1s</span><span class="cmp-g dim">~500ms</span><span class="cmp-g dim">~300ms</span>
-          </div>
-        </div>
-        <!-- Fuel coaching -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Fuel coaching</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">✓</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span>
-          </div>
-        </div>
-        <!-- Predictive maintenance -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Predictive maintenance</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">✓</span><span class="cmp-g warn">$$$</span><span class="cmp-g no">✗</span><span class="cmp-g dim">✓</span>
-          </div>
-        </div>
-        <!-- Driver scoring -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Driver scoring</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">✓</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span><span class="cmp-g no">✗</span>
-          </div>
-        </div>
-                <!-- Key Management -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Key programming</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">? Mode 05</span><span class="cmp-g no">?</span><span class="cmp-g no">?</span><span class="cmp-g no">?</span>
-          </div>
-        </div>
-        <!-- Subscription -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">Monthly service</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">$1.99/mo</span><span class="cmp-g no">$100/yr</span><span class="cmp-g dim">No</span><span class="cmp-g warn">Updates $</span>
-          </div>
-        </div>
-        <!-- BYO adapter -->
-        <div class="cmp-row-full">
-          <div class="cmp-feat-label">BYO adapter</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes">✓ ~$20</span><span class="cmp-g no">Locked</span><span class="cmp-g no">Locked</span><span class="cmp-g no">Built-in</span>
-          </div>
-        </div>
-        <!-- Total cost highlight -->
-        <div class="cmp-row-full" style="background:rgba(6,182,212,0.06);border-color:rgba(6,182,212,0.2);margin-top:4px">
-          <div class="cmp-feat-label" style="color:var(--accent);font-weight:700">Year 1 total</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes" style="font-size:13px"><strong>~$54</strong></span><span class="cmp-g no" style="font-size:11px">$200+</span><span class="cmp-g dim" style="font-size:11px">$120</span><span class="cmp-g dim" style="font-size:11px">$389</span>
-          </div>
-        
-        <!-- Key programming cost -->
-        <div class="cmp-row-full" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2);margin-top:2px">
-          <div class="cmp-feat-label" style="color:#10b981;font-weight:700">Key programming cost</div>
-          <div class="cmp-grid4">
-            <span class="cmp-g yes" style="font-size:12px"><strong>$199 + $9/key</strong></span><span class="cmp-g no" style="font-size:11px">N/A</span><span class="cmp-g no" style="font-size:11px">N/A</span><span class="cmp-g dim" style="font-size:11px">$5,500+</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p style="font-size:12px;color:var(--dim);margin-top:20px;text-align:center">Year 1: Lume Scan $9.99 + $1.99/mo × 12 + adapter (~$20) = <strong style="color:var(--accent)">~$54 total</strong> vs FIXD at $100/year or BlueDriver at $120. <a href="https://lumeauto.tech/order" style="color:var(--accent2)">See all pricing tiers →</a></p>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="sec" style="border-top:1px solid var(--border)">
-    <div class="sec-label">How It Works</div>
-    <h2>Three steps. Two minutes.</h2>
-    <p class="sec-sub">No mechanic. No wiring. No subscription setup.</p>
-    <div class="steps">
-      <div class="step"><div class="step-num">01</div><h3>Plug In Any BLE Adapter</h3><p>Use any ELM327 BLE 4.0+ adapter from Amazon ($15-$30). Plug it into the OBD-II port under your dash. Every car since 1996 has one.</p></div>
-      <div class="step"><div class="step-num">02</div><h3>Open Lume Scan</h3><p>Tap "Connect via Bluetooth." Auto-discovers your adapter, initializes ELM327 protocol, starts reading within seconds.</p></div>
-      <div class="step"><div class="step-num">03</div><h3>Drive</h3><p>42 signals stream in real time. Fuel coaching, predictive alerts, and driver scoring activate automatically.</p></div>
-    </div>
-  </section>
-
-  <!-- THE 4/42 ARCHITECTURE -->
-  <section class="sec" style="border-top:1px solid var(--border);position:relative;overflow:hidden">
-    <div style="position:absolute;top:0;right:0;width:50%;height:100%;opacity:0.15;pointer-events:none">
-      <img src="img/architecture-4-42.png" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center">
-    </div>
-    <div style="position:relative;z-index:1">
-      <div class="sec-label">The 4/42 Architecture</div>
-      <h2>Why 42 signals?<br>Because your engine is a system of flows.</h2>
-      <p class="sec-sub" style="max-width:700px">Most scanners read a handful of numbers and call it a day. We asked a different question: <em>what if you treated every engine like four interconnected systems, each one telling part of the story?</em></p>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:20px;margin-top:40px">
-        <div style="padding:28px;border-radius:16px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.12);position:relative;overflow:hidden;display:flex;flex-direction:column;height:100%">
-            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(6,182,212,0.15),transparent 70%);pointer-events:none"></div>
-            <img src="img/signal_throughput_1779557514326.png" alt="Throughput Base" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3 style="color:var(--accent2);font-size:1.1rem;margin-bottom:8px">Throughput Base</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7"><strong style="color:var(--text)">"What's flowing in and out right now."</strong><br>Air, fuel, heat, exhaust — the raw materials your engine consumes and produces every second. 10 signals tracking intake volume, fuel delivery, throttle response, and atmospheric conditions.</p>
-        </div>
-        <div style="padding:28px;border-radius:16px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.12);position:relative;overflow:hidden;display:flex;flex-direction:column;height:100%">
-            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(6,182,212,0.15),transparent 70%);pointer-events:none"></div>
-            <img src="img/signal_process_1779557530809.png" alt="Process Rate" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3 style="color:var(--accent);font-size:1.1rem;margin-bottom:8px">Process Rate</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7"><strong style="color:var(--text)">"How efficiently is it being converted to work."</strong><br>Combustion timing, fuel trim corrections, engine load — 8 signals measuring whether your engine is burning fuel efficiently or wasting it.</p>
-        </div>
-        <div style="padding:28px;border-radius:16px;background:rgba(56,189,248,0.04);border:1px solid rgba(56,189,248,0.12);position:relative;overflow:hidden;display:flex;flex-direction:column;height:100%">
-            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(56,189,248,0.15),transparent 70%);pointer-events:none"></div>
-            <img src="img/signal_flow_1779557542824.png" alt="Flow State" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3 style="color:#38bdf8;font-size:1.1rem;margin-bottom:8px">Flow State</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7"><strong style="color:var(--text)">"What's the real-time state right now."</strong><br>Oxygen sensors, catalyst health, driver behavior scoring — 5 signals that put the numbers in context. Are you cruising efficiently or hammering the throttle?</p>
-        </div>
-        <div style="padding:28px;border-radius:16px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.12);position:relative;overflow:hidden;display:flex;flex-direction:column;height:100%">
-            <div style="position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle,rgba(245,158,11,0.15),transparent 70%);pointer-events:none"></div>
-            <img src="img/signal_lifecycle_1779557562448.png" alt="System Lifecycle" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:16px">
-            <h3 style="color:#f59e0b;font-size:1.1rem;margin-bottom:8px">System Lifecycle</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7"><strong style="color:var(--text)">"How long will things last."</strong><br>Coolant, battery, check engine status, component degradation — 6 signals predicting what's about to fail <em>before</em> your dashboard warns you.</p>
-        </div>
-      </div>
-
-      <div style="margin-top:40px;padding:28px 32px;border-radius:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);max-width:800px;margin-left:auto;margin-right:auto">
-        <p style="font-size:1rem;color:var(--text);line-height:1.8;text-align:center">
-          <strong style="color:var(--accent2)">4 primitives × 10+ signals each = 42 governance nodes.</strong><br>
-          <span style="color:rgba(255,255,255,0.5)">Read 10 times per second. Computed deterministically. Zero AI. Zero guesswork.<br>It's the difference between a thermometer and a full physical.</span>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- VISUAL FEATURE CARDS -->
-  <section class="sec" style="border-top:1px solid var(--border)">
-    <div class="sec-label">Intelligence</div>
-    <h2>Not just data. Decisions.</h2>
-    <p class="sec-sub">Two features that separate Lume Scan from every code reader on the market.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:20px;margin-top:32px">
-      <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,182,212,0.12);background:rgba(6,182,212,0.03)">
-        <div style="height:220px;overflow:hidden;position:relative">
-          <img src="img/fuel-coaching.png" alt="Passive fuel coaching through car speakers" style="width:100%;height:100%;object-fit:cover">
-          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,12,0.9) 0%,rgba(10,10,12,0.3) 50%,transparent 100%)"></div>
-          <div style="position:absolute;bottom:16px;left:20px;right:20px">
-            <div style="font-size:0.7rem;color:var(--accent);font-weight:700;letter-spacing:0.1em;text-transform:uppercase">PASSIVE FUEL COACHING</div>
-          </div>
-        </div>
-        <div style="padding:24px">
-          <h3 style="font-size:1.15rem;margin-bottom:8px">Your car teaches you to drive better.</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7">Audio tones through your car's Bluetooth speakers. A chime when you're driving efficiently. A subtle buzz when you're wasting fuel. Your brain learns the pattern automatically — no screen required. Most drivers save <strong style="color:var(--accent)">$180–$320/year</strong> on fuel without thinking about it.</p>
-        </div>
-      </div>
-      <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(245,158,11,0.12);background:rgba(245,158,11,0.03)">
-        <div style="height:220px;overflow:hidden;position:relative">
-          <img src="img/predictive-engine.png" alt="Predictive maintenance engine visualization" style="width:100%;height:100%;object-fit:cover">
-          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,12,0.9) 0%,rgba(10,10,12,0.3) 50%,transparent 100%)"></div>
-          <div style="position:absolute;bottom:16px;left:20px;right:20px">
-            <div style="font-size:0.7rem;color:#f59e0b;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">PREDICTIVE MAINTENANCE</div>
-          </div>
-        </div>
-        <div style="padding:24px">
-          <h3 style="font-size:1.15rem;margin-bottom:8px">Catch the $30 fix before it becomes a $2,500 repair.</h3>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.7">Lume Scan detects component degradation <strong style="color:#f59e0b">1–3% before</strong> it triggers a check engine light. That failing O2 sensor? We'll tell you about it weeks before your dashboard does — and link you directly to the $25 replacement part on Amazon.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LIVE SCAN DEMO -->
-  <section class="sec" style="border-top:1px solid var(--border)">
-    <div class="sec-label">Live Demo</div>
-    <h2>See it in action.</h2>
-    <p class="sec-sub">This is a simulated diagnostic scan showing exactly what Lume Scan does — reading 42 OBD-II signals at 100ms intervals.</p>
-
-    <div id="scan-demo" style="background:#0a0a0c;border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:800px;margin:0 auto">
-      <!-- Header bar -->
-      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.015);flex-wrap:wrap;gap:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div id="scan-dot" style="width:10px;height:10px;border-radius:50%;background:var(--dim);transition:all 0.3s"></div>
-          <span id="scan-status" style="font-family:var(--mono);font-size:13px;color:var(--dim)">CONNECTION: STANDBY</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:13px;color:rgba(255,255,255,0.25)">PROTOCOL: CAN ISO 15765-4</div>
-      </div>
-
-      <!-- Main display -->
-      <div style="padding:2rem;min-height:320px;position:relative" id="scan-body">
-        <!-- Start overlay -->
-        <div id="scan-start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,10,12,0.85);backdrop-filter:blur(4px);z-index:10;cursor:pointer" onclick="startScan()">
-          <button style="display:flex;align-items:center;gap:12px;background:rgba(6,182,212,0.1);border:1px solid var(--accent);padding:14px 36px;border-radius:30px;color:var(--accent);font-weight:700;font-size:18px;cursor:pointer;animation:scan-pulse 2s ease infinite;font-family:var(--sans)">
-            ▶ INITIATE LIVE SCAN
-          </button>
-        </div>
-
-        <!-- Scanning view (hidden initially) -->
-        <div id="scan-live" style="display:none">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem" id="scan-grid">
-            <div>
-              <div style="color:rgba(255,255,255,0.25);font-size:11px;letter-spacing:2px;margin-bottom:12px">REAL-TIME TELEMETRY STREAM</div>
-              <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:13px">
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">ENGINE_RPM</span><span id="t-rpm" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">CALC_LOAD</span><span id="t-load" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">O2_VOLTAGE</span><span id="t-o2" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">TIMING_ADV</span><span id="t-timing" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">COOLANT_TEMP</span><span id="t-coolant" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:var(--dim)">MAF_RATE</span><span id="t-maf" style="color:var(--accent2)">---</span></div>
-                <div style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:rgba(255,255,255,0.2)">NODES_ACTIVE</span><span style="color:rgba(255,255,255,0.2)">42</span></div>
-                <div style="display:flex;justify-content:space-between"><span style="color:rgba(255,255,255,0.2)">LATENCY</span><span style="color:rgba(255,255,255,0.2)">12ms</span></div>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
-              <div style="font-size:48px;margin-bottom:12px">⚡</div>
-              <div id="scan-pct" style="font-size:2.5rem;font-weight:700;font-family:var(--mono);color:var(--text)">0%</div>
-              <div style="width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:16px;overflow:hidden">
-                <div id="scan-bar" style="width:0%;height:100%;background:var(--accent);transition:width 0.1s linear;border-radius:2px"></div>
-              </div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-family:var(--mono)">SCANNING 42 SIGNALS @ 100Hz</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Complete view (hidden initially) -->
-        <div id="scan-done" style="display:none;text-align:center;padding:1rem 0">
-          <div style="font-size:48px;margin-bottom:12px">ðŸ›¡ï¸</div>
-          <h3 style="font-size:1.5rem;margin-bottom:16px">Scan Complete</h3>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-            <div style="padding:16px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.2)">
-              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">BATTERY</div>
-              <div style="font-size:1.5rem;font-weight:700;color:var(--accent);font-family:var(--mono)">84%</div>
-            </div>
-            <div style="padding:16px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.2)">
-              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">FAULTS</div>
-              <div style="font-size:1.2rem;font-weight:600;color:var(--text)">0 PENDING</div>
-            </div>
-            <div style="padding:16px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.2)">
-              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">STATUS</div>
-              <div style="font-size:1.2rem;font-weight:600;color:var(--text)">✓ HEALTHY</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-            <div style="padding:14px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.15)">
-              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">DRIVER SCORE</div>
-              <div style="font-size:1.3rem;font-weight:700;color:var(--accent2);font-family:var(--mono)">87 / 100</div>
-            </div>
-            <div style="padding:14px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px solid rgba(6,182,212,0.15)">
-              <div style="font-size:11px;color:var(--dim);letter-spacing:1px;margin-bottom:6px">FUEL SAVINGS</div>
-              <div style="font-size:1.3rem;font-weight:700;color:var(--accent);font-family:var(--mono)">$23/mo</div>
-            </div>
-          </div>
-          <div style="padding:14px;background:rgba(6,182,212,0.05);border-radius:10px;border:1px dashed rgba(6,182,212,0.4);font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all;letter-spacing:0.05em;margin-bottom:16px">
-            LUME_HASH: 0x8f2c3b4a...9d1e<span id="scan-hash"></span>
-          </div>
-          <button onclick="resetScan()" style="background:transparent;border:none;color:var(--dim);cursor:pointer;text-decoration:underline;font-size:14px;font-family:var(--sans)">Reset Demo</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 42 SIGNALS -->
-  <section class="sec" id="signals" style="border-top:1px solid var(--border)">
-    <div class="sec-label">The 42-Signal Engine</div>
-    <h2>What we actually read.</h2>
-    <p class="sec-sub">Every 100ms, Lume Scan reads and computes across four signal domains.</p>
-    <div class="sig-grid">
-      <div class="sig-card"><h3 style="color:var(--accent)">🔥 Combustion (10)</h3><p>RPM · MAF · MAP · Throttle · Engine Load · Vol. Efficiency · Air-Fuel Ratio · Combustion Eff. · Timing Advance · Baro Pressure</p></div>
-      <div class="sig-card"><h3 style="color:var(--accent2)">⛽ Fuel System (10)</h3><p>Fuel Flow · O2 Upstream B1 · O2 Downstream B1 · STFT B1/B2 · LTFT B1/B2 · Catalyst Temp · Catalyst Eff. · MPG Instant</p></div>
-      <div class="sig-card"><h3 style="color:#f59e0b">ðŸ›¡ï¸ Health & Safety (11)</h3><p>Coolant · IAT · Battery · Runtime · MIL · DTC Count · Speed · Abs Load · Degradation Index · Driver Score · MPG Recovery</p></div>
-      <div class="sig-card"><h3 style="color:#ef4444">âš™ï¸ Governance (11)</h3><p>Mode · Flow State · Process Drift · Throughput Alert · Lifecycle Warning · Fuel Coach · Predictive Score · Trend · Anomaly · Session Δ · Baseline</p></div>
-    </div>
-  </section>
-
-  <!-- WHAT ONE CATCH SAVES YOU -->
-  <section class="sec" style="border-top:1px solid var(--border);position:relative;overflow:hidden">
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(6,182,212,0.06) 0%,transparent 70%);pointer-events:none"></div>
-    <div style="position:relative;z-index:1">
-      <div class="sec-label" style="color:#f59e0b">Real-World Scenario</div>
-      <h2>What one catch saves you.</h2>
-      <p class="sec-sub" style="max-width:650px">The fuel savings are great. But the real money is in what Lume Scan <em>prevents</em>.</p>
-
-      <!-- Savings visual -->
-      <div style="max-width:900px;margin:40px auto 0">
-        <div style="border-radius:20px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.015)">
-          <div style="padding:24px;position:relative;overflow:hidden">
-            <img src="img/savings-shield.png" alt="Repair cost savings visualization" style="width:100%;border-radius:12px;margin-bottom:24px;max-height:300px;object-fit:cover">
-          </div>
-
-          <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));border-top:1px solid var(--border)">
-            <!-- Without -->
-            <div style="padding:28px;border-right:1px solid var(--border);text-align:center">
-              <div style="font-size:0.7rem;color:#ef4444;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Without Lume Scan</div>
-              <div style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:16px">Catalytic converter fails without warning</div>
-              <div style="font-size:clamp(1.75rem, 5vw, 2.5rem);font-weight:800;color:#ef4444;font-family:var(--mono);letter-spacing:-1px">$2,500</div>
-              <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:4px">Shop diagnosis + parts + labor</div>
-            </div>
-            <!-- With -->
-            <div style="padding:28px;text-align:center;background:rgba(6,182,212,0.03)">
-              <div style="font-size:0.7rem;color:var(--accent);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">With Lume Scan</div>
-              <div style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-bottom:16px">Caught at 1.2% degradation — 6 weeks early</div>
-              <div style="font-size:clamp(1.75rem, 5vw, 2.5rem);font-weight:800;color:var(--accent);font-family:var(--mono);letter-spacing:-1px">$89</div>
-              <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:4px">DIY with Amazon part + 30 min</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- First year total -->
-        <div style="margin-top:24px;padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(6,182,212,0.06),rgba(6,182,212,0.04));border:1px solid rgba(6,182,212,0.2);text-align:center">
-          <div style="font-size:0.75rem;color:var(--accent);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px">First-Year Total Value</div>
-          <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; display:flex; align-items:center; justify-content:center; gap:12px; margin: 16px 0 24px; border:1px solid rgba(255,255,255,0.03);">
-            <div style="text-align:center; flex:1;">
-              <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">Fuel savings</div>
-              <div style="font-size:1.5rem; font-weight:700; color:var(--accent2); font-family:var(--mono);">$328</div>
-            </div>
-            <div style="font-size:1.4rem; color:rgba(255,255,255,0.15); font-weight:300;">+</div>
-            <div style="text-align:center; flex:1;">
-              <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">Repair avoided</div>
-              <div style="font-size:1.5rem; font-weight:700; color:var(--accent); font-family:var(--mono);">$2,411</div>
-            </div>
-          </div>
-
-          <div style="position:relative; border-top:1px dashed rgba(6,182,212,0.25); padding-top:24px; margin-bottom:20px; text-align:center;">
-            <div style="position:absolute; top:-16px; left:50%; transform:translateX(-50%); background:var(--bg); width:32px; height:32px; border-radius:50%; border:1px solid rgba(6,182,212,0.3); display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:1.2rem; font-weight:700; box-shadow:0 0 10px rgba(0,0,0,0.5);">=</div>
-            <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em;">Total Saved</div>
-            <div style="font-size:2.8rem; font-weight:800; font-family:var(--mono); line-height:1;"><span class="gr">$2,739</span></div>
-          </div>
-          <p style="font-size:0.85rem;color:rgba(255,255,255,0.5)">From a tool that <strong style="color:var(--text)">starts at $9.99</strong>. That's a <strong style="color:var(--accent)">270x+ return</strong> in year one.</p>
-        </div>
-
-        <p style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:16px">Based on average catalytic converter replacement costs (AAA, 2024). Your actual savings depend on vehicle condition and driving patterns.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- WHAT YOU NEED -->
-  <section class="sec" style="border-top:1px solid var(--border)">
-    <div class="sec-label">What You Need</div>
-    <h2>Software only. BYO adapter.</h2>
-    <p class="sec-sub">Lume Scan Pro starts at $9.99 + a small monthly service fee. Pair with any standard BLE OBD-II adapter.</p>
-    <div class="two-col-grid">
-      <div class="equal-card"><h3>✅ Recommended Adapters</h3><p><strong>Veepeak BLELink</strong> — $16 on Amazon<br><strong>BAFX BLE</strong> — $22 on Amazon<br><strong>OBDLink MX+</strong> — $35 (premium)<br>Any ELM327 BLE 4.0+ adapter works.</p></div>
-      <div class="equal-card"><h3>✅ Compatible Vehicles</h3><p>Every gasoline car, truck, and SUV sold in the US after 1996 with a standard OBD-II port. That's <strong>1.4 billion vehicles worldwide</strong>.</p></div>
-    </div>
-  </section>
-
-  <!-- PROPRIETARY HARDWARE TEASER -->
-  <section class="sec" id="hardware" style="border-top:1px solid var(--border)">
-    <div class="sec-label">Coming Soon</div>
-    <h2>Proprietary hardware.<br>Even deeper diagnostics.</h2>
-    <div class="hw-teaser">
-      <div>
-        <h3>The Lume Scan Dongle</h3>
-        <p>We're developing a purpose-built BLE 5.0 diagnostic dongle with onboard flash storage, hardware-level AES-256 encryption, and extended PID coverage that goes far beyond standard ELM327 adapters.</p>
-        <p><strong style="color:var(--text)">What the proprietary hardware unlocks:</strong></p>
-        <p>• <strong>Extended PID access</strong> — manufacturer-specific codes beyond standard OBD-II<br>
-        • <strong>Vehicle-Carried Mode</strong> — 32MB onboard storage logs diagnostics between sessions<br>
-        • <strong>Hardware-signed packets</strong> — Ed25519 cryptographic verification of every reading<br>
-        • <strong>Faster BLE 5.0</strong> — 2x throughput for true 100ms polling of all 42 signals<br>
-        • <strong>Fleet-grade durability</strong> — automotive-temp-rated, always-on, zero driver intervention</p>
-        <div class="hw-tag">Q4 2026 · Waitlist Open</div>
-      </div>
-      <div style="text-align:center">
-        <div style="width:100%;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(6,182,212,0.04));border:1px solid var(--border);padding:20px">
-          <img src="img/dongle-mockup.png" alt="Lume Scan OBD-II Dongle" style="width:100%;max-width:320px;border-radius:12px;margin-bottom:16px">
-          <div style="font-size:14px;font-weight:700;color:var(--accent2)">LUME SCAN DONGLE</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px">BLE 5.0 · AES-256 · Ed25519 · 32MB Flash</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">US Patent Pending 64/032,339</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  
-
-  <!-- TRUST LAYER VERIFIED -->
-  <section class="sec" style="padding:80px 24px">
-    <div style="max-width:900px;margin:0 auto">
-      <div class="sec-label">Trust Layer Ledger</div>
-      <h2>Every scan is sealed.<br>Every report is verifiable.</h2>
-      <p class="sec-sub" style="margin-bottom:32px">LumeScan is the first consumer product integrated with the Trust Layer Ledger. Every diagnostic scan is cryptographically hashed and permanently sealed — creating an unalterable record of your vehicle's health.</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px">
-        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
-            <img src="img/mode-consumer.png" alt="Consumer Mode" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
-            <h4 style="font-size:0.9rem;margin-bottom:6px">Consumer Mode</h4>
-          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Keep your adapter plugged in for daily health snapshots. Every night, Lume Scan summarizes your vehicle's condition in plain English — verified and sealed on the Trust Layer Ledger.</p>
-        </div>
-        <div style="padding:20px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
-            <img src="img/mode-mechanic.png" alt="Mechanic Mode" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
-            <h4 style="font-size:0.9rem;margin-bottom:6px">Mechanic Mode</h4>
-          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Generate a verified Scan Certificate for your customer. Timestamped, hashed, and independently verifiable. Build credibility with every diagnosis.</p>
-        </div>
-        <div style="padding:20px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.08);border-radius:14px;display:flex;flex-direction:column;height:100%">
-            <img src="img/mode-print.png" alt="Print & Download" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:16px">
-            <h4 style="font-size:0.9rem;margin-bottom:6px">Print &amp; Download</h4>
-          <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);line-height:1.6">Download PDF certificates, export CSV data, or print verified reports with the TLL Hallmark. Perfect for insurance, resale, or shop records.</p>
-        </div>
-      </div>
-      <div style="text-align:center"><a href="/explorer.html" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:30px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:#67e8f9;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;transition:all 0.2s">ðŸ›¡ï¸ Open Scan Explorer</a></div>
-    </div>
-  </section>
-
-  <!-- BUILT BY LUME42 LABS -->
-  <section class="sec" style="border-top:1px solid var(--border);position:relative;overflow:hidden">
-    <div style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.08;pointer-events:none">
-      <img src="img/lume42-labs.png" alt="" style="width:100%;height:100%;object-fit:cover">
-    </div>
-    <div style="position:relative;z-index:1;max-width:800px;margin:0 auto;text-align:center">
-      <div class="sec-label">Our Mission</div>
-      <h2>Built by <a href="https://lume42.com" style="color:inherit;text-decoration:none;border-bottom:2px solid var(--accent2)">Lume42 Labs</a>.</h2>
-      <div style="margin:32px auto 0;max-width:680px">
-        <p style="font-size:1.1rem;line-height:1.9;color:rgba(255,255,255,0.7);margin-bottom:24px">
-          We believe professional-grade tools shouldn't cost professional-grade prices.
-        </p>
-        <p style="font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.5);margin-bottom:24px">
-          Everything is getting more expensive — gas, repairs, insurance, groceries, rent. We started Lume42 Labs because we were tired of watching families pay $150 for a diagnostic read that takes 45 seconds, or $200 for a code reader that does less than a $30 app.
-        </p>
-        <p style="font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.5);margin-bottom:24px">
-          Every product we build follows the same principle: <strong style="color:var(--text)">take something that costs $150–$500 at a shop or in a professional tool, and put it in your hands for under $40.</strong> No lock-in. No planned obsolescence. Real tools, real savings, real ownership.
-        </p>
-        <p style="font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.5);margin-bottom:32px">
-          Lume Scan is our first product — and it's proof that the model works. Software that starts at $9.99, puts $300+ back in your pocket every year, catches thousand-dollar repairs before they happen, and turns your phone into a professional diagnostic tool that rivals hardware costing 10x more.
-        </p>
-        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
-          <div style="padding:16px 24px;border-radius:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12);position:relative">
-            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.3);border-radius:4px;font-size:9px;font-weight:700;color:var(--accent);padding:2px 8px;letter-spacing:0.05em">FOUNDERS CLUB &middot; Users 1&ndash;100</div>
-            <div style="font-size:1.8rem;font-weight:800;color:var(--accent2);font-family:var(--mono)">$9.99</div>
-            <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px">one-time license</div>
-          </div>
-          <div style="padding:16px 24px;border-radius:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12);position:relative">
-            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(6,182,212,0.2);border:1px solid rgba(6,182,212,0.3);border-radius:4px;font-size:9px;font-weight:700;color:var(--accent);padding:2px 8px;letter-spacing:0.05em">FOUNDERS CLUB &middot; Users 1&ndash;100</div>
-            <div style="font-size:1.8rem;font-weight:800;color:var(--accent);font-family:var(--mono)"><div style="padding:16px 24px;border-radius:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12)">
-            <div style="font-size:1.8rem;font-weight:800;color:var(--accent2);font-family:var(--mono)">$9.99</div>
-            <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px">Founders price</div>
-          </div>
-          <div style="padding:16px 24px;border-radius:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12)">
-            <div style="font-size:1.8rem;font-weight:800;color:var(--accent);font-family:var(--mono)">$1.99</div>
-            <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px">/mo for diagnostics</div>
-          </div>.99</div>
-            <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px">/mo service fee</div>
-          </div>
-          <div style="padding:16px 24px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">
-            <div style="font-size:1.8rem;font-weight:800;color:var(--text);font-family:var(--mono)">∞</div>
-            <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px">Updates included</div>
-          </div>
-        </div>
-        <p style="font-size:0.68rem;color:rgba(255,255,255,0.2);margin-bottom:12px">*Founders Club: $9.99 + $1.99/mo (users 1&ndash;100) &middot; Early Adopter: $19.99 + $2.49/mo (101&ndash;500) &middot; Standard: $39.99 + $4.99/mo &middot; Own Outright: $249 one-time. Tier locked at signup.</p>
-        <p style="font-size:0.8rem;color:rgba(255,255,255,0.25);font-style:italic">
-          🇺🇸 Proudly designed in Gladeville, Tennessee<br>
-          DarkWave Studios LLC / <a href="https://lume42.com" style="color:rgba(255,255,255,0.35)">Lume42 Labs</a><br>
-          US Provisional Patent 64/032,339
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- DOWNLOAD APP -->
-  
-
-  <section class="sec" id="faq" style="border-top:1px solid var(--border)">
-    <div class="sec-label">FAQ</div>
-    <h2>Questions</h2>
-    <div class="faq" style="margin-top:32px">
-      <div class="faq-item"><div class="faq-q">Is there a subscription?</div><div class="faq-a"><p>Sort of. You make a one-time software purchase (from $9.99) and pay a small monthly service fee ($1.99/mo at Founders pricing, locked for life) for continuous updates, new features, and cloud diagnostics. Cancel anytime — you keep the software. Or choose <strong>Own Outright ($249)</strong> for lifetime access with zero recurring fees. <a href="https://lumeauto.tech/order" style="color:var(--accent2)">See pricing →</a></p></div></div>
-      <div class="faq-item"><div class="faq-q">How much will I actually save?</div><div class="faq-a"><p>At $3.50/gallon and 15,000 miles/year, most drivers save $180–$320 annually through fuel coaching alone. The app pays for itself in about 2 weeks.</p></div></div>
-      <div class="faq-item"><div class="faq-q">Do I need a mechanic to install it?</div><div class="faq-a"><p>No. Plug the adapter into the OBD-II port under your steering column. Takes 10 seconds. No wiring, no tools, no modifications.</p></div></div>
-      <div class="faq-item"><div class="faq-q">What's the difference between this and a cheap code reader?</div><div class="faq-a"><p>A code reader tells you P0420. Lume Scan tells you your catalyst is degrading at 1.2% per month, predicts failure in 6 weeks, and has been coaching you to save $23/month on fuel the entire time.</p></div></div>
-      <div class="faq-item"><div class="faq-q">Is my vehicle data private?</div><div class="faq-a"><p>Yes. All data stays on your device. We don't collect, sell, or share your driving data. See our <a href="/privacy.html">Privacy Policy</a>.</p></div></div>
-      <div class="faq-item"><div class="faq-q">Will the proprietary dongle be required?</div><div class="faq-a"><p>No. Lume Scan will always work with any BLE OBD-II adapter. The proprietary dongle unlocks extended diagnostics and vehicle-carried logging, but the core 42-signal engine works with any $15-$30 adapter.</p></div></div>
-      <div class="faq-item"><div class="faq-q">What about adapter returns?</div><div class="faq-a"><p>The OBD-II adapter is a standard commodity device purchased separately from Amazon or other retailers. We do not sell, manufacture, or warranty adapters. For adapter returns or exchanges, contact Amazon or the original retailer directly. We guarantee our software and firmware — not third-party hardware.</p></div></div>
-      <div class="faq-item"><div class="faq-q">What makes the diagnostic output trustworthy?</div><div class="faq-a"><p>Every scan result is cryptographically hashed (SHA-256) and anchored to the <a href="https://dwtl.io" style="color:var(--accent2)">Trust Layer Ledger</a> — a public, immutable verification chain. Your diagnostic data is mathematically provable, tamper-proof, and independently verifiable. No other consumer diagnostic tool offers this.</p></div></div>
-    </div>
-  </section>
-  
-    <!-- FINAL CTA -->
-  <section class="sec" style="text-align:center;padding:100px 24px;position:relative">
-    <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.06) 0%,transparent 70%);pointer-events:none"></div>
-    <div class="sec-label">Ready?</div>
-    <h2><span style="white-space:nowrap">Professional diagnostics.</span><br>Consumer price.</h2>
-    <p class="sec-sub" style="margin:16px auto 40px">42 signals. Predictive maintenance. Fuel coaching. From $9.99 + $1.99/mo. All updates included.</p>
-    <a href="https://lumeauto.tech/order" class="cta-btn">🔧 Get Lume Scan — From $9.99</a>
-    <div class="hero-trust" style="margin-top:20px"><span>✓ Software is yours to keep</span><span>✓ 7-day satisfaction guarantee</span><span>✓ Updates included</span></div>
-  </section>
-
-  <!-- VIDEO SECTION -->
-  <section class="sec" id="watch" style="border-top:1px solid var(--border);text-align:center">
-    <div class="sec-label">Watch</div>
-    <h2>See Lume Scan in action.</h2>
-    <p class="sec-sub" style="margin-bottom:32px">Professional vehicle diagnostics on your phone. 42 signals. Real-time intelligence.</p>
-    <div style="max-width:780px;margin:0 auto">
-      <a href="https://www.youtube.com/channel/UCAVktkawgHpKg4GAvkY7iGw" target="_blank" rel="noreferrer" style="display:block;position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(6,182,212,0.2);background:#000;text-decoration:none;">
-        <img src="img/lume_scene_3_dashboard_1779565113355.png" alt="Lume Scan intro video thumbnail" style="width:100%;height:auto;display:block;opacity:0.85;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">
-        <!-- Play button overlay -->
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-          <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,0,0,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(255,0,0,0.4);transition:transform 0.2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left:4px"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-        </div>
-        <!-- Channel label -->
-        <div style="position:absolute;bottom:0;left:0;right:0;padding:20px 24px;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);text-align:left">
-          <div style="display:flex;align-items:center;gap:10px">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            <span style="color:#fff;font-weight:600;font-size:0.9rem">DarkWave Studios — YouTube Channel</span>
-          </div>
-        </div>
-      </a>
-      <p style="margin-top:16px;font-size:0.8rem;color:rgba(255,255,255,0.35)">Subscribe for demo walkthroughs, diagnostic tutorials, and product updates.</p>
-    </div>
-  </section>
-
-  <!-- ECOSYSTEM — horizontal scroll carousel -->
-  <section class="sec eco" style="padding:60px 24px 40px;border-top:1px solid rgba(255,255,255,0.04)">
-    <div style="max-width:1100px;margin:0 auto">
-      <div class="sec-label">Part of the DarkWave Ecosystem</div>
-      <h2 style="font-size:1.6rem;margin-bottom:8px">Built on a connected platform.</h2>
-      <p class="sec-sub" style="margin-bottom:24px">Lume Scan is the diagnostic arm of a 42-app technology ecosystem.</p>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:12px">
-        <div style="display:flex;gap:14px;min-width:max-content;padding:0 4px">
-
-          <a href="https://lumeauto.tech" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-lumeauto.png" alt="Lume Auto" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">🚗 Lume Auto</h4><p style="margin:0">The parent platform for all things automotive — trust-layer verified diagnostics, fleet governance &amp; vehicle intelligence by DarkWave Studios</p></div>
-          </a>
-
-          <a href="https://garagebot.io" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-garagebot.png" alt="GarageBot" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">🔧 GarageBot</h4><p style="margin:0">AI-assisted parts sourcing for everything from RC products to aviation — home of the Torque mechanic suite</p></div>
-          </a>
-
-          <a href="https://hydrocore.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-hydrocore.png" alt="HydroCore" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">💧 HydroCore</h4><p style="margin:0">The first proposed closed-loop hydrogen engine — clean propulsion research &amp; development</p></div>
-          </a>
-
-          <a href="https://meridiancanon.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-meridian.png" alt="Meridian Canon" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">⚡ Meridian Canon</h4><p style="margin:0">Wireless energy internet — next-generation power distribution &amp; transmission infrastructure</p></div>
-          </a>
-
-          <a href="https://verdaraultra.com" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-verdara.png" alt="Verdara Ultra" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ”ï¸ Verdara Ultra</h4><p style="margin:0">Outdoor travel &amp; adventure — 42-node deterministic engine for terrain analysis, safety &amp; ultra-distance planning</p></div>
-          </a>
-
-          <a href="https://dwtl.io" class="eco-card" style="min-width:240px;max-width:240px;padding:0;overflow:hidden">
-            <img src="img/eco-trustlayer.png" alt="Trust Layer Ledger" style="width:100%;height:130px;object-fit:cover;display:block">
-            <div style="padding:14px 16px 16px"><h4 style="margin:0 0 6px">ðŸ›¡ï¸ Trust Layer Ledger</h4><p style="margin:0">Verified identity, Signal token, decentralized governance &amp; the connective tissue for all 42 apps</p></div>
-          </a>
-
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:12px;font-size:0.65rem;color:rgba(255,255,255,0.2);letter-spacing:0.1em">SWIPE TO EXPLORE →</div>
-    </div>
-  </section>
-
-  <footer>
-    <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:#e2e8f0;letter-spacing:0.5px">🇺🇸 Proudly made in Gladeville, TN, USA</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:20px">
-      <a href="#download" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);border-radius:8px;color:rgba(6,182,212,0.9);font-size:0.8rem;font-weight:500;text-decoration:none">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 2H6.477L0 17.346l3.477 4.308L12 15.116l8.523 6.538L24 17.346zM4.193 16.5L8 6h8l3.807 10.5L12 11.192z"/></svg>
-        Android — Download Now
-      </a>
-      <span style="position:relative;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.35);font-size:0.8rem;font-weight:500;cursor:default;filter:blur(0.3px);user-select:none" aria-disabled="true">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-        iOS — App Store
-        <span style="position:absolute;top:-8px;right:-8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:4px;font-size:0.55rem;font-weight:700;letter-spacing:0.06em;padding:1px 5px;color:rgba(255,255,255,0.5);text-transform:uppercase">Coming Soon</span>
-      </span>
-      <a href="https://x.com/TrustSignal26" target="_blank" rel="noreferrer" aria-label="X Account" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:rgba(255,255,255,0.7);text-decoration:none;transition:all 0.2s">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <a href="https://www.youtube.com/channel/UCAVktkawgHpKg4GAvkY7iGw" target="_blank" rel="noreferrer" aria-label="YouTube Channel" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:rgba(255,255,255,0.7);text-decoration:none;transition:all 0.2s">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
-    </div>
-    <p style="font-size:0.65rem;color:rgba(255,255,255,0.2);margin-bottom:12px">Google Play and the Google Play logo are trademarks of Google LLC. Apple and the Apple logo are trademarks of Apple Inc.</p>
-    <p>© 2026 DarkWave Studios LLC · <a href="https://lume42.com">Lume42 Labs</a> · <a href="https://lumeauto.tech">Lume Auto</a> · <a href="https://dwtl.io">Trust Layer</a> · <a href="/whitepaper.html">Whitepaper</a><br>
-    <a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="https://lume42.com/#/invest" style="color:#38bdf8">Signal Holdings</a> · US Patent Pending 64/032,339</p>
-    <p style="font-size:0.65rem;color:rgba(255,255,255,0.2);max-width:700px;margin:12px auto 0;line-height:1.6">Lume Scan Pro subscriptions are billed monthly via Stripe. Your payment method is charged automatically at the start of each billing cycle. Cancel anytime — no contracts, no cancellation fees. Software purchase is non-refundable after 7 days. See <a href="/terms.html" style="color:var(--accent);font-size:0.65rem">Terms</a> and <a href="/privacy.html" style="color:var(--accent);font-size:0.65rem">Privacy</a> for details.</p>
-  </footer>
-
-  <script>
-  // Ken Burns slideshow
-  const slides=document.querySelectorAll('.hero-slide');
-  let cur=0;
-  setInterval(()=>{slides[cur].classList.remove('active');cur=(cur+1)%slides.length;slides[cur].classList.add('active')},5000);
-
-  // FAQ accordion
-  document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{const item=q.parentElement;document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});item.classList.toggle('open')})});
-
-  // Intersection observer for fade-in
-  const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:0.1});
-  document.querySelectorAll('.carousel-card,.equal-card,.step,.sig-card,.faq-item,.eco-card,.stat').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease, transform 0.6s ease';obs.observe(el)});
-
-  // Smooth nav scroll
-  document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
-
-  // ── Carousel engine ──
-  function initCarousel(id) {
-    const wrap = document.getElementById(id);
-    if (!wrap) return;
-    const track = wrap.querySelector('.carousel-track');
-    const cards = wrap.querySelectorAll('.carousel-card');
-    const dotsContainer = wrap.querySelector('.carousel-dots');
-    if (!cards.length) return;
-
-    let page = 0;
-    const isMobile = window.innerWidth <= 768;
-    const perPage = isMobile ? 1 : 3;
-    const totalPages = Math.ceil(cards.length / perPage);
-    const gap = isMobile ? 0 : 16;
-
-    // Size cards: on mobile each card = 100% of wrapper, on desktop = ~33%
-    const wrapWidth = wrap.offsetWidth;
-    const cardWidth = isMobile ? wrapWidth : (wrapWidth - gap * (perPage - 1)) / perPage;
-    const trackWidth = cardWidth * cards.length + gap * (cards.length - 1);
-    track.style.width = trackWidth + 'px';
-    track.style.gap = gap + 'px';
-    cards.forEach(c => { c.style.flex = '0 0 ' + cardWidth + 'px'; c.style.maxWidth = cardWidth + 'px'; });
-
-    // Build dots
-    if (dotsContainer) {
-      dotsContainer.innerHTML = '';
-      for (let i = 0; i < totalPages; i++) {
-        const dot = document.createElement('button');
-        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Page ' + (i + 1));
-        dot.onclick = () => goTo(i);
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function goTo(p) {
-      page = Math.max(0, Math.min(totalPages - 1, p));
-      const offset = page * perPage * (cardWidth + gap);
-      // Don't scroll past the end
-      const maxOffset = trackWidth - wrapWidth;
-      const clampedOffset = Math.min(offset, maxOffset);
-      track.style.transform = 'translateX(-' + clampedOffset + 'px)';
-      if (dotsContainer) {
-        dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
-          d.classList.toggle('active', i === page);
-        });
-      }
-    }
-
-    // Touch swipe
-    let tx = 0;
-    wrap.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-    wrap.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - tx;
-      if (dx < -40) goTo(page + 1);
-      else if (dx > 40) goTo(page - 1);
-    }, { passive: true });
-
-    // Expose for arrow buttons
-    wrap._goTo = goTo;
-    wrap._getPage = () => page;
-    wrap._totalPages = totalPages;
-  }
-
-  function scrollCarousel(id, dir) {
-    const wrap = document.getElementById(id);
-    if (!wrap || !wrap._goTo) return;
-    wrap._goTo(wrap._getPage() + dir);
-  }
-
-  // Init all carousels
-  initCarousel('feat-carousel');
-
-  // Re-init on resize
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
-  });
-  // ── Live Scan Simulator ──
-  let scanInterval = null;
-  let scanProgress = 0;
-
-  function startScan() {
-    document.getElementById('scan-start').style.display = 'none';
-    document.getElementById('scan-live').style.display = 'block';
-    document.getElementById('scan-done').style.display = 'none';
-    document.getElementById('scan-dot').style.background = 'var(--accent)';
-    document.getElementById('scan-dot').style.boxShadow = '0 0 10px var(--accent)';
-    document.getElementById('scan-status').textContent = 'CONNECTION: ACTIVE (100Hz)';
-    document.getElementById('scan-status').style.color = 'var(--accent)';
-    scanProgress = 0;
-
-    scanInterval = setInterval(() => {
-      scanProgress += 0.8;
-      if (scanProgress >= 100) {
-        scanProgress = 100;
-        clearInterval(scanInterval);
-        setTimeout(completeScan, 300);
-      }
-      document.getElementById('scan-pct').textContent = Math.floor(scanProgress) + '%';
-      document.getElementById('scan-bar').style.width = scanProgress + '%';
-
-      // Jitter telemetry
-      document.getElementById('t-rpm').textContent = Math.floor(800 + Math.random() * 200);
-      document.getElementById('t-load').textContent = (20 + Math.random() * 15).toFixed(1) + '%';
-      document.getElementById('t-o2').textContent = (0.1 + Math.random() * 0.8).toFixed(2) + 'v';
-      document.getElementById('t-timing').textContent = Math.floor(10 + Math.random() * 5) + 'Â°';
-      document.getElementById('t-coolant').textContent = Math.floor(185 + Math.random() * 15) + 'Â°F';
-      document.getElementById('t-maf').textContent = (3.5 + Math.random() * 4).toFixed(1) + ' g/s';
-    }, 100);
-  }
-
-  function completeScan() {
-    document.getElementById('scan-live').style.display = 'none';
-    document.getElementById('scan-done').style.display = 'block';
-    document.getElementById('scan-dot').style.background = 'var(--accent2)';
-    document.getElementById('scan-dot').style.boxShadow = 'none';
-    document.getElementById('scan-status').textContent = 'CONNECTION: TERMINATED';
-    document.getElementById('scan-status').style.color = 'var(--dim)';
-    document.getElementById('scan-hash').textContent = ' ' + Date.now();
-  }
-
-  function resetScan() {
-    clearInterval(scanInterval);
-    scanProgress = 0;
-    document.getElementById('scan-live').style.display = 'none';
-    document.getElementById('scan-done').style.display = 'none';
-    document.getElementById('scan-start').style.display = 'flex';
-    document.getElementById('scan-dot').style.background = 'var(--dim)';
-    document.getElementById('scan-dot').style.boxShadow = 'none';
-    document.getElementById('scan-status').textContent = 'CONNECTION: STANDBY';
-    document.getElementById('scan-status').style.color = 'var(--dim)';
-    document.getElementById('scan-pct').textContent = '0%';
-    document.getElementById('scan-bar').style.width = '0%';
-  }
-  // ── Download Verification ──
-  async function verifyDownload() {
-    const emailEl = document.getElementById('dl-email');
-    const errEl = document.getElementById('dl-error');
-    const btnEl = document.getElementById('dl-btn');
-    const email = (emailEl.value || '').trim().toLowerCase();
-    if (!email || !email.includes('@')) {
-      errEl.textContent = 'Please enter the email you used to purchase.';
-      errEl.style.display = 'block';
-      return;
-    }
-    btnEl.textContent = 'â³ VERIFYING...';
-    btnEl.disabled = true;
-    errEl.style.display = 'none';
-    try {
-      const res = await fetch('https://lumeauto.tech/api/account/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (res.ok && data.subscription_active) {
-        const h = new Date().getHours();
-        const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-        const name = email.split('@')[0];
-        const capName = name.charAt(0).toUpperCase() + name.slice(1);
-        document.getElementById('dl-greeting-text').textContent = greeting + ', ' + capName + '! ðŸ‘‹';
-        document.getElementById('dl-greeting').style.display = 'block';
-        document.getElementById('dl-link').href = 'https://lumeauto.tech/download/apk?email=' + encodeURIComponent(email);
-        document.getElementById('dl-gate').style.display = 'none';
-        document.getElementById('dl-ready').style.display = 'block';
-      } else {
-        errEl.textContent = data.error || 'No active Pro license found for this email.';
-        errEl.style.display = 'block';
-        btnEl.textContent = 'ðŸ”“ VERIFY & DOWNLOAD';
-        btnEl.disabled = false;
-      }
-    } catch (e) {
-      errEl.textContent = 'Network error. Please try again.';
-      errEl.style.display = 'block';
-      btnEl.textContent = 'ðŸ”“ VERIFY & DOWNLOAD';
-      btnEl.disabled = false;
-    }
-  }
-  document.getElementById('dl-email')?.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') verifyDownload();
-  });
-  </script>
-
-    <!-- DarkWave Studios Ecosystem Analytics -->
-    <script>
-      (function(){
-        var sid = 'xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); });
-        var vid = localStorage.getItem('dw_vid');
-        if (!vid) { vid = 'xxxx-xxxx-xxxx'.replace(/x/g, function(){ return (Math.random()*16|0).toString(16); }); localStorage.setItem('dw_vid', vid); }
-        function track() {
-          try {
-            var ua = navigator.userAgent;
-            var mobile = /Mobile|Android|iPhone/.test(ua);
-            navigator.sendBeacon('https://darkwavestudios.io/api/analytics/pageview', JSON.stringify({
-              path: window.location.pathname,
-              title: document.title,
-              referrer: document.referrer || null,
-              userAgent: ua,
-              sessionId: sid,
-              visitorId: vid,
-              device: mobile ? 'mobile' : 'desktop',
-              browser: /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : 'Other',
-              os: /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'macOS' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : 'Other'
-            }));
-          } catch(e) {}
-        }
-        track();
-        window.addEventListener('popstate', track);
-        var origPush = history.pushState;
-        history.pushState = function(){ origPush.apply(this, arguments); track(); };
-      })();
-    </script>
-    <!-- DarkWave Studios Command Center -->
-    <script>
-      (function(){
-        var cc=0,timer=null;
-        function injectShield(){
-          var f=document.querySelector('footer');
-          if(!f)return setTimeout(injectShield,2000);
-          var existing=f.querySelector('[data-dw-shield]');
-          if(existing)return;
-          var s=document.createElement('span');
-          s.setAttribute('data-dw-shield','1');
-          s.textContent='\u25C8';
-          s.style.cssText='cursor:default;opacity:0.2;font-size:14px;user-select:none;margin-left:6px;';
-          s.addEventListener('click',function(){
-            cc++;if(timer)clearTimeout(timer);
-            if(cc>=3){cc=0;showPinModal();}
-            else{timer=setTimeout(function(){cc=0;},2000);}
-          });
-          var copy=f.querySelector('[class*="copyright"],[class*="Copyright"]');
-          if(copy){copy.appendChild(s);}
-          else{var last=f.lastElementChild||f;last.appendChild(s);}
-        }
-        function showPinModal(){
-          var o=document.createElement('div');
-          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;';
-          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
-          var box=document.createElement('div');
-          box.style.cssText='background:#0a0a1a;border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:32px;text-align:center;min-width:280px;font-family:system-ui,sans-serif;';
-          box.innerHTML='<div style="font-size:12px;color:#06b6d4;margin-bottom:16px;letter-spacing:3px;">AUTHENTICATION REQUIRED</div>';
-          var inp=document.createElement('input');
-          inp.type='password';inp.maxLength=4;
-          inp.style.cssText='background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:12px;color:#fff;font-size:24px;text-align:center;width:120px;letter-spacing:8px;outline:none;';
-          inp.addEventListener('keydown',function(e){
-            if(e.key==='Enter'){
-              if(inp.value==='0424'){o.remove();showCommandCenter();}
-              else{inp.style.borderColor='#f43f5e';inp.value='';setTimeout(function(){inp.style.borderColor='rgba(6,182,212,0.2)';},600);}
-            }
-          });
-          box.appendChild(inp);
-          var hint=document.createElement('div');
-          hint.style.cssText='margin-top:12px;font-size:10px;color:rgba(255,255,255,0.3);';
-          hint.textContent='Enter PIN to continue';
-          box.appendChild(hint);
-          o.appendChild(box);document.body.appendChild(o);
-          setTimeout(function(){inp.focus();},100);
-        }
-        function showCommandCenter(){
-          var o=document.createElement('div');
-          o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:99999;';
-          o.addEventListener('click',function(e){if(e.target===o)o.remove();});
-          var links=[
-            {l:'Trust Layer Dashboard',u:'https://dwtl.io'},
-            {l:'Axiom Studio',u:'https://axiomstudio.dev'},
-            {l:'TrustGen 3D',u:'https://trustgen.design'},
-            {l:'TrustVault',u:'https://trustvault.studio'},
-            {l:'TrustShield',u:'https://trustshield.tech'},
-            {l:'Lume Auto',u:'https://lumeauto.tech'},
-            {l:'Lume Scan',u:'https://lumescan.tech'},
-            {l:'DarkWave Studios',u:'https://darkwavestudios.io'}
-          ];
-          var html='<div style="background:linear-gradient(135deg,#0a0a1a,#0d1117);border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:40px;max-width:500px;width:90%;font-family:system-ui,sans-serif;">';
-          html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;"><div style="font-size:14px;color:#06b6d4;letter-spacing:3px;font-weight:700;">\u27D0 COMMAND CENTER</div><span id="cc-close" style="color:#666;font-size:20px;cursor:pointer;">\u2715</span></div>';
-          html+='<div style="display:grid;gap:10px;">';
-          links.forEach(function(lk){
-            html+='<a href="'+lk.u+'" target="_blank" rel="noopener" style="display:block;padding:12px 16px;background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.1);border-radius:10px;color:#94a3b8;text-decoration:none;font-size:13px;transition:all 0.2s;" onmouseenter="this.style.borderColor=\'rgba(6,182,212,0.3)\';this.style.color=\'#06b6d4\';" onmouseleave="this.style.borderColor=\'rgba(6,182,212,0.1)\';this.style.color=\'#94a3b8\';">'+lk.l+'</a>';
-          });
-          html+='</div><div style="margin-top:20px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center;">\u00A9 2026 DarkWave Studios LLC</div></div>';
-          o.innerHTML=html;
-          document.body.appendChild(o);
-          document.getElementById('cc-close').addEventListener('click',function(){o.remove();});
-        }
-        if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(injectShield,1000);});
-        else setTimeout(injectShield,1000);
-      })();
-    </script>
-  
-  <!-- MODAL SYSTEM -->
-  <div class="modal-overlay" id="global-modal" onclick="closeModal(event)">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-      <div class="modal-title" id="modal-title"></div>
-      <div class="modal-body" id="modal-body"></div>
+    <div class="footer">
+      <a href="https://axiomstudio.dev">Axiom AI</a>
+      <span>&middot;</span>
+      <a href="https://dwtl.io/presale">Signal Presale</a>
+      <span>&middot;</span>
+      <a href="https://tlid.io">TLID Domains</a>
+      <span>&middot;</span>
+      <a href="https://darkwavestudios.io">DarkWave Studios</a>
     </div>
   </div>
 
   <script>
-    const modalData = {
-      'modal-software': {
-        title: 'Perpetual License',
-        body: 'When you purchase Lume Scan, the core 42-signal diagnostic engine is yours forever. No arbitrary lockouts, no forced upgrades. We believe professional tools should be owned, not just rented.'
-      },
-      'modal-updates': {
-        title: 'Continuous Evolution',
-        body: 'The automotive landscape changes rapidly. Your Lume Scan software includes over-the-air (OTA) payload updates, ensuring your diagnostic definitions, predictive algorithms, and Mode 06 capabilities are always state-of-the-art.'
-      },
-      'modal-guarantee': {
-        title: 'Risk-Free Trial',
-        body: 'We are confident in our engineering. Try Lume Scan for 7 days on your own vehicles. If the 42-signal engine doesn\'t immediately prove its value over generic code readers, we will refund your software purchase—no questions asked.'
+    (function(){
+      var launch=new Date('2026-06-23T09:00:00-05:00').getTime();
+      function tick(){
+        var diff=launch-Date.now();
+        if(diff<=0){document.querySelector('.countdown').innerHTML='<span style="font-size:1.4rem;font-weight:900;color:var(--accent)">We are live!</span>';return;}
+        var pad=function(n){return n<10?'0'+n:''+n;};
+        document.getElementById('cd-d').textContent=pad(Math.floor(diff/86400000));
+        document.getElementById('cd-h').textContent=pad(Math.floor((diff%86400000)/3600000));
+        document.getElementById('cd-m').textContent=pad(Math.floor((diff%3600000)/60000));
+        document.getElementById('cd-s').textContent=pad(Math.floor((diff%60000)/1000));
       }
-    };
-
-    function openModal(id) {
-      const data = modalData[id];
-      if (data) {
-        document.getElementById('modal-title').innerText = data.title;
-        document.getElementById('modal-body').innerText = data.body;
-        document.getElementById('global-modal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
+      tick();setInterval(tick,1000);
+    })();
+    function submitEmail(){
+      var input=document.getElementById('teaser-email');
+      var btn=document.getElementById('teaser-btn');
+      var email=input.value.trim();
+      if(!email||!email.includes('@')){input.style.borderColor='rgba(239,68,68,.5)';setTimeout(function(){input.style.borderColor='';},1200);return;}
+      try{var l=JSON.parse(localStorage.getItem('dw_launch_list')||'[]');if(!l.includes(email)){l.push(email);localStorage.setItem('dw_launch_list',JSON.stringify(l));}}catch(e){}
+      fetch('https://axiom42.com/api/sms/optin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Launch Subscriber',phone:'email-only',email:email,consent:true,consentTimestamp:new Date().toISOString(),consentSource:'teaser_'+window.location.hostname})}).catch(function(){});
+      btn.textContent='\u2713 You\'re on the list';
+      btn.classList.add('done');
+      input.value='';
     }
-
-    function closeModal(event) {
-      document.getElementById('global-modal').classList.remove('active');
-      document.body.style.overflow = '';
-    }
+    document.getElementById('teaser-email').addEventListener('keydown',function(e){if(e.key==='Enter')submitEmail();});
   </script>
-
 </body>
 </html>
-
-
