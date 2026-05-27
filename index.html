@@ -1,6 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<style id="glass-blackout-style">
+  /* GLASS BLACKOUT STYLES */
+  #glass-blackout-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647; /* Max z-index */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 6, 23, 0.4);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #fff;
+    transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  #glass-blackout-overlay.hidden {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    pointer-events: none;
+  }
+  .gb-modal {
+    background: linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(2,6,23,0.95) 100%);
+    border: 1px solid rgba(34,211,238,0.2);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(34,211,238,0.05);
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #glass-blackout-overlay.hidden .gb-modal {
+    transform: translateY(-20px) scale(0.95);
+  }
+  .gb-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: rgba(34,211,238,0.1);
+    color: #22d3ee;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(34,211,238,0.2);
+  }
+  .gb-title {
+    font-size: 42px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 16px 0;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+  .gb-subtitle {
+    font-size: 16px;
+    color: #94a3b8;
+    margin: 0 0 36px 0;
+    line-height: 1.6;
+  }
+  .gb-timer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .gb-time-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    min-width: 80px;
+  }
+  .gb-time-box .num {
+    font-size: 32px;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    color: #22d3ee;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .gb-time-box .lbl {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .gb-ctas {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .gb-btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: #000;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gb-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34,211,238,0.3);
+  }
+  .gb-btn-secondary {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gb-btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(34,211,238,0.3);
+  }
+  .gb-free-banner {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .gb-free-banner p {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0 0 16px 0;
+  }
+  .gb-free-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  .gb-free-link {
+    font-size: 12px;
+    color: #22d3ee;
+    text-decoration: none;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34,211,238,0.05);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(34,211,238,0.15);
+    transition: all 0.2s;
+  }
+  .gb-free-link:hover {
+    background: rgba(34,211,238,0.1);
+    border-color: rgba(34,211,238,0.3);
+    color: #fff;
+  }
+
+  /* Toast Notification */
+  #gb-toast-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2147483647;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .gb-toast {
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(34,211,238,0.3);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    animation: gb-toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gb-toast.hiding {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s;
+  }
+  @keyframes gb-toast-in {
+    0% { transform: translateY(20px) scale(0.9); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* Demo Indicator */
+  #gb-demo-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(34,211,238,0.2);
+    color: #22d3ee;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    z-index: 2147483646;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(34,211,238,0.1);
+  }
+  #gb-demo-indicator.visible {
+    opacity: 1;
+  }
+  
+  @media (max-width: 600px) {
+    .gb-modal { padding: 32px 24px; }
+    .gb-title { font-size: 32px; }
+    .gb-time-box { min-width: 64px; padding: 10px; }
+    .gb-time-box .num { font-size: 24px; }
+    .gb-ctas { flex-direction: column; }
+    .gb-btn-primary, .gb-btn-secondary { width: 100%; justify-content: center; }
+    .gb-free-links { flex-direction: column; gap: 10px; }
+  }
+</style>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lume Scan — Coming Soon | DarkWave Studios</title>
@@ -207,5 +457,109 @@
     }
     document.getElementById('teaser-email').addEventListener('keydown',function(e){if(e.key==='Enter')submitEmail();});
   </script>
+
+<div id="glass-blackout-overlay">
+  <div class="gb-modal">
+    <div class="gb-badge">🔒 Ecosystem Unlock</div>
+    <h1 class="gb-title">Lume Scan</h1>
+    <p class="gb-subtitle">The premier bidirectional diagnostic and fleet management suite featuring Mode 06 remote execution.</p>
+    
+    <div class="gb-timer">
+      <div class="gb-time-box"><div class="num" id="gb-days">28</div><div class="lbl">Days</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-hours">00</div><div class="lbl">Hours</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-mins">00</div><div class="lbl">Mins</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-secs">00</div><div class="lbl">Secs</div></div>
+    </div>
+    
+    <div class="gb-ctas">
+      <button class="gb-btn-primary" onclick="enterDemoMode()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Enter Demo Mode
+      </button>
+      <a href="https://dwtl.io/presale" class="gb-btn-secondary">Join $SIG Presale</a>
+    </div>
+
+    <div class="gb-free-banner">
+      <p>While you wait, download our 100% Free & Ad-Free platforms today:</p>
+      <div class="gb-free-links">
+        <a href="https://chronoverse.tlid.io" class="gb-free-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Chronoverse
+        </a>
+        <a href="https://trustshield.tech" class="gb-free-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          TrustShield
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gb-demo-indicator">Preview Mode</div>
+<div id="gb-toast-container"></div>
+
+<script>
+  // Countdown Timer
+  (function(){
+    const targetDate = new Date('June 23, 2026 09:00:00').getTime();
+    function update() {
+      const now = new Date().getTime();
+      const dist = targetDate - now;
+      if (dist < 0) return;
+      document.getElementById('gb-days').innerText = Math.floor(dist / (1000 * 60 * 60 * 24));
+      document.getElementById('gb-hours').innerText = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+      document.getElementById('gb-mins').innerText = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      document.getElementById('gb-secs').innerText = Math.floor((dist % (1000 * 60)) / 1000).toString().padStart(2, '0');
+    }
+    update();
+    setInterval(update, 1000);
+  })();
+
+  // Demo Mode
+  window.enterDemoMode = function() {
+    document.getElementById('glass-blackout-overlay').classList.add('hidden');
+    document.getElementById('gb-demo-indicator').classList.add('visible');
+    
+    // Intercept clicks
+    document.body.addEventListener('click', function(e) {
+      // Find closest anchor or button
+      const target = e.target.closest('a, button');
+      if (!target) return;
+      
+      // Allow specific navigation or free links
+      if (target.closest('.gb-modal')) return;
+      if (target.href && (target.href.includes('chronoverse') || target.href.includes('trustshield') || target.href.startsWith('#'))) return;
+      
+      // Keywords to intercept
+      const text = (target.textContent || '').toLowerCase();
+      const href = (target.href || '').toLowerCase();
+      const isAction = target.tagName === 'BUTTON' || 
+                       href.includes('/buy') || 
+                       href.includes('.exe') || 
+                       href.includes('.apk') ||
+                       ['save', 'export', 'download', 'deploy', 'generate', 'buy', 'checkout'].some(k => text.includes(k));
+      
+      if (isAction) {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('🔒 Feature unlocks June 23, 2026');
+      }
+    }, true); // Use capture phase
+  };
+
+  function showToast(msg) {
+    const container = document.getElementById('gb-toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'gb-toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('hiding');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+</script>
+
 </body>
 </html>
