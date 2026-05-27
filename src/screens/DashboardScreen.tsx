@@ -72,19 +72,41 @@ const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key
   },
 ];
 
+import DTCRegistry from '../data/lumescan_dtc';
+
 // Generate simulated failure alerts from telemetry
 function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
   const alerts: FailureAlert[] = [];
-  if (data.sl7_mil && data.sl8_dtcCount > 0) {
+  
+  // Dynamically resolve active DTCs using the Axiom Deterministic Knowledge Registry
+  if (data.sl7_mil && data.sl8_dtcCount > 0 && data.activeDTCs) {
+    for (const code of data.activeDTCs) {
+      const dtcKey = `dtc_${code.toLowerCase()}`;
+      // @ts-ignore
+      const jsonStr = DTCRegistry.responses[dtcKey];
+      if (jsonStr) {
+        try {
+          const alertObj = JSON.parse(jsonStr) as FailureAlert;
+          alerts.push(alertObj);
+        } catch (e) {
+          console.warn(`Failed to parse DTC JSON for ${code}:`, e);
+        }
+      }
+    }
+  }
+
+  // Legacy hardcoded fallback if no specific codes are resolved
+  if (alerts.length === 0 && data.sl7_mil && data.sl8_dtcCount > 0) {
     alerts.push({
       type: 'active', code: 'P0420', system: 'Catalyst System',
       interpretation: 'Catalyst System Efficiency Below Threshold',
       severity: 'Moderate — safe to drive short term',
       action: 'Replace catalytic converter',
       partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
-      vehicle: '2019 Ford F-150',
+      vehicle: 'Universal',
     });
   }
+
   if (data.fs7_catEff < 93) {
     alerts.push({
       type: 'imminent', system: 'Catalyst System',
@@ -93,7 +115,7 @@ function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
       timeline: '~6 weeks', degradationRate: '1.2%/month',
       action: 'Schedule catalytic converter inspection',
       partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
-      vehicle: '2019 Ford F-150',
+      vehicle: 'Universal',
     });
   }
   return alerts;

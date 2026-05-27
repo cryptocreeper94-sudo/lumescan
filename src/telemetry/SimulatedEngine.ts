@@ -44,6 +44,7 @@ export interface TelemetrySnapshot {
   sl4_runtime: number;      // seconds
   sl7_mil: boolean;         // Check Engine Light
   sl8_dtcCount: number;     // Diagnostic Trouble Code Count
+  activeDTCs: string[];     // Array of active DTC codes
   sl11_degradation: number; // 0-100 health score
   // Computed
   mpgInstant: number;
@@ -82,7 +83,8 @@ let state: TelemetrySnapshot = {
   pr6_combEff: 97.8, pr7_engLoad: 18, pr8_absLoad: 12,
   fs1_o2UpB1: 0.45, fs2_o2DnB1: 0.72, fs5_catTempB1: 420, fs7_catEff: 94,
   fs10_driverScore: 82,
-  sl1_coolant: 92, sl3_battery: 14.2, sl4_runtime: 0, sl7_mil: false, sl8_dtcCount: 0,
+  sl1_coolant: 92, sl3_battery: 14.2, sl4_runtime: 0, sl7_mil: true, sl8_dtcCount: 1,
+  activeDTCs: ['P0171'],
   sl11_degradation: 88,
   mpgInstant: 24.3, mpgRecovery: 12.4, governanceMode: 'Flow State',
 };

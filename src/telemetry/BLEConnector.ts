@@ -300,7 +300,7 @@ function buildSnapshot(): TelemetrySnapshot {
     fs10_driverScore: computeDriverScore(r),
     sl1_coolant: r.coolant || 0, sl3_battery: r.battery || 0,
     sl4_runtime: Math.floor((now - startTime) / 1000),
-    sl7_mil: !!r.mil, sl8_dtcCount: r.dtcCount || 0, sl11_degradation: 88,
+    sl7_mil: !!r.mil, sl8_dtcCount: r.dtcCount || 0, activeDTCs: [], sl11_degradation: 88,
     mpgInstant: computeMPG(r), mpgRecovery: 0, governanceMode: computeMode(r),
   };
 }

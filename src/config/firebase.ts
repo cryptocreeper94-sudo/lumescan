@@ -39,6 +39,7 @@ const ALLOWED_EMAILS = [
   'cryptocreeper94@gmail.com',
   'averymackenna@gmail.com',
   'barrycline33@gmail.com',
+  'andrews@coxautoinc.com',
 ];
 
 function validateEmailDomain(email: string | null): void {

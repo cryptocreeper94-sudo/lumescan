@@ -262,6 +262,7 @@ export function buildRealSnapshot(): TelemetrySnapshot {
     sl4_runtime: Math.floor((now - (globalThis.__lumeStartTime || now)) / 1000),
     sl7_mil: !!r.mil,
     sl8_dtcCount: r.dtcCount || 0,
+    activeDTCs: [],
     sl11_degradation: 88,
     mpgInstant: computeMPG(r),
     mpgRecovery: 0, // calculated over time

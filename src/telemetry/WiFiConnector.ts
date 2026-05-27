@@ -280,6 +280,7 @@ export function buildSnapshot(): TelemetrySnapshot {
     sl4_runtime: Math.floor((now - startTime) / 1000),
     sl7_mil: !!r.mil,
     sl8_dtcCount: r.dtcCount || 0,
+    activeDTCs: [],
     sl11_degradation: 88,
     mpgInstant: computeMPG(r),
     mpgRecovery: 0,

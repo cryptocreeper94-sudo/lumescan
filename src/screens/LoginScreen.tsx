@@ -38,10 +38,12 @@ export default function LoginScreen() {
           if (msg.includes('Access restricted')) {
             setError('Access restricted to authorized email addresses.');
           } else {
-            setError('Google sign-in failed. Please try again.');
+            setError('Google sign-in failed: ' + msg);
           }
         })
         .finally(() => setLoading(false));
+    } else if (response?.type === 'error') {
+      setError('Google Sign-In is not configured for this build. Use email/password to sign in.');
     }
   }, [response]);
 
@@ -78,7 +80,7 @@ export default function LoginScreen() {
       } else if (msg.includes('invalid-api-key')) {
         setError('Firebase API Key is missing. Please update config.');
       } else {
-        setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim());
+        setError(msg || 'Authentication failed. Please try again.');
       }
       setLoading(false);
     }
