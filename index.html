@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -168,7 +168,10 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script>
+    firebase.initializeApp({apiKey:'AIzaSyCVPbg2gQ9K3UB3qNCrb-VHfsYM7ABZBck',authDomain:'darkwave-auth.firebaseapp.com',projectId:'darkwave-auth',storageBucket:'darkwave-auth.firebasestorage.app',messagingSenderId:'41307406912',appId:'1:41307406912:web:b82a15c90790542e2a55a5'});var db=firebase.firestore();
     (function(){
       var launch=new Date('2026-06-23T09:00:00-05:00').getTime();
       function tick(){
@@ -188,6 +191,7 @@
       var email=input.value.trim();
       if(!email||!email.includes('@')){input.style.borderColor='rgba(239,68,68,.5)';setTimeout(function(){input.style.borderColor='';},1200);return;}
       try{var l=JSON.parse(localStorage.getItem('dw_launch_list')||'[]');if(!l.includes(email)){l.push(email);localStorage.setItem('dw_launch_list',JSON.stringify(l));}}catch(e){}
+      db.collection('launch_emails').add({email:email,app:'lumescan',source:window.location.hostname,timestamp:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
       fetch('https://axiom42.com/api/sms/optin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Launch Subscriber',phone:'email-only',email:email,consent:true,consentTimestamp:new Date().toISOString(),consentSource:'teaser_'+window.location.hostname})}).catch(function(){});
       btn.textContent='\u2713 You\'re on the list';
       btn.classList.add('done');
