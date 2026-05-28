@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText, Lock } from 'lucide-react-native';
+import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText, Lock, Thermometer } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
@@ -20,15 +20,25 @@ const CARD_WIDTH = isTablet
 // Free tier gets exactly 3 live signals — everything else is blurred
 const FREE_SIGNAL_KEYS = ['tb6_rpm', 'tb7_speed', 'sl1_coolant'];
 
+// Temperature conversion helpers
+const toF = (c: number) => c * 9 / 5 + 32;
+const fmtTemp = (c: number, useF: boolean) => useF ? `${toF(c).toFixed(0)}°F` : `${c.toFixed(1)}°C`;
+const fmtTempShort = (c: number, useF: boolean) => useF ? `${toF(c).toFixed(0)}°F` : `${c.toFixed(0)}°C`;
+
+// Coolant threshold: 100°C = 212°F
+const coolantWarnThreshold = (useF: boolean) => useF ? 212 : 100;
+const coolantDangerThreshold = (useF: boolean) => useF ? 221 : 105;
+
 // All 42 signal definitions organized by governance node
-const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key: string; label: string; format: (d: TelemetrySnapshot) => string; colorFn?: (d: TelemetrySnapshot) => string }[] }[] = [
+function getAllSignals(useF: boolean): { group: string; icon: any; iconColor: string; signals: { key: string; label: string; format: (d: TelemetrySnapshot) => string; colorFn?: (d: TelemetrySnapshot) => string }[] }[] {
+  return [
   {
     group: 'TB — Throughput', icon: Activity, iconColor: COLORS.cyan,
     signals: [
       { key: 'tb1_maf', label: 'MAF (TB1)', format: d => `${d.tb1_maf.toFixed(1)} g/s` },
       { key: 'tb2_fuelFlow', label: 'Fuel Flow (TB2)', format: d => `${d.tb2_fuelFlow.toFixed(0)} cc/min` },
       { key: 'tb3_map', label: 'MAP (TB3)', format: d => `${d.tb3_map.toFixed(0)} kPa` },
-      { key: 'tb4_iat', label: 'IAT (TB4)', format: d => `${d.tb4_iat.toFixed(1)}°C` },
+      { key: 'tb4_iat', label: 'IAT (TB4)', format: d => fmtTemp(d.tb4_iat, useF) },
       { key: 'tb5_throttle', label: 'Throttle (TB5)', format: d => `${d.tb5_throttle.toFixed(1)}%` },
       { key: 'tb6_rpm', label: 'RPM (TB6)', format: d => `${d.tb6_rpm.toFixed(0)}` },
       { key: 'tb7_speed', label: 'Speed (TB7)', format: d => `${(d.tb7_speed * 0.621371).toFixed(0)} mph` },
@@ -55,7 +65,7 @@ const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key
     signals: [
       { key: 'fs1_o2UpB1', label: 'O2 Up B1 (FS1)', format: d => `${d.fs1_o2UpB1.toFixed(2)}V` },
       { key: 'fs2_o2DnB1', label: 'O2 Dn B1 (FS2)', format: d => `${d.fs2_o2DnB1.toFixed(2)}V` },
-      { key: 'fs5_catTempB1', label: 'Cat Temp (FS5)', format: d => `${d.fs5_catTempB1.toFixed(0)}°C` },
+      { key: 'fs5_catTempB1', label: 'Cat Temp (FS5)', format: d => fmtTempShort(d.fs5_catTempB1, useF) },
       { key: 'fs7_catEff', label: 'Cat.Eff (FS7)', format: d => `${d.fs7_catEff.toFixed(1)}%`, colorFn: d => d.fs7_catEff > 92 ? COLORS.emerald : '#f59e0b' },
       { key: 'fs10_driverScore', label: 'Driver (FS10)', format: d => `${d.fs10_driverScore.toFixed(0)}/100`, colorFn: d => d.fs10_driverScore > 80 ? COLORS.emerald : '#f59e0b' },
     ]
@@ -63,7 +73,7 @@ const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key
   {
     group: 'SL — Lifecycle', icon: ShieldCheck, iconColor: '#f59e0b',
     signals: [
-      { key: 'sl1_coolant', label: 'Coolant (SL1)', format: d => `${d.sl1_coolant.toFixed(1)}°C`, colorFn: d => d.sl1_coolant < 100 ? COLORS.emerald : '#ef4444' },
+      { key: 'sl1_coolant', label: 'Coolant (SL1)', format: d => fmtTemp(d.sl1_coolant, useF), colorFn: d => d.sl1_coolant < 100 ? COLORS.emerald : '#ef4444' },
       { key: 'sl3_battery', label: 'Battery (SL3)', format: d => `${d.sl3_battery.toFixed(1)}V`, colorFn: d => d.sl3_battery > 13.5 ? COLORS.emerald : '#f59e0b' },
       { key: 'sl7_mil', label: 'MIL (SL7)', format: d => d.sl7_mil ? 'ON' : 'OFF', colorFn: d => d.sl7_mil ? '#ef4444' : COLORS.emerald },
       { key: 'sl8_dtcCount', label: 'DTC Count (SL8)', format: d => `${d.sl8_dtcCount}`, colorFn: d => d.sl8_dtcCount > 0 ? '#ef4444' : COLORS.emerald },
@@ -71,7 +81,8 @@ const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key
       { key: 'sl4_runtime', label: 'Runtime (SL4)', format: d => `${d.sl4_runtime}s` },
     ]
   },
-];
+  ];
+}
 
 import DTCRegistry from '../data/lumescan_dtc';
 
@@ -79,8 +90,9 @@ import DTCRegistry from '../data/lumescan_dtc';
  * Build a plain English health summary from telemetry.
  * This is what non-mechanic users see first — no jargon.
  */
-function getPlainEnglishSummary(data: TelemetrySnapshot): { emoji: string; headline: string; details: string[] } {
+function getPlainEnglishSummary(data: TelemetrySnapshot, useF: boolean): { emoji: string; headline: string; details: string[] } {
   const issues: string[] = [];
+  const t = (c: number) => useF ? `${toF(c).toFixed(0)}°F` : `${c.toFixed(0)}°C`;
   
   // Check engine light
   if (data.sl7_mil) {
@@ -89,7 +101,7 @@ function getPlainEnglishSummary(data: TelemetrySnapshot): { emoji: string; headl
 
   // Coolant temperature
   if (data.sl1_coolant > 105) {
-    issues.push(`Your engine is running hot (${data.sl1_coolant.toFixed(0)}°C). This could be a failing thermostat, low coolant, or a radiator fan not kicking on. Don't drive long distances until this is checked.`);
+    issues.push(`Your engine is running hot (${t(data.sl1_coolant)}). This could be a failing thermostat, low coolant, or a radiator fan not kicking on. Don't drive long distances until this is checked.`);
   } else if (data.sl1_coolant > 0 && data.sl1_coolant < 70 && data.sl4_runtime > 300) {
     issues.push(`Your engine hasn't reached normal operating temperature after ${Math.floor(data.sl4_runtime / 60)} minutes. Your thermostat is likely stuck open — your heater will blow cold air and you're wasting gas.`);
   }
@@ -138,7 +150,7 @@ function getPlainEnglishSummary(data: TelemetrySnapshot): { emoji: string; headl
       emoji: '✅',
       headline: 'Your vehicle is running great.',
       details: [
-        `Engine temp is normal (${data.sl1_coolant.toFixed(0)}°C), battery is strong (${data.sl3_battery.toFixed(1)}V), and no trouble codes are stored.`,
+        `Engine temp is normal (${t(data.sl1_coolant)}), battery is strong (${data.sl3_battery.toFixed(1)}V), and no trouble codes are stored.`,
         data.mpgInstant > 0 ? `You're getting ${data.mpgInstant.toFixed(1)} MPG right now. ${data.mpgRecovery > 0 ? `That's ${data.mpgRecovery.toFixed(1)}% better than baseline.` : ''}` : 'Engine is warming up.',
       ],
     };
@@ -153,7 +165,7 @@ function getPlainEnglishSummary(data: TelemetrySnapshot): { emoji: string; headl
 }
 
 // Generate failure alerts from live telemetry with affiliate part links
-function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal'): FailureAlert[] {
+function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal', useF: boolean = true): FailureAlert[] {
   const alerts: FailureAlert[] = [];
   
   // Dynamically resolve active DTCs using the Axiom Deterministic Knowledge Registry
@@ -214,9 +226,11 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal')
   }
 
   if (data.sl1_coolant > 105) {
+    const temp = useF ? `${toF(data.sl1_coolant).toFixed(0)}°F` : `${data.sl1_coolant.toFixed(0)}°C`;
+    const limit = useF ? '221°F' : '105°C';
     alerts.push({
       type: 'active', system: 'Cooling System',
-      interpretation: `Engine temperature is ${data.sl1_coolant.toFixed(0)}°C — above the safe limit of 105°C. Driving while overheating causes warped cylinder heads ($1,500+ repair). Pull over if the temp gauge hits the red zone.`,
+      interpretation: `Engine temperature is ${temp} — above the safe limit of ${limit}. Driving while overheating causes warped cylinder heads ($1,500+ repair). Pull over if the temp gauge hits the red zone.`,
       severity: 'High — risk of engine damage',
       action: 'Check coolant level, inspect thermostat and radiator fan',
       partName: 'Coolant Thermostat', partPriceLow: 15, partPriceHigh: 45,
@@ -225,9 +239,11 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal')
   }
 
   if (data.sl1_coolant > 0 && data.sl1_coolant < 70 && data.sl4_runtime > 300) {
+    const temp = useF ? `${toF(data.sl1_coolant).toFixed(0)}°F` : `${data.sl1_coolant.toFixed(0)}°C`;
+    const target = useF ? '194-212°F' : '90-100°C';
     alerts.push({
       type: 'imminent', system: 'Cooling System',
-      interpretation: `Your engine is running cold — it should be at 90-100°C after ${Math.floor(data.sl4_runtime / 60)} minutes, but it's only ${data.sl1_coolant.toFixed(0)}°C. Your thermostat is stuck open. This makes your heater blow cold air and wastes fuel.`,
+      interpretation: `Your engine is running cold — it should be at ${target} after ${Math.floor(data.sl4_runtime / 60)} minutes, but it's only ${temp}. Your thermostat is stuck open. This makes your heater blow cold air and wastes fuel.`,
       severity: 'Low — safe to drive, but burns more gas',
       timeline: '~1 month',
       action: 'Replace thermostat',
@@ -259,6 +275,7 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal')
 
 export default function DashboardScreen({ onReport, tier }: { onReport?: () => void; tier: Tier }) {
   const [data, setData] = useState<TelemetrySnapshot | null>(null);
+  const [useFahrenheit, setUseFahrenheit] = useState(true); // Default to °F for US users
   const pulseAnim = useSharedValue(1);
   const isPro = tier === 'pro';
 
@@ -300,8 +317,9 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     : data.governanceMode === 'Throughput Alert' ? '#f59e0b'
     : COLORS.cyan;
 
-  const alerts = getActiveAlerts(data);
-  const totalSignals = ALL_SIGNALS.reduce((sum, g) => sum + g.signals.length, 0);
+  const alerts = getActiveAlerts(data, 'Universal', useFahrenheit);
+  const signalGroups = getAllSignals(useFahrenheit);
+  const totalSignals = signalGroups.reduce((sum, g) => sum + g.signals.length, 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -329,9 +347,29 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
         {/* Personalized Greeting */}
         <Text style={styles.greeting}>{getGreeting()}</Text>
 
+        {/* °F/°C Toggle + Plain English Health Summary */}
+        <View style={styles.tempToggleRow}>
+          <TouchableOpacity
+            style={[styles.tempToggleBtn, useFahrenheit && styles.tempToggleActive]}
+            onPress={() => setUseFahrenheit(true)}
+            activeOpacity={0.7}
+          >
+            <Thermometer size={12} color={useFahrenheit ? COLORS.cyan : COLORS.textDim} />
+            <Text style={[styles.tempToggleText, useFahrenheit && styles.tempToggleTextActive]}>°F</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tempToggleBtn, !useFahrenheit && styles.tempToggleActive]}
+            onPress={() => setUseFahrenheit(false)}
+            activeOpacity={0.7}
+          >
+            <Thermometer size={12} color={!useFahrenheit ? COLORS.cyan : COLORS.textDim} />
+            <Text style={[styles.tempToggleText, !useFahrenheit && styles.tempToggleTextActive]}>°C</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Plain English Health Summary */}
         {(() => {
-          const summary = getPlainEnglishSummary(data);
+          const summary = getPlainEnglishSummary(data, useFahrenheit);
           return (
             <View style={styles.summaryPanel}>
               <Text style={styles.summaryHeadline}>{summary.emoji} {summary.headline}</Text>
@@ -409,7 +447,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
         </Text>
 
         <View style={styles.grid}>
-          {ALL_SIGNALS.map((group) => {
+          {signalGroups.map((group) => {
             const IconComp = group.icon;
             return (
               <View key={group.group} style={styles.card}>
@@ -478,6 +516,11 @@ const styles = StyleSheet.create({
   summaryPanel: { backgroundColor: 'rgba(6,182,212,0.04)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.12)', borderRadius: 14, padding: 16, marginBottom: 16 },
   summaryHeadline: { color: COLORS.textMain, fontSize: 16, fontWeight: '700', marginBottom: 10, lineHeight: 22 },
   summaryDetail: { color: COLORS.textMuted, fontSize: 13, lineHeight: 20, marginBottom: 8, paddingLeft: 4 },
+  tempToggleRow: { flexDirection: 'row', alignSelf: 'flex-end', gap: 4, marginBottom: 10 },
+  tempToggleBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.02)' },
+  tempToggleActive: { borderColor: 'rgba(6,182,212,0.3)', backgroundColor: 'rgba(6,182,212,0.08)' },
+  tempToggleText: { color: COLORS.textDim, fontSize: 12, fontWeight: '700' },
+  tempToggleTextActive: { color: COLORS.cyan },
   connectionBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)', gap: 8 },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.emerald },
   connectionText: { color: COLORS.emerald, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
