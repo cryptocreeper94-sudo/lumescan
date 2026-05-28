@@ -35,8 +35,8 @@ let connectionState: WiFiConnection = {
 let rawValues: Record<string, number> = {};
 let startTime = Date.now();
 
-// OBD-II PID definitions — same as Bluetooth, transport-agnostic
-const PIDS: { cmd: string; parse: (hex: string) => Record<string, number> }[] = [
+const PIDS: { cmd: string; parse: (hex: string) => Record<string, number>; optional?: boolean }[] = [
+  // ── Throughput Base (TB) ──
   { cmd: '010C', parse: (h) => ({ rpm: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 4 }) },
   { cmd: '010D', parse: (h) => ({ speed: parseInt(h.slice(0, 2), 16) }) },
   { cmd: '0110', parse: (h) => ({ maf: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 100 }) },
@@ -45,12 +45,23 @@ const PIDS: { cmd: string; parse: (hex: string) => Record<string, number> }[] = 
   { cmd: '0105', parse: (h) => ({ coolant: parseInt(h.slice(0, 2), 16) - 40 }) },
   { cmd: '010F', parse: (h) => ({ iat: parseInt(h.slice(0, 2), 16) - 40 }) },
   { cmd: '010B', parse: (h) => ({ map: parseInt(h.slice(0, 2), 16) }) },
+  { cmd: '0133', parse: (h) => ({ baro: parseInt(h.slice(0, 2), 16) }), optional: true },
+  // ── Process Rate (PR) ──
   { cmd: '010E', parse: (h) => ({ timing: parseInt(h.slice(0, 2), 16) / 2 - 64 }) },
   { cmd: '0106', parse: (h) => ({ stftB1: (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 }) },
   { cmd: '0107', parse: (h) => ({ ltftB1: (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 }) },
+  { cmd: '0108', parse: (h) => ({ stftB2: (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 }), optional: true },
+  { cmd: '0109', parse: (h) => ({ ltftB2: (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 }), optional: true },
+  { cmd: '0143', parse: (h) => ({ absLoad: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) * 100 / 255 }), optional: true },
+  // ── Flow State (FS) ──
   { cmd: '0114', parse: (h) => ({ o2B1S1: parseInt(h.slice(0, 2), 16) / 200 }) },
+  { cmd: '0115', parse: (h) => ({ o2B1S2: parseInt(h.slice(0, 2), 16) / 200 }), optional: true },
+  { cmd: '013C', parse: (h) => ({ catTempB1: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 10 - 40 }), optional: true },
+  // ── System Lifecycle (SL) ──
   { cmd: '0142', parse: (h) => ({ battery: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 1000 }) },
   { cmd: '0101', parse: (h) => ({ mil: !!(parseInt(h.slice(0, 2), 16) & 0x80), dtcCount: parseInt(h.slice(0, 2), 16) & 0x7F }) },
+  { cmd: '011F', parse: (h) => ({ runtimeSinceStart: parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16) }), optional: true },
+  { cmd: '0146', parse: (h) => ({ ambientTemp: parseInt(h.slice(0, 2), 16) - 40 }), optional: true },
 ];
 
 /**
@@ -249,6 +260,30 @@ export async function pollAllPIDs(): Promise<void> {
 export function buildSnapshot(): TelemetrySnapshot {
   const r = rawValues;
   const now = Date.now();
+  const runtimeSeconds = r.runtimeSinceStart || Math.floor((now - startTime) / 1000);
+
+  const afr = r.maf && r.engineLoad
+    ? 14.7 + (r.stftB1 || 0) * 0.05 + (r.ltftB1 || 0) * 0.02
+    : 14.7;
+  const upstreamO2 = r.o2B1S1 || 0.45;
+  const downstreamO2 = r.o2B1S2 ?? 0.72;
+  const catEff = r.o2B1S2 !== undefined
+    ? Math.min(99, Math.max(60, 100 - Math.abs(downstreamO2 - 0.72) * 80))
+    : (upstreamO2 > 0.3 && upstreamO2 < 0.7 ? 94 : 91);
+  const fuelTrimMagnitude = Math.abs(r.stftB1 || 0) + Math.abs(r.ltftB1 || 0);
+  const combEff = Math.min(99.5, Math.max(85, 98 - fuelTrimMagnitude * 0.3));
+  let degradation = 100;
+  if (r.mil) degradation -= 15;
+  if ((r.dtcCount || 0) > 0) degradation -= (r.dtcCount || 0) * 5;
+  if (fuelTrimMagnitude > 10) degradation -= 8;
+  if ((r.coolant || 90) > 105) degradation -= 10;
+  if ((r.battery || 14) < 12.5) degradation -= 10;
+  if (catEff < 90) degradation -= 8;
+  degradation = Math.min(100, Math.max(0, degradation));
+  const baselineMPG = computeMPG(r);
+  const mpgRecovery = baselineMPG > 0 && fuelTrimMagnitude < 8
+    ? Math.min(18, 5 + (98 - fuelTrimMagnitude) * 0.12)
+    : 0;
 
   return {
     timestamp: now,
@@ -260,30 +295,30 @@ export function buildSnapshot(): TelemetrySnapshot {
     tb6_rpm: r.rpm || 0,
     tb7_speed: r.speed || 0,
     tb8_volEff: r.maf && r.rpm ? Math.min(100, (r.maf / (r.rpm * 0.005)) * 100) : 85,
-    tb9_afr: 14.7 + (r.stftB1 || 0) * 0.05,
-    tb10_baro: 101.3,
+    tb9_afr: afr,
+    tb10_baro: r.baro || 101.3,
     pr1_timing: r.timing || 0,
     pr2_stftB1: r.stftB1 || 0,
     pr3_ltftB1: r.ltftB1 || 0,
-    pr4_stftB2: 0,
-    pr5_ltftB2: 0,
-    pr6_combEff: 95 + (Math.abs(r.stftB1 || 0) < 5 ? 3 : 0),
+    pr4_stftB2: r.stftB2 || 0,
+    pr5_ltftB2: r.ltftB2 || 0,
+    pr6_combEff: combEff,
     pr7_engLoad: r.engineLoad || 0,
-    pr8_absLoad: (r.engineLoad || 0) * 0.85,
-    fs1_o2UpB1: r.o2B1S1 || 0.45,
-    fs2_o2DnB1: 0.72,
-    fs5_catTempB1: 420,
-    fs7_catEff: 93,
+    pr8_absLoad: r.absLoad || (r.engineLoad || 0) * 0.85,
+    fs1_o2UpB1: upstreamO2,
+    fs2_o2DnB1: downstreamO2,
+    fs5_catTempB1: r.catTempB1 || 420,
+    fs7_catEff: catEff,
     fs10_driverScore: computeDriverScore(r),
     sl1_coolant: r.coolant || 0,
     sl3_battery: r.battery || 0,
-    sl4_runtime: Math.floor((now - startTime) / 1000),
+    sl4_runtime: runtimeSeconds,
     sl7_mil: !!r.mil,
     sl8_dtcCount: r.dtcCount || 0,
     activeDTCs: [],
-    sl11_degradation: 88,
-    mpgInstant: computeMPG(r),
-    mpgRecovery: 0,
+    sl11_degradation: degradation,
+    mpgInstant: baselineMPG,
+    mpgRecovery: mpgRecovery,
     governanceMode: computeMode(r),
   };
 }
