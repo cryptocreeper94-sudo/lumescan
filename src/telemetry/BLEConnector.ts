@@ -550,27 +550,15 @@ async function readPID(cmd: string): Promise<string> {
 }
 
 /**
- * Read active DTCs via Mode 03
+ * Decode DTC bytes — shared by Mode 03, 07, and 0A
  */
-export async function readDTCs(): Promise<string[]> {
-  const response = await sendBLECommand('03', 5000);
-  if (!response || response.includes('NO DATA')) return [];
-  
+function decodeDTCBytes(data: string): string[] {
   const dtcs: string[] = [];
-  const clean = response.replace(/[\s\r\n]/g, '');
-  
-  // Response format: "43XXYY..." — skip "43" header, then pairs of bytes = DTCs
-  // Find the "43" header
-  const idx = clean.indexOf('43');
-  if (idx < 0) return [];
-  
-  const data = clean.substring(idx + 2);
   for (let i = 0; i + 3 < data.length; i += 4) {
     const byte1 = parseInt(data.slice(i, i + 2), 16);
     const byte2 = parseInt(data.slice(i + 2, i + 4), 16);
     if (byte1 === 0 && byte2 === 0) continue; // Padding
     
-    // Decode DTC: first 2 bits = category, remaining 14 bits = code
     const category = ['P', 'C', 'B', 'U'][(byte1 >> 6) & 0x03];
     const digit2 = (byte1 >> 4) & 0x03;
     const digit3 = byte1 & 0x0F;
@@ -578,8 +566,478 @@ export async function readDTCs(): Promise<string[]> {
     const digit5 = byte2 & 0x0F;
     dtcs.push(`${category}${digit2}${digit3.toString(16)}${digit4.toString(16)}${digit5.toString(16)}`.toUpperCase());
   }
-  
   return dtcs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 02 — Freeze Frame Data
+// Snapshot of PID values at the moment the last DTC was stored.
+// Same PIDs as Mode 01, prefix "02" + PID + frame number (00).
+// ═══════════════════════════════════════════════════════════════
+
+export interface FreezeFrameData {
+  dtcTrigger: string;   // The DTC that triggered this freeze frame
+  rpm?: number;
+  speed?: number;
+  coolant?: number;
+  engineLoad?: number;
+  throttle?: number;
+  stftB1?: number;
+  ltftB1?: number;
+  map?: number;
+  timing?: number;
+  iat?: number;
+  maf?: number;
+}
+
+export async function readFreezeFrame(): Promise<FreezeFrameData | null> {
+  // First, read DTC that triggered the freeze frame (PID 02 in Mode 02)
+  const dtcResponse = await sendBLECommand('0202\r', 3000);
+  if (!dtcResponse || dtcResponse.includes('NO DATA')) return null;
+
+  const ff: FreezeFrameData = { dtcTrigger: '' };
+
+  // Parse the trigger DTC from Mode 02 PID 02
+  const dtcClean = dtcResponse.replace(/[\s\r\n]/g, '');
+  const dtcIdx = dtcClean.toUpperCase().indexOf('4202');
+  if (dtcIdx >= 0) {
+    const dtcHex = dtcClean.substring(dtcIdx + 4);
+    const decoded = decodeDTCBytes(dtcHex);
+    if (decoded.length > 0) ff.dtcTrigger = decoded[0];
+  }
+
+  // Read key PIDs from the freeze frame (frame 00)
+  const ffPids: { cmd: string; key: keyof FreezeFrameData; parse: (h: string) => number }[] = [
+    { cmd: '020C00', key: 'rpm', parse: h => (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 4 },
+    { cmd: '020D00', key: 'speed', parse: h => parseInt(h.slice(0, 2), 16) },
+    { cmd: '020500', key: 'coolant', parse: h => parseInt(h.slice(0, 2), 16) - 40 },
+    { cmd: '020400', key: 'engineLoad', parse: h => parseInt(h.slice(0, 2), 16) * 100 / 255 },
+    { cmd: '021100', key: 'throttle', parse: h => parseInt(h.slice(0, 2), 16) * 100 / 255 },
+    { cmd: '020600', key: 'stftB1', parse: h => (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 },
+    { cmd: '020700', key: 'ltftB1', parse: h => (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 },
+    { cmd: '020B00', key: 'map', parse: h => parseInt(h.slice(0, 2), 16) },
+    { cmd: '020E00', key: 'timing', parse: h => parseInt(h.slice(0, 2), 16) / 2 - 64 },
+    { cmd: '020F00', key: 'iat', parse: h => parseInt(h.slice(0, 2), 16) - 40 },
+    { cmd: '021000', key: 'maf', parse: h => (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 100 },
+  ];
+
+  for (const { cmd, key, parse } of ffPids) {
+    const response = await sendBLECommand(cmd + '\r', 2000);
+    if (!response || response.includes('NO DATA')) continue;
+    const clean = response.replace(/[\s\r\n]/g, '');
+    // Mode 02 response starts with "42" + PID
+    const pidHex = cmd.slice(2, 4).toUpperCase();
+    const respHeader = `42${pidHex}`;
+    const idx = clean.toUpperCase().indexOf(respHeader);
+    if (idx >= 0) {
+      const data = clean.substring(idx + respHeader.length);
+      // Skip frame byte (00) — it's 2 chars
+      const valueData = data.length > 2 ? data.substring(2) : data;
+      try {
+        (ff as any)[key] = parse(valueData);
+      } catch { /* skip */ }
+    }
+  }
+
+  return ff.dtcTrigger || ff.rpm !== undefined ? ff : null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 03 — Read Active (Confirmed) DTCs
+// ═══════════════════════════════════════════════════════════════
+
+export async function readDTCs(): Promise<string[]> {
+  const response = await sendBLECommand('03', 5000);
+  if (!response || response.includes('NO DATA')) return [];
+  
+  const clean = response.replace(/[\s\r\n]/g, '');
+  const idx = clean.indexOf('43');
+  if (idx < 0) return [];
+  
+  return decodeDTCBytes(clean.substring(idx + 2));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 04 — Clear DTCs and Reset MIL
+// WARNING: Clears all stored DTCs, freeze frame, and resets monitors.
+// Vehicle will need to complete a full drive cycle to pass emissions.
+// ═══════════════════════════════════════════════════════════════
+
+export async function clearDTCs(): Promise<{ success: boolean; message: string }> {
+  try {
+    const response = await sendBLECommand('04', 5000);
+    if (!response) {
+      return { success: false, message: 'No response from vehicle ECU' };
+    }
+    if (response.includes('44') || response.includes('OK')) {
+      console.log('[LumeScan] DTCs cleared successfully');
+      return { success: true, message: 'All trouble codes cleared. Check engine light will turn off. Drive cycle monitors have been reset — you will need to complete a full drive cycle before emissions testing.' };
+    }
+    if (response.includes('ERROR') || response.includes('UNABLE')) {
+      return { success: false, message: 'ECU rejected the clear command. The vehicle may require the engine to be running.' };
+    }
+    return { success: false, message: `Unexpected response: ${response.substring(0, 40)}` };
+  } catch (e: any) {
+    return { success: false, message: `Communication error: ${e.message || 'Unknown'}` };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 05 — O2 Sensor Monitoring Test Results
+// Returns rich/lean switch times, voltage thresholds, and sensor
+// response characteristics. Not supported on all CAN vehicles —
+// many post-2008 vehicles moved this data to Mode 06.
+// ═══════════════════════════════════════════════════════════════
+
+export interface O2TestResult {
+  testId: number;
+  testName: string;
+  sensorLocation: string;  // e.g., "Bank 1, Sensor 1"
+  value: number;
+  unit: string;
+  minLimit?: number;
+  maxLimit?: number;
+  passed?: boolean;
+}
+
+const O2_TEST_NAMES: Record<number, { name: string; unit: string; scale: number }> = {
+  0x01: { name: 'Rich-to-Lean Threshold Voltage', unit: 'V', scale: 0.005 },
+  0x02: { name: 'Lean-to-Rich Threshold Voltage', unit: 'V', scale: 0.005 },
+  0x03: { name: 'Low Voltage Switch Time', unit: 'ms', scale: 0.004 },
+  0x04: { name: 'High Voltage Switch Time', unit: 'ms', scale: 0.004 },
+  0x05: { name: 'Rich-to-Lean Switch Time', unit: 'ms', scale: 0.004 },
+  0x06: { name: 'Lean-to-Rich Switch Time', unit: 'ms', scale: 0.004 },
+  0x07: { name: 'Minimum Sensor Voltage', unit: 'V', scale: 0.005 },
+  0x08: { name: 'Maximum Sensor Voltage', unit: 'V', scale: 0.005 },
+  0x09: { name: 'Transition Time', unit: 'ms', scale: 0.004 },
+};
+
+const O2_SENSOR_LOCATIONS: Record<number, string> = {
+  0x01: 'Bank 1, Sensor 1',
+  0x02: 'Bank 1, Sensor 2',
+  0x03: 'Bank 1, Sensor 3',
+  0x04: 'Bank 1, Sensor 4',
+  0x05: 'Bank 2, Sensor 1',
+  0x06: 'Bank 2, Sensor 2',
+  0x07: 'Bank 2, Sensor 3',
+  0x08: 'Bank 2, Sensor 4',
+};
+
+export async function readO2SensorTests(): Promise<O2TestResult[]> {
+  const results: O2TestResult[] = [];
+
+  // Query each test ID (01-09) for each sensor (01-08)
+  // Only query common combinations to avoid timeouts
+  for (let testId = 0x01; testId <= 0x09; testId++) {
+    for (let sensor = 0x01; sensor <= 0x04; sensor++) {
+      const cmd = `05${testId.toString(16).padStart(2, '0')}${sensor.toString(16).padStart(2, '0')}`;
+      const response = await sendBLECommand(cmd + '\r', 2000);
+      if (!response || response.includes('NO DATA') || response.includes('ERROR')) continue;
+
+      const clean = response.replace(/[\s\r\n]/g, '');
+      const header = `45${testId.toString(16).padStart(2, '0').toUpperCase()}`;
+      const idx = clean.toUpperCase().indexOf(header);
+      if (idx < 0) continue;
+
+      const data = clean.substring(idx + 4);
+      if (data.length < 4) continue;
+
+      const testDef = O2_TEST_NAMES[testId];
+      if (!testDef) continue;
+
+      // Parse the value (2 bytes)
+      const rawValue = parseInt(data.slice(0, 4), 16);
+      const value = rawValue * testDef.scale;
+
+      results.push({
+        testId,
+        testName: testDef.name,
+        sensorLocation: O2_SENSOR_LOCATIONS[sensor] || `Sensor ${sensor}`,
+        value,
+        unit: testDef.unit,
+      });
+    }
+  }
+
+  console.log(`[LumeScan] Mode 05: ${results.length} O2 sensor test results`);
+  return results;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 06 — On-Board Monitoring Test Results
+// The dealer-level mode. Returns actual test values vs pass/fail
+// thresholds for every emissions monitor: catalyst, misfire, EVAP,
+// O2 sensors, EGR, etc. This is what makes predictive diagnostics
+// possible — you can see a component at 87% of its failure threshold.
+// ═══════════════════════════════════════════════════════════════
+
+export interface Mode06TestResult {
+  mid: number;          // Monitor ID (Test Group)
+  midName: string;      // e.g., "Catalyst Monitor Bank 1"
+  tid: number;          // Test ID within the monitor
+  tidName: string;      // e.g., "Catalyst Efficiency"
+  value: number;        // Actual measured value
+  minLimit: number;     // Minimum acceptable value
+  maxLimit: number;     // Maximum acceptable value
+  unit: string;
+  passed: boolean;      // Did it pass?
+  percentToFail: number; // 0-100%, how close to failure threshold
+}
+
+// SAE J1979 Monitor IDs (MIDs) — covers the major test groups
+const MID_NAMES: Record<number, string> = {
+  0x01: 'Catalyst Monitor Bank 1',
+  0x02: 'Catalyst Monitor Bank 2',
+  0x03: 'Catalyst Heater Monitor',
+  0x05: 'Evaporative System Monitor',
+  0x06: 'Oxygen Sensor Monitor Bank 1',
+  0x07: 'Oxygen Sensor Monitor Bank 2',
+  0x08: 'Oxygen Sensor Heater Monitor',
+  0x09: 'EGR/VVT System Monitor',
+  0x0A: 'Secondary Air System Monitor',
+  0x0B: 'A/C Refrigerant Monitor',
+  0x21: 'Catalyst Monitor (NMHC)',
+  0x22: 'NOx/SCR Catalyst Monitor',
+  0x31: 'Misfire Monitor Cylinder 1',
+  0x32: 'Misfire Monitor Cylinder 2',
+  0x33: 'Misfire Monitor Cylinder 3',
+  0x34: 'Misfire Monitor Cylinder 4',
+  0x35: 'Misfire Monitor Cylinder 5',
+  0x36: 'Misfire Monitor Cylinder 6',
+  0x37: 'Misfire Monitor Cylinder 7',
+  0x38: 'Misfire Monitor Cylinder 8',
+  0x39: 'Misfire Monitor General',
+  0x41: 'A/C System Monitor',
+  0xA0: 'Manufacturer Specific',
+};
+
+// Common Test IDs within monitors
+const TID_NAMES: Record<number, { name: string; unit: string }> = {
+  0x01: { name: 'Rich-to-Lean Response', unit: 'ms' },
+  0x02: { name: 'Lean-to-Rich Response', unit: 'ms' },
+  0x03: { name: 'Low Sensor Voltage', unit: 'V' },
+  0x04: { name: 'High Sensor Voltage', unit: 'V' },
+  0x05: { name: 'Voltage Amplitude', unit: 'V' },
+  0x06: { name: 'Sensor Period', unit: 'ms' },
+  0x07: { name: 'Minimum Test Value', unit: '' },
+  0x08: { name: 'Maximum Test Value', unit: '' },
+  0x09: { name: 'Average Test Value', unit: '' },
+  0x0A: { name: 'Test Count', unit: 'count' },
+  0x80: { name: 'Efficiency Ratio', unit: '%' },
+  0x81: { name: 'Misfire Count', unit: 'count' },
+  0x82: { name: 'EVAP Leak Pressure', unit: 'Pa' },
+  0x83: { name: 'Catalyst Light-off Time', unit: 's' },
+  0x84: { name: 'EGR Flow Rate', unit: 'g/s' },
+};
+
+/**
+ * Read Mode 06 test results for a specific Monitor ID (MID).
+ * CAN protocol format: 06 XX where XX = MID
+ * Response: 46 MID TID value min max (each 2 bytes)
+ */
+async function readMode06MID(mid: number): Promise<Mode06TestResult[]> {
+  const results: Mode06TestResult[] = [];
+  const cmd = `06${mid.toString(16).padStart(2, '0')}`;
+  const response = await sendBLECommand(cmd + '\r', 3000);
+  if (!response || response.includes('NO DATA') || response.includes('ERROR')) return results;
+
+  const clean = response.replace(/[\s\r\n]/g, '');
+  const header = '46';
+  let pos = 0;
+
+  // CAN responses may contain multiple test results
+  while (pos < clean.length) {
+    const idx = clean.toUpperCase().indexOf(header, pos);
+    if (idx < 0 || idx + 14 > clean.length) break;
+
+    // Format: 46 MID TID ValueHi ValueLo MinHi MinLo MaxHi MaxLo
+    // Each field is 1 byte (2 hex chars) = 14 chars total
+    const midByte = parseInt(clean.slice(idx + 2, idx + 4), 16);
+    const tid = parseInt(clean.slice(idx + 4, idx + 6), 16);
+    const value = parseInt(clean.slice(idx + 6, idx + 10), 16);
+    const minLimit = parseInt(clean.slice(idx + 10, idx + 14), 16);
+    // Some responses have max limit, some don't
+    let maxLimit = 0xFFFF;
+    if (idx + 18 <= clean.length) {
+      maxLimit = parseInt(clean.slice(idx + 14, idx + 18), 16);
+      pos = idx + 18;
+    } else {
+      pos = idx + 14;
+    }
+
+    if (isNaN(midByte) || isNaN(tid) || isNaN(value)) { pos = idx + 2; continue; }
+
+    const midName = MID_NAMES[midByte] || `Monitor 0x${midByte.toString(16).toUpperCase()}`;
+    const tidDef = TID_NAMES[tid] || { name: `Test 0x${tid.toString(16).toUpperCase()}`, unit: '' };
+    const passed = value >= minLimit && value <= maxLimit;
+
+    // Calculate how close to failure (0% = perfect, 100% = at threshold)
+    let percentToFail = 0;
+    if (maxLimit > minLimit) {
+      const range = maxLimit - minLimit;
+      const distFromCenter = Math.abs(value - (minLimit + range / 2));
+      percentToFail = Math.min(100, (distFromCenter / (range / 2)) * 100);
+    }
+
+    results.push({
+      mid: midByte, midName,
+      tid, tidName: tidDef.name,
+      value, minLimit, maxLimit,
+      unit: tidDef.unit,
+      passed,
+      percentToFail: Math.round(percentToFail),
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Read all available Mode 06 test results.
+ * Queries the most common MIDs. Skip quickly on NO DATA.
+ */
+export async function readAllMode06(): Promise<Mode06TestResult[]> {
+  const allResults: Mode06TestResult[] = [];
+
+  // Query the most important MIDs first
+  const midsToQuery = [
+    0x01, 0x02,        // Catalyst
+    0x05,              // EVAP
+    0x06, 0x07,        // O2 Sensors
+    0x08,              // O2 Heaters
+    0x09,              // EGR/VVT
+    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, // Misfires per cylinder
+    0x39,              // Misfire general
+    0x21, 0x22,        // NMHC / NOx catalyst
+  ];
+
+  for (const mid of midsToQuery) {
+    const results = await readMode06MID(mid);
+    allResults.push(...results);
+  }
+
+  console.log(`[LumeScan] Mode 06: ${allResults.length} on-board monitoring test results`);
+  return allResults;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 07 — Read Pending (Drive-Cycle Incomplete) DTCs
+// These are codes that have been detected but haven't confirmed
+// across enough drive cycles to set the MIL. The "early warning"
+// system — you can see a P0420 forming before the light comes on.
+// ═══════════════════════════════════════════════════════════════
+
+export async function readPendingDTCs(): Promise<string[]> {
+  const response = await sendBLECommand('07', 5000);
+  if (!response || response.includes('NO DATA')) return [];
+  
+  const clean = response.replace(/[\s\r\n]/g, '');
+  const idx = clean.indexOf('47');
+  if (idx < 0) return [];
+  
+  return decodeDTCBytes(clean.substring(idx + 2));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 09 — Vehicle Information
+// VIN, Calibration ID, CVN, ECU name, and more.
+// ═══════════════════════════════════════════════════════════════
+
+export interface VehicleInfo {
+  vin?: string;             // 17-char VIN
+  calibrationId?: string;   // ECU calibration ID
+  cvn?: string;             // Calibration Verification Number
+  ecuName?: string;          // ECU name/label
+  inUseTracking?: string;   // In-use performance tracking
+}
+
+/**
+ * Decode ASCII from hex pairs.
+ */
+function hexToAscii(hex: string): string {
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2) {
+    const charCode = parseInt(hex.slice(i, i + 2), 16);
+    if (charCode > 31 && charCode < 127) str += String.fromCharCode(charCode);
+  }
+  return str.trim();
+}
+
+export async function readVehicleInfo(): Promise<VehicleInfo> {
+  const info: VehicleInfo = {};
+
+  // PID 02 — VIN (17 characters)
+  const vinResp = await sendBLECommand('0902\r', 5000);
+  if (vinResp && !vinResp.includes('NO DATA')) {
+    const clean = vinResp.replace(/[\s\r\n]/g, '');
+    // Response: 4902 01 XXXXXXXXXX... (multi-line possible)
+    // Find "4902" header, skip count byte, rest is VIN in hex
+    const idx = clean.toUpperCase().indexOf('4902');
+    if (idx >= 0) {
+      // Skip header (4902) + count byte (2 chars) = 6 chars
+      const vinHex = clean.substring(idx + 6);
+      const vin = hexToAscii(vinHex);
+      if (vin.length >= 17) info.vin = vin.substring(0, 17);
+      else if (vin.length > 0) info.vin = vin;
+    }
+  }
+
+  // PID 04 — Calibration ID
+  const calResp = await sendBLECommand('0904\r', 3000);
+  if (calResp && !calResp.includes('NO DATA')) {
+    const clean = calResp.replace(/[\s\r\n]/g, '');
+    const idx = clean.toUpperCase().indexOf('4904');
+    if (idx >= 0) {
+      const calHex = clean.substring(idx + 6);
+      info.calibrationId = hexToAscii(calHex) || undefined;
+    }
+  }
+
+  // PID 06 — CVN (Calibration Verification Number)
+  const cvnResp = await sendBLECommand('0906\r', 3000);
+  if (cvnResp && !cvnResp.includes('NO DATA')) {
+    const clean = cvnResp.replace(/[\s\r\n]/g, '');
+    const idx = clean.toUpperCase().indexOf('4906');
+    if (idx >= 0) {
+      info.cvn = clean.substring(idx + 6, idx + 14).toUpperCase(); // 4-byte hex
+    }
+  }
+
+  // PID 0A — ECU Name
+  const ecuResp = await sendBLECommand('090A\r', 3000);
+  if (ecuResp && !ecuResp.includes('NO DATA')) {
+    const clean = ecuResp.replace(/[\s\r\n]/g, '');
+    const idx = clean.toUpperCase().indexOf('490A');
+    if (idx >= 0) {
+      const ecuHex = clean.substring(idx + 6);
+      info.ecuName = hexToAscii(ecuHex) || undefined;
+    }
+  }
+
+  if (info.vin) {
+    console.log(`[LumeScan] Mode 09: VIN = ${info.vin}`);
+  }
+
+  return info;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mode 0A — Permanent DTCs
+// These CANNOT be cleared by Mode 04 or by disconnecting the
+// battery. They are only cleared by the ECU itself after the
+// vehicle completes enough drive cycles proving the fault is gone.
+// If a vehicle has permanent DTCs, it WILL fail emissions testing.
+// ═══════════════════════════════════════════════════════════════
+
+export async function readPermanentDTCs(): Promise<string[]> {
+  const response = await sendBLECommand('0A', 5000);
+  if (!response || response.includes('NO DATA')) return [];
+  
+  const clean = response.replace(/[\s\r\n]/g, '');
+  const idx = clean.indexOf('4A');
+  if (idx < 0) return [];
+  
+  return decodeDTCBytes(clean.substring(idx + 2));
 }
 
 /**

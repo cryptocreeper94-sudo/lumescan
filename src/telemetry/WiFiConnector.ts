@@ -385,3 +385,297 @@ export function enterDemoMode(onStatusChange: (status: WiFiConnection) => void):
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// ═══════════════════════════════════════════════════════════════
+// WiFi OBD-II Modes 02-0A
+// Same protocol as BLE — just different transport (elmSocket.send)
+// ═══════════════════════════════════════════════════════════════
+
+// Re-export types from BLE connector for shared interfaces
+import type { FreezeFrameData, O2TestResult, Mode06TestResult, VehicleInfo } from './BLEConnector';
+export type { FreezeFrameData, O2TestResult, Mode06TestResult, VehicleInfo };
+
+/**
+ * Generic WiFi command sender with response parsing
+ */
+async function sendWiFiOBD(cmd: string, timeoutMs: number = 2000): Promise<string> {
+  const response = await elmSocket.send(cmd, timeoutMs);
+  if (!response || response.includes('NO DATA') || response.includes('ERROR') || response.includes('UNABLE')) return '';
+  return response.replace(/[\s\r\n]/g, '');
+}
+
+/**
+ * Decode DTC bytes — shared by Mode 03, 07, and 0A
+ */
+function decodeDTCBytes(data: string): string[] {
+  const dtcs: string[] = [];
+  for (let i = 0; i + 3 < data.length; i += 4) {
+    const byte1 = parseInt(data.slice(i, i + 2), 16);
+    const byte2 = parseInt(data.slice(i + 2, i + 4), 16);
+    if (byte1 === 0 && byte2 === 0) continue;
+    const category = ['P', 'C', 'B', 'U'][(byte1 >> 6) & 0x03];
+    const digit2 = (byte1 >> 4) & 0x03;
+    const digit3 = byte1 & 0x0F;
+    const digit4 = (byte2 >> 4) & 0x0F;
+    const digit5 = byte2 & 0x0F;
+    dtcs.push(`${category}${digit2}${digit3.toString(16)}${digit4.toString(16)}${digit5.toString(16)}`.toUpperCase());
+  }
+  return dtcs;
+}
+
+function hexToAscii(hex: string): string {
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2) {
+    const charCode = parseInt(hex.slice(i, i + 2), 16);
+    if (charCode > 31 && charCode < 127) str += String.fromCharCode(charCode);
+  }
+  return str.trim();
+}
+
+// ── Mode 02: Freeze Frame ──
+export async function readFreezeFrameWiFi(): Promise<FreezeFrameData | null> {
+  const dtcResp = await sendWiFiOBD('0202', 3000);
+  if (!dtcResp) return null;
+
+  const ff: FreezeFrameData = { dtcTrigger: '' };
+  const dtcIdx = dtcResp.toUpperCase().indexOf('4202');
+  if (dtcIdx >= 0) {
+    const decoded = decodeDTCBytes(dtcResp.substring(dtcIdx + 4));
+    if (decoded.length > 0) ff.dtcTrigger = decoded[0];
+  }
+
+  const ffPids: { cmd: string; key: keyof FreezeFrameData; parse: (h: string) => number }[] = [
+    { cmd: '020C00', key: 'rpm', parse: h => (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 4 },
+    { cmd: '020D00', key: 'speed', parse: h => parseInt(h.slice(0, 2), 16) },
+    { cmd: '020500', key: 'coolant', parse: h => parseInt(h.slice(0, 2), 16) - 40 },
+    { cmd: '020400', key: 'engineLoad', parse: h => parseInt(h.slice(0, 2), 16) * 100 / 255 },
+    { cmd: '021100', key: 'throttle', parse: h => parseInt(h.slice(0, 2), 16) * 100 / 255 },
+    { cmd: '020600', key: 'stftB1', parse: h => (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 },
+    { cmd: '020700', key: 'ltftB1', parse: h => (parseInt(h.slice(0, 2), 16) - 128) * 100 / 128 },
+    { cmd: '020B00', key: 'map', parse: h => parseInt(h.slice(0, 2), 16) },
+    { cmd: '020E00', key: 'timing', parse: h => parseInt(h.slice(0, 2), 16) / 2 - 64 },
+    { cmd: '020F00', key: 'iat', parse: h => parseInt(h.slice(0, 2), 16) - 40 },
+    { cmd: '021000', key: 'maf', parse: h => (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 100 },
+  ];
+
+  for (const { cmd, key, parse } of ffPids) {
+    const resp = await sendWiFiOBD(cmd, 2000);
+    if (!resp) continue;
+    const pidHex = cmd.slice(2, 4).toUpperCase();
+    const header = `42${pidHex}`;
+    const idx = resp.toUpperCase().indexOf(header);
+    if (idx >= 0) {
+      const data = resp.substring(idx + header.length);
+      const valueData = data.length > 2 ? data.substring(2) : data;
+      try { (ff as any)[key] = parse(valueData); } catch { /* skip */ }
+    }
+  }
+  return ff.dtcTrigger || ff.rpm !== undefined ? ff : null;
+}
+
+// ── Mode 03: Active DTCs ──
+export async function readDTCsWiFi(): Promise<string[]> {
+  const resp = await sendWiFiOBD('03', 5000);
+  if (!resp) return [];
+  const idx = resp.indexOf('43');
+  return idx >= 0 ? decodeDTCBytes(resp.substring(idx + 2)) : [];
+}
+
+// ── Mode 04: Clear DTCs ──
+export async function clearDTCsWiFi(): Promise<{ success: boolean; message: string }> {
+  try {
+    const resp = await sendWiFiOBD('04', 5000);
+    if (!resp) return { success: false, message: 'No response from vehicle ECU' };
+    if (resp.includes('44') || resp.toUpperCase().includes('OK')) {
+      return { success: true, message: 'All trouble codes cleared. Check engine light will turn off. Drive cycle monitors have been reset.' };
+    }
+    return { success: false, message: `ECU rejected the clear command.` };
+  } catch (e: any) {
+    return { success: false, message: `Communication error: ${e.message || 'Unknown'}` };
+  }
+}
+
+// ── Mode 05: O2 Sensor Monitoring ──
+const O2_TEST_NAMES: Record<number, { name: string; unit: string; scale: number }> = {
+  0x01: { name: 'Rich-to-Lean Threshold Voltage', unit: 'V', scale: 0.005 },
+  0x02: { name: 'Lean-to-Rich Threshold Voltage', unit: 'V', scale: 0.005 },
+  0x03: { name: 'Low Voltage Switch Time', unit: 'ms', scale: 0.004 },
+  0x04: { name: 'High Voltage Switch Time', unit: 'ms', scale: 0.004 },
+  0x05: { name: 'Rich-to-Lean Switch Time', unit: 'ms', scale: 0.004 },
+  0x06: { name: 'Lean-to-Rich Switch Time', unit: 'ms', scale: 0.004 },
+  0x07: { name: 'Minimum Sensor Voltage', unit: 'V', scale: 0.005 },
+  0x08: { name: 'Maximum Sensor Voltage', unit: 'V', scale: 0.005 },
+  0x09: { name: 'Transition Time', unit: 'ms', scale: 0.004 },
+};
+
+const O2_SENSOR_LOCATIONS: Record<number, string> = {
+  0x01: 'Bank 1, Sensor 1', 0x02: 'Bank 1, Sensor 2',
+  0x03: 'Bank 1, Sensor 3', 0x04: 'Bank 1, Sensor 4',
+  0x05: 'Bank 2, Sensor 1', 0x06: 'Bank 2, Sensor 2',
+  0x07: 'Bank 2, Sensor 3', 0x08: 'Bank 2, Sensor 4',
+};
+
+export async function readO2SensorTestsWiFi(): Promise<O2TestResult[]> {
+  const results: O2TestResult[] = [];
+  for (let testId = 0x01; testId <= 0x09; testId++) {
+    for (let sensor = 0x01; sensor <= 0x04; sensor++) {
+      const cmd = `05${testId.toString(16).padStart(2, '0')}${sensor.toString(16).padStart(2, '0')}`;
+      const resp = await sendWiFiOBD(cmd, 2000);
+      if (!resp) continue;
+      const header = `45${testId.toString(16).padStart(2, '0').toUpperCase()}`;
+      const idx = resp.toUpperCase().indexOf(header);
+      if (idx < 0) continue;
+      const data = resp.substring(idx + 4);
+      if (data.length < 4) continue;
+      const testDef = O2_TEST_NAMES[testId];
+      if (!testDef) continue;
+      const rawValue = parseInt(data.slice(0, 4), 16);
+      results.push({
+        testId, testName: testDef.name,
+        sensorLocation: O2_SENSOR_LOCATIONS[sensor] || `Sensor ${sensor}`,
+        value: rawValue * testDef.scale, unit: testDef.unit,
+      });
+    }
+  }
+  console.log(`[LumeScan WiFi] Mode 05: ${results.length} O2 sensor test results`);
+  return results;
+}
+
+// ── Mode 06: On-Board Monitoring Test Results ──
+const MID_NAMES: Record<number, string> = {
+  0x01: 'Catalyst Monitor Bank 1', 0x02: 'Catalyst Monitor Bank 2',
+  0x03: 'Catalyst Heater Monitor', 0x05: 'Evaporative System Monitor',
+  0x06: 'Oxygen Sensor Monitor Bank 1', 0x07: 'Oxygen Sensor Monitor Bank 2',
+  0x08: 'Oxygen Sensor Heater Monitor', 0x09: 'EGR/VVT System Monitor',
+  0x0A: 'Secondary Air System Monitor', 0x0B: 'A/C Refrigerant Monitor',
+  0x21: 'Catalyst Monitor (NMHC)', 0x22: 'NOx/SCR Catalyst Monitor',
+  0x31: 'Misfire Monitor Cyl 1', 0x32: 'Misfire Monitor Cyl 2',
+  0x33: 'Misfire Monitor Cyl 3', 0x34: 'Misfire Monitor Cyl 4',
+  0x35: 'Misfire Monitor Cyl 5', 0x36: 'Misfire Monitor Cyl 6',
+  0x37: 'Misfire Monitor Cyl 7', 0x38: 'Misfire Monitor Cyl 8',
+  0x39: 'Misfire Monitor General', 0x41: 'A/C System Monitor',
+};
+
+const TID_NAMES: Record<number, { name: string; unit: string }> = {
+  0x01: { name: 'Rich-to-Lean Response', unit: 'ms' },
+  0x02: { name: 'Lean-to-Rich Response', unit: 'ms' },
+  0x03: { name: 'Low Sensor Voltage', unit: 'V' },
+  0x04: { name: 'High Sensor Voltage', unit: 'V' },
+  0x05: { name: 'Voltage Amplitude', unit: 'V' },
+  0x06: { name: 'Sensor Period', unit: 'ms' },
+  0x80: { name: 'Efficiency Ratio', unit: '%' },
+  0x81: { name: 'Misfire Count', unit: 'count' },
+  0x82: { name: 'EVAP Leak Pressure', unit: 'Pa' },
+  0x83: { name: 'Catalyst Light-off Time', unit: 's' },
+  0x84: { name: 'EGR Flow Rate', unit: 'g/s' },
+};
+
+async function readMode06MIDWiFi(mid: number): Promise<Mode06TestResult[]> {
+  const results: Mode06TestResult[] = [];
+  const cmd = `06${mid.toString(16).padStart(2, '0')}`;
+  const resp = await sendWiFiOBD(cmd, 3000);
+  if (!resp) return results;
+
+  let pos = 0;
+  while (pos < resp.length) {
+    const idx = resp.toUpperCase().indexOf('46', pos);
+    if (idx < 0 || idx + 14 > resp.length) break;
+
+    const midByte = parseInt(resp.slice(idx + 2, idx + 4), 16);
+    const tid = parseInt(resp.slice(idx + 4, idx + 6), 16);
+    const value = parseInt(resp.slice(idx + 6, idx + 10), 16);
+    const minLimit = parseInt(resp.slice(idx + 10, idx + 14), 16);
+    let maxLimit = 0xFFFF;
+    if (idx + 18 <= resp.length) {
+      maxLimit = parseInt(resp.slice(idx + 14, idx + 18), 16);
+      pos = idx + 18;
+    } else {
+      pos = idx + 14;
+    }
+    if (isNaN(midByte) || isNaN(tid) || isNaN(value)) { pos = idx + 2; continue; }
+
+    const midName = MID_NAMES[midByte] || `Monitor 0x${midByte.toString(16).toUpperCase()}`;
+    const tidDef = TID_NAMES[tid] || { name: `Test 0x${tid.toString(16).toUpperCase()}`, unit: '' };
+    const passed = value >= minLimit && value <= maxLimit;
+
+    let percentToFail = 0;
+    if (maxLimit > minLimit) {
+      const range = maxLimit - minLimit;
+      percentToFail = Math.min(100, (Math.abs(value - (minLimit + range / 2)) / (range / 2)) * 100);
+    }
+
+    results.push({
+      mid: midByte, midName, tid, tidName: tidDef.name,
+      value, minLimit, maxLimit, unit: tidDef.unit,
+      passed, percentToFail: Math.round(percentToFail),
+    });
+  }
+  return results;
+}
+
+export async function readAllMode06WiFi(): Promise<Mode06TestResult[]> {
+  const allResults: Mode06TestResult[] = [];
+  const mids = [0x01, 0x02, 0x05, 0x06, 0x07, 0x08, 0x09,
+    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x21, 0x22];
+  for (const mid of mids) {
+    allResults.push(...await readMode06MIDWiFi(mid));
+  }
+  console.log(`[LumeScan WiFi] Mode 06: ${allResults.length} on-board monitoring test results`);
+  return allResults;
+}
+
+// ── Mode 07: Pending DTCs ──
+export async function readPendingDTCsWiFi(): Promise<string[]> {
+  const resp = await sendWiFiOBD('07', 5000);
+  if (!resp) return [];
+  const idx = resp.indexOf('47');
+  return idx >= 0 ? decodeDTCBytes(resp.substring(idx + 2)) : [];
+}
+
+// ── Mode 09: Vehicle Information ──
+export async function readVehicleInfoWiFi(): Promise<VehicleInfo> {
+  const info: VehicleInfo = {};
+
+  // VIN
+  const vinResp = await sendWiFiOBD('0902', 5000);
+  if (vinResp) {
+    const idx = vinResp.toUpperCase().indexOf('4902');
+    if (idx >= 0) {
+      const vin = hexToAscii(vinResp.substring(idx + 6));
+      if (vin.length >= 17) info.vin = vin.substring(0, 17);
+      else if (vin.length > 0) info.vin = vin;
+    }
+  }
+
+  // Calibration ID
+  const calResp = await sendWiFiOBD('0904', 3000);
+  if (calResp) {
+    const idx = calResp.toUpperCase().indexOf('4904');
+    if (idx >= 0) info.calibrationId = hexToAscii(calResp.substring(idx + 6)) || undefined;
+  }
+
+  // CVN
+  const cvnResp = await sendWiFiOBD('0906', 3000);
+  if (cvnResp) {
+    const idx = cvnResp.toUpperCase().indexOf('4906');
+    if (idx >= 0) info.cvn = cvnResp.substring(idx + 6, idx + 14).toUpperCase();
+  }
+
+  // ECU Name
+  const ecuResp = await sendWiFiOBD('090A', 3000);
+  if (ecuResp) {
+    const idx = ecuResp.toUpperCase().indexOf('490A');
+    if (idx >= 0) info.ecuName = hexToAscii(ecuResp.substring(idx + 6)) || undefined;
+  }
+
+  if (info.vin) console.log(`[LumeScan WiFi] Mode 09: VIN = ${info.vin}`);
+  return info;
+}
+
+// ── Mode 0A: Permanent DTCs ──
+export async function readPermanentDTCsWiFi(): Promise<string[]> {
+  const resp = await sendWiFiOBD('0A', 5000);
+  if (!resp) return [];
+  const idx = resp.indexOf('4A');
+  return idx >= 0 ? decodeDTCBytes(resp.substring(idx + 2)) : [];
+}
