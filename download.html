@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Download Lume Scan | Professional OBD-II Engine</title>
+  <meta name="description" content="Download Lume Scan — the deterministic OBD-II diagnostic engine. Direct APK download for Android with native BLE and WiFi OBD-II connectivity.">
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -173,7 +174,7 @@
   document.querySelectorAll('.carousel-card,.equal-card,.step,.sig-card,.faq-item,.eco-card,.stat').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.6s ease, transform 0.6s ease';obs.observe(el)});
 
   // Smooth nav scroll
-  document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'})})});
+  document.querySelectorAll('.nav-links a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const target=document.querySelector(a.getAttribute('href'));if(target)target.scrollIntoView({behavior:'smooth'});else{const href=a.getAttribute('href');if(href&&href.startsWith('/'))window.location.href=href;}})});
 
   // ── Carousel engine ──
   function initCarousel(id) {
@@ -465,9 +466,4 @@
       })();
     </script>
   </body>
-</html>
-
-
-
-</body>
 </html>

@@ -5,6 +5,7 @@ import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
 import { startWiFiTelemetryLoop, getWiFiStatus } from '../telemetry/WiFiConnector';
+import { startBLENativeTelemetryLoop, getBLENativeStatus } from '../telemetry/BLEConnector';
 import { auth } from '../config/firebase';
 import type { Tier } from '../config/entitlement';
 import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
@@ -145,7 +146,11 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
       ),
       -1, true
     );
-    const stop = startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 150);
+    const bleConn = getBLENativeStatus();
+    const useBLE = bleConn.status === 'connected';
+    const stop = useBLE
+      ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 150)
+      : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 150);
     return () => stop();
   }, []);
 
@@ -176,7 +181,12 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
           <View style={styles.connectionBadge}>
             <Animated.View style={[styles.statusDot, animatedStyle]} />
             <Text style={styles.connectionText}>
-              {getWiFiStatus().isSimulated ? 'DEMO MODE' : 'WIFI CONNECTED'}
+              {getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated
+                ? 'DEMO MODE'
+                : getBLENativeStatus().status === 'connected'
+                  ? `BLE: ${getBLENativeStatus().deviceName || 'CONNECTED'}`
+                  : 'WIFI CONNECTED'
+              }
             </Text>
           </View>
         </View>
