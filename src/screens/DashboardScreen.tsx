@@ -75,8 +75,85 @@ const ALL_SIGNALS: { group: string; icon: any; iconColor: string; signals: { key
 
 import DTCRegistry from '../data/lumescan_dtc';
 
-// Generate simulated failure alerts from telemetry
-function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
+/**
+ * Build a plain English health summary from telemetry.
+ * This is what non-mechanic users see first — no jargon.
+ */
+function getPlainEnglishSummary(data: TelemetrySnapshot): { emoji: string; headline: string; details: string[] } {
+  const issues: string[] = [];
+  
+  // Check engine light
+  if (data.sl7_mil) {
+    issues.push(`Your check engine light is ON with ${data.sl8_dtcCount} trouble code${data.sl8_dtcCount !== 1 ? 's' : ''} stored. Scroll down for details on each code and what part to order.`);
+  }
+
+  // Coolant temperature
+  if (data.sl1_coolant > 105) {
+    issues.push(`Your engine is running hot (${data.sl1_coolant.toFixed(0)}°C). This could be a failing thermostat, low coolant, or a radiator fan not kicking on. Don't drive long distances until this is checked.`);
+  } else if (data.sl1_coolant > 0 && data.sl1_coolant < 70 && data.sl4_runtime > 300) {
+    issues.push(`Your engine hasn't reached normal operating temperature after ${Math.floor(data.sl4_runtime / 60)} minutes. Your thermostat is likely stuck open — your heater will blow cold air and you're wasting gas.`);
+  }
+
+  // Battery voltage
+  if (data.sl3_battery > 0 && data.sl3_battery < 12.4) {
+    issues.push(`Your battery voltage is low (${data.sl3_battery.toFixed(1)}V). A healthy battery reads 12.6V+ with the engine off and 13.5-14.5V while running. This could mean a dying battery or a failing alternator.`);
+  } else if (data.sl3_battery > 15.0) {
+    issues.push(`Your charging system voltage is too high (${data.sl3_battery.toFixed(1)}V). The voltage regulator in your alternator may be failing, which can fry electrical components and boil your battery dry.`);
+  }
+
+  // Fuel trims — lean condition
+  if (Math.abs(data.pr2_stftB1) > 15 || Math.abs(data.pr3_ltftB1) > 15) {
+    const isLean = (data.pr2_stftB1 + data.pr3_ltftB1) > 0;
+    if (isLean) {
+      issues.push(`Your engine is running lean — it's getting too much air and not enough fuel. You probably have a vacuum leak (a cracked rubber hose under the hood) or a dirty air flow sensor.`);
+    } else {
+      issues.push(`Your engine is running rich — it's dumping too much fuel. This wastes gas and can ruin your catalytic converter ($200-$1,000 part). Common causes: leaking fuel injector or a stuck-open purge valve.`);
+    }
+  }
+
+  // Catalyst efficiency
+  if (data.fs7_catEff < 85) {
+    issues.push(`Your catalytic converter is failing (${data.fs7_catEff.toFixed(0)}% efficiency). It's supposed to be above 92%. You'll fail your next emissions inspection and your fuel economy is suffering. Plan to replace it soon.`);
+  } else if (data.fs7_catEff < 92) {
+    issues.push(`Your catalytic converter is wearing out (${data.fs7_catEff.toFixed(0)}% efficiency). It still passes emissions, but it's degrading. You have roughly 4-8 weeks before it triggers a check engine light.`);
+  }
+
+  // MPG analysis
+  if (data.mpgInstant > 0 && data.mpgInstant < 12 && data.tb7_speed > 30) {
+    issues.push(`Your fuel economy is poor (${data.mpgInstant.toFixed(1)} MPG at ${(data.tb7_speed * 0.621371).toFixed(0)} mph). This is below average. Check tire pressure, air filter, and spark plugs — those three things alone can improve MPG by 10-15%.`);
+  }
+
+  // Driver score coaching
+  if (data.fs10_driverScore < 60) {
+    issues.push(`Your driving style is costing you money. Aggressive acceleration and hard braking wastes 15-30% more fuel. Ease off the gas pedal — your wallet will thank you.`);
+  }
+
+  // Overall health score
+  if (data.sl11_degradation < 70) {
+    issues.push(`Overall engine health is at ${data.sl11_degradation.toFixed(0)}%. Multiple systems need attention. Address the items below starting with any red alerts first.`);
+  }
+
+  if (issues.length === 0) {
+    return {
+      emoji: '✅',
+      headline: 'Your vehicle is running great.',
+      details: [
+        `Engine temp is normal (${data.sl1_coolant.toFixed(0)}°C), battery is strong (${data.sl3_battery.toFixed(1)}V), and no trouble codes are stored.`,
+        data.mpgInstant > 0 ? `You're getting ${data.mpgInstant.toFixed(1)} MPG right now. ${data.mpgRecovery > 0 ? `That's ${data.mpgRecovery.toFixed(1)}% better than baseline.` : ''}` : 'Engine is warming up.',
+      ],
+    };
+  }
+
+  const emoji = data.sl7_mil ? '🚨' : issues.length > 2 ? '⚠️' : '🔶';
+  const headline = data.sl7_mil
+    ? `${data.sl8_dtcCount} issue${data.sl8_dtcCount !== 1 ? 's' : ''} found — check engine light is on.`
+    : `${issues.length} thing${issues.length !== 1 ? 's' : ''} to keep an eye on.`;
+
+  return { emoji, headline, details: issues };
+}
+
+// Generate failure alerts from live telemetry with affiliate part links
+function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal'): FailureAlert[] {
   const alerts: FailureAlert[] = [];
   
   // Dynamically resolve active DTCs using the Axiom Deterministic Knowledge Registry
@@ -88,6 +165,7 @@ function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
       if (jsonStr) {
         try {
           const alertObj = JSON.parse(jsonStr) as FailureAlert;
+          alertObj.vehicle = vehicle; // Use real vehicle for affiliate links
           alerts.push(alertObj);
         } catch (e) {
           console.warn(`Failed to parse DTC JSON for ${code}:`, e);
@@ -100,25 +178,82 @@ function getActiveAlerts(data: TelemetrySnapshot): FailureAlert[] {
   if (alerts.length === 0 && data.sl7_mil && data.sl8_dtcCount > 0) {
     alerts.push({
       type: 'active', code: 'P0420', system: 'Catalyst System',
-      interpretation: 'Catalyst System Efficiency Below Threshold',
+      interpretation: 'Your catalytic converter isn\'t cleaning exhaust gases properly. This is the #1 most common check engine light code. You\'ll fail emissions testing.',
       severity: 'Moderate — safe to drive short term',
       action: 'Replace catalytic converter',
       partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
-      vehicle: 'Universal',
+      vehicle,
     });
   }
 
-  if (data.fs7_catEff < 93) {
+  // ── Signal-Based Imminent Failure Alerts ──
+  // These trigger from LIVE data, not stored DTCs — true predictive diagnostics
+
+  if (data.fs7_catEff < 93 && data.fs7_catEff > 0) {
     alerts.push({
       type: 'imminent', system: 'Catalyst System',
-      interpretation: 'Catalyst efficiency degrading — approaching failure threshold',
+      interpretation: `Your catalytic converter is wearing out (${data.fs7_catEff.toFixed(0)}% efficient, should be 95%+). It's not bad enough for a check engine light yet, but it's heading there. Getting ahead of this saves you from failing your next emissions test.`,
       severity: 'Watch — not yet critical',
       timeline: '~6 weeks', degradationRate: '1.2%/month',
-      action: 'Schedule catalytic converter inspection',
+      action: 'Schedule catalytic converter replacement',
       partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
-      vehicle: 'Universal',
+      vehicle,
     });
   }
+
+  if (data.sl3_battery > 0 && data.sl3_battery < 12.4) {
+    alerts.push({
+      type: 'imminent', system: 'Electrical System',
+      interpretation: `Your battery voltage is ${data.sl3_battery.toFixed(1)}V — that's below the 12.6V minimum for a healthy battery. If it drops further, you'll get stranded with a no-start one morning. Batteries typically last 3-5 years.`,
+      severity: 'Moderate — could leave you stranded',
+      timeline: '~2-4 weeks',
+      action: 'Test battery at auto parts store (free) or replace',
+      partName: 'Car Battery', partPriceLow: 100, partPriceHigh: 250,
+      vehicle,
+    });
+  }
+
+  if (data.sl1_coolant > 105) {
+    alerts.push({
+      type: 'active', system: 'Cooling System',
+      interpretation: `Engine temperature is ${data.sl1_coolant.toFixed(0)}°C — above the safe limit of 105°C. Driving while overheating causes warped cylinder heads ($1,500+ repair). Pull over if the temp gauge hits the red zone.`,
+      severity: 'High — risk of engine damage',
+      action: 'Check coolant level, inspect thermostat and radiator fan',
+      partName: 'Coolant Thermostat', partPriceLow: 15, partPriceHigh: 45,
+      vehicle,
+    });
+  }
+
+  if (data.sl1_coolant > 0 && data.sl1_coolant < 70 && data.sl4_runtime > 300) {
+    alerts.push({
+      type: 'imminent', system: 'Cooling System',
+      interpretation: `Your engine is running cold — it should be at 90-100°C after ${Math.floor(data.sl4_runtime / 60)} minutes, but it's only ${data.sl1_coolant.toFixed(0)}°C. Your thermostat is stuck open. This makes your heater blow cold air and wastes fuel.`,
+      severity: 'Low — safe to drive, but burns more gas',
+      timeline: '~1 month',
+      action: 'Replace thermostat',
+      partName: 'Coolant Thermostat', partPriceLow: 15, partPriceHigh: 45,
+      vehicle,
+    });
+  }
+
+  const totalTrim = Math.abs(data.pr2_stftB1) + Math.abs(data.pr3_ltftB1);
+  if (totalTrim > 20) {
+    const isLean = (data.pr2_stftB1 + data.pr3_ltftB1) > 0;
+    alerts.push({
+      type: 'imminent', system: 'Fuel System',
+      interpretation: isLean
+        ? `Your engine is running lean — the computer is adding ${data.pr3_ltftB1.toFixed(1)}% extra fuel to compensate for unmetered air entering the engine. Most likely cause: a cracked vacuum hose or a dirty mass airflow sensor.`
+        : `Your engine is dumping extra fuel — the computer is pulling ${Math.abs(data.pr3_ltftB1).toFixed(1)}% fuel away because the exhaust is too rich. Check for a leaking fuel injector or stuck purge valve.`,
+      severity: isLean ? 'Moderate — can cause misfires' : 'Moderate — wastes fuel and damages catalytic converter',
+      timeline: '~2-4 weeks',
+      action: isLean ? 'Check vacuum hoses, clean MAF sensor' : 'Inspect fuel injectors and purge valve',
+      partName: isLean ? 'MAF Sensor Cleaner' : 'Fuel Injector',
+      partPriceLow: isLean ? 8 : 40,
+      partPriceHigh: isLean ? 150 : 120,
+      vehicle,
+    });
+  }
+
   return alerts;
 }
 
@@ -193,6 +328,19 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
         {/* Personalized Greeting */}
         <Text style={styles.greeting}>{getGreeting()}</Text>
+
+        {/* Plain English Health Summary */}
+        {(() => {
+          const summary = getPlainEnglishSummary(data);
+          return (
+            <View style={styles.summaryPanel}>
+              <Text style={styles.summaryHeadline}>{summary.emoji} {summary.headline}</Text>
+              {summary.details.map((detail, i) => (
+                <Text key={i} style={styles.summaryDetail}>• {detail}</Text>
+              ))}
+            </View>
+          );
+        })()}
 
         {/* Tier Badge */}
         {!isPro && (
@@ -327,6 +475,9 @@ const styles = StyleSheet.create({
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800', letterSpacing: 1 },
   headerTitleSub: { color: COLORS.textMuted, fontWeight: '400' },
   greeting: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 12, fontStyle: 'italic' },
+  summaryPanel: { backgroundColor: 'rgba(6,182,212,0.04)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.12)', borderRadius: 14, padding: 16, marginBottom: 16 },
+  summaryHeadline: { color: COLORS.textMain, fontSize: 16, fontWeight: '700', marginBottom: 10, lineHeight: 22 },
+  summaryDetail: { color: COLORS.textMuted, fontSize: 13, lineHeight: 20, marginBottom: 8, paddingLeft: 4 },
   connectionBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)', gap: 8 },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.emerald },
   connectionText: { color: COLORS.emerald, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
