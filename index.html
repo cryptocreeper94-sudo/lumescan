@@ -407,7 +407,7 @@
       <p class="notify-label">Get notified when Lume Scan goes live.</p>
       <div class="capture">
         <input type="email" id="teaser-email" placeholder="Enter your enterprise email" autocomplete="email">
-        <button id="teaser-btn" onclick="submitEmail()">Notify Me</button>
+        <button id="teaser-btn" >Notify Me</button>
       </div>
     </div>
 
@@ -458,6 +458,7 @@
       btn.classList.add('done');
       input.value='';
     }
+    document.getElementById('teaser-btn').addEventListener('click', submitEmail);
     document.getElementById('teaser-email').addEventListener('keydown',function(e){if(e.key==='Enter')submitEmail();});
   </script>
 
@@ -478,7 +479,7 @@
     </div>
     
     <div class="gb-ctas">
-      <button class="gb-btn-primary" onclick="enterDemoMode()">
+      <button class="gb-btn-primary" id="gb-enter-demo">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         Enter Demo Mode
       </button>
@@ -550,8 +551,9 @@
         e.stopPropagation();
         showToast('🔒 Feature unlocks June 23, 2026');
       }
-    }, true); // Use capture phase
+    }, true);
   };
+  document.getElementById('gb-enter-demo').addEventListener('click', window.enterDemoMode);
 
   function showToast(msg) {
     const container = document.getElementById('gb-toast-container');
