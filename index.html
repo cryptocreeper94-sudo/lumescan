@@ -4,6 +4,10 @@
 
 <style id="glass-blackout-style">
   /* GLASS BLACKOUT STYLES */
+  html.gb-active, html.gb-active body {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
   #glass-blackout-overlay {
     position: fixed;
     inset: 0;
@@ -17,6 +21,9 @@
     font-family: 'Inter', system-ui, sans-serif;
     color: #fff;
     transition: opacity 0.4s ease, backdrop-filter 0.4s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px;
   }
   #glass-blackout-overlay.hidden {
     opacity: 0;
@@ -28,13 +35,15 @@
     background: linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(2,6,23,0.95) 100%);
     border: 1px solid rgba(34,211,238,0.2);
     border-radius: 24px;
-    padding: 48px;
-    max-width: 600px;
-    width: 90%;
+    padding: 36px 32px;
+    max-width: 520px;
+    width: 100%;
     text-align: center;
     box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(34,211,238,0.05);
     transform: translateY(0);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: auto;
+    flex-shrink: 0;
   }
   #glass-blackout-overlay.hidden .gb-modal {
     transform: translateY(-20px) scale(0.95);
@@ -55,34 +64,34 @@
     border: 1px solid rgba(34,211,238,0.2);
   }
   .gb-title {
-    font-size: 42px;
+    font-size: 36px;
     font-weight: 900;
     color: #fff;
-    margin: 0 0 16px 0;
+    margin: 0 0 10px 0;
     letter-spacing: -1px;
     line-height: 1.1;
   }
   .gb-subtitle {
-    font-size: 16px;
+    font-size: 14px;
     color: #94a3b8;
-    margin: 0 0 36px 0;
+    margin: 0 0 20px 0;
     line-height: 1.6;
   }
   .gb-timer {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 36px;
+    gap: 8px;
+    margin-bottom: 20px;
   }
   .gb-time-box {
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.05);
     border-radius: 12px;
-    padding: 12px 16px;
-    min-width: 80px;
+    padding: 10px 12px;
+    min-width: 64px;
   }
   .gb-time-box .num {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 900;
     font-family: 'JetBrains Mono', monospace;
     color: #22d3ee;
@@ -143,8 +152,8 @@
     border-color: rgba(34,211,238,0.3);
   }
   .gb-free-banner {
-    margin-top: 36px;
-    padding-top: 24px;
+    margin-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid rgba(255,255,255,0.05);
   }
   .gb-free-banner p {
@@ -241,13 +250,20 @@
   }
   
   @media (max-width: 600px) {
-    .gb-modal { padding: 32px 24px; }
-    .gb-title { font-size: 32px; }
-    .gb-time-box { min-width: 64px; padding: 10px; }
-    .gb-time-box .num { font-size: 24px; }
-    .gb-ctas { flex-direction: column; }
-    .gb-btn-primary, .gb-btn-secondary { width: 100%; justify-content: center; }
-    .gb-free-links { flex-direction: column; gap: 10px; }
+    #glass-blackout-overlay { padding: 12px; }
+    .gb-modal { padding: 24px 18px; }
+    .gb-badge { font-size: 9px; padding: 4px 10px; margin-bottom: 12px; }
+    .gb-title { font-size: 28px; margin-bottom: 8px; }
+    .gb-subtitle { font-size: 12px; margin-bottom: 14px; }
+    .gb-timer { gap: 6px; margin-bottom: 14px; }
+    .gb-time-box { min-width: 52px; padding: 8px 6px; }
+    .gb-time-box .num { font-size: 20px; }
+    .gb-time-box .lbl { font-size: 8px; }
+    .gb-ctas { flex-direction: column; gap: 8px; }
+    .gb-btn-primary, .gb-btn-secondary { width: 100%; justify-content: center; padding: 12px 20px; font-size: 13px; }
+    .gb-free-banner { margin-top: 14px; padding-top: 12px; }
+    .gb-free-banner p { font-size: 11px; margin-bottom: 10px; }
+    .gb-free-links { flex-direction: column; gap: 8px; }
   }
 </style>
 
@@ -545,10 +561,14 @@
     setInterval(update, 1000);
   })();
 
+  // Lock body scroll while gate is visible
+  document.documentElement.classList.add('gb-active');
+
   // Demo Mode
   window.enterDemoMode = function() {
     document.getElementById('glass-blackout-overlay').classList.add('hidden');
     document.getElementById('gb-demo-indicator').classList.add('visible');
+    document.documentElement.classList.remove('gb-active');
     
     // Intercept clicks
     document.body.addEventListener('click', function(e) {
