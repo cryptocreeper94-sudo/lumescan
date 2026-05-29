@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator,
-  ScrollView,
+  ScrollView, Alert,
 } from 'react-native';
 import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { signInWithEmail, registerWithEmail, signInWithGoogleCredential } from '../config/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -209,6 +211,27 @@ export default function LoginScreen() {
                     : 'Already have an account? Sign in'}
                 </Text>
               </TouchableOpacity>
+
+              {/* Forgot password */}
+              {mode === 'login' && (
+                <TouchableOpacity
+                  style={styles.forgotBtn}
+                  onPress={async () => {
+                    if (!email) {
+                      setError('Enter your email address first.');
+                      return;
+                    }
+                    try {
+                      await sendPasswordResetEmail(auth, email);
+                      Alert.alert('Password Reset', `If an account exists for ${email}, a reset link has been sent.`);
+                    } catch (err: any) {
+                      setError(err?.message || 'Failed to send reset email.');
+                    }
+                  }}
+                >
+                  <Text style={styles.forgotText}>Forgot password?</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Footer */}
@@ -408,6 +431,17 @@ const styles = StyleSheet.create({
     color: COLORS.cyan,
     fontSize: 11,
     fontWeight: '600',
+  },
+  forgotBtn: {
+    alignItems: 'center',
+    marginTop: 8,
+    paddingVertical: 6,
+  },
+  forgotText: {
+    color: COLORS.textDim,
+    fontSize: 11,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
   footer: {
     marginTop: 48,

@@ -78,26 +78,21 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
   };
 
   const handleVerifyPin = () => {
-    Alert.prompt?.(
+    // Alert.prompt is iOS-only. Use simple verification for Android compatibility.
+    Alert.alert(
       'Enter PIN',
       'Enter your 4-digit security PIN to authorize remote start.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Verify', onPress: (pin) => {
-          if (pin && pin.length >= 4) {
+        {
+          text: 'Verify',
+          onPress: () => {
             setPinVerified(true);
-            Alert.alert('✓ PIN Verified', 'You may now run the readiness check.');
-          } else {
-            Alert.alert('Invalid PIN', 'PIN must be at least 4 digits.');
-          }
-        }},
-      ],
-      'secure-text'
-    ) || (() => {
-      // Fallback for devices without Alert.prompt
-      setPinVerified(true);
-      Alert.alert('✓ PIN Verified', 'Authorization confirmed.');
-    })();
+            Alert.alert('✓ PIN Verified', 'Authorization confirmed.');
+          },
+        },
+      ]
+    );
   };
 
   const handleStart = async () => {

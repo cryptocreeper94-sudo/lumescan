@@ -4,7 +4,7 @@ import { Wifi, Bluetooth, Activity, ChevronRight, Zap } from 'lucide-react-nativ
 import { COLORS } from '../theme/colors';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
-  Easing, withSequence, withDelay, FadeIn
+  Easing, withSequence, withDelay, FadeIn, type SharedValue
 } from 'react-native-reanimated';
 import { probeForAdapter, WiFiConnection, enterDemoMode } from '../telemetry/WiFiConnector';
 import { connectBLENative, BLEConnection, enterBLEDemoMode } from '../telemetry/BLEConnector';
@@ -49,7 +49,7 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
     ), -1, true);
   }, []);
 
-  const makeRingStyle = (anim: Animated.SharedValue<number>, size: number) =>
+  const makeRingStyle = (anim: SharedValue<number>, size: number) =>
     useAnimatedStyle(() => ({
       position: 'absolute' as const,
       width: size, height: size, borderRadius: size / 2,

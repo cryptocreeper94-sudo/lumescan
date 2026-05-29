@@ -59,7 +59,7 @@ const PIDS: { cmd: string; parse: (hex: string) => Record<string, number>; optio
   { cmd: '013C', parse: (h) => ({ catTempB1: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 10 - 40 }), optional: true },
   // ── System Lifecycle (SL) ──
   { cmd: '0142', parse: (h) => ({ battery: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 1000 }) },
-  { cmd: '0101', parse: (h) => ({ mil: !!(parseInt(h.slice(0, 2), 16) & 0x80), dtcCount: parseInt(h.slice(0, 2), 16) & 0x7F }) },
+  { cmd: '0101', parse: (h) => ({ mil: (parseInt(h.slice(0, 2), 16) & 0x80) ? 1 : 0, dtcCount: parseInt(h.slice(0, 2), 16) & 0x7F }) },
   { cmd: '011F', parse: (h) => ({ runtimeSinceStart: parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16) }), optional: true },
   { cmd: '0146', parse: (h) => ({ ambientTemp: parseInt(h.slice(0, 2), 16) - 40 }), optional: true },
 ];

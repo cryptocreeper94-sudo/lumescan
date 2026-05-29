@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking } from 'react-native';
 import { Settings, User, Shield, Wrench, Radio, LogOut, ExternalLink, ChevronRight, Key, Zap } from 'lucide-react-native';
+import Constants from 'expo-constants';
 import { COLORS } from '../theme/colors';
 import { auth } from '../config/firebase';
 import { getWiFiStatus, disconnectWiFi } from '../telemetry/WiFiConnector';
@@ -173,7 +174,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>LumeScan v1.0.0 · DarkWave Studios LLC · US Patent Pending 64/032,339</Text>
+        <Text style={styles.version}>LumeScan v{Constants.expoConfig?.version || '1.0.0'} · Build {Constants.expoConfig?.android?.versionCode || '—'} · DarkWave Studios LLC · US Patent Pending 64/032,339</Text>
       </ScrollView>
     </View>
   );

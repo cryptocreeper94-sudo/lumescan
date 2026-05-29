@@ -7,6 +7,11 @@
 import { BleManager, Device, Characteristic } from 'react-native-ble-plx';
 import { TelemetrySnapshot, tick as simulatedTick } from './SimulatedEngine';
 
+// Extend globalThis for session tracking
+declare global {
+  var __lumeStartTime: number | undefined;
+}
+
 // Common ELM327 BLE service/characteristic UUIDs
 const ELM327_SERVICE_UUID = 'fff0';
 const ELM327_WRITE_UUID = 'fff1';
@@ -34,7 +39,7 @@ const PID_COMMANDS: { pid: string; parse: (bytes: number[]) => Record<string, nu
   { pid: '0114', parse: (b) => ({ o2B1S1: b[0] / 200 }) },                                  // O2 Bank 1 Sensor 1
   { pid: '0142', parse: (b) => ({ battery: ((b[0] * 256) + b[1]) / 1000 }) },              // Battery Voltage
   { pid: '011C', parse: (b) => ({ obdStandard: b[0] }) },                                    // OBD Standard
-  { pid: '0101', parse: (b) => ({ mil: !!(b[0] & 0x80), dtcCount: b[0] & 0x7F }) },       // MIL + DTC count
+  { pid: '0101', parse: (b) => ({ mil: (b[0] & 0x80) ? 1 : 0, dtcCount: b[0] & 0x7F }) },       // MIL + DTC count
 ];
 
 export type ConnectionStatus = 'disconnected' | 'scanning' | 'connecting' | 'initializing' | 'connected' | 'error';

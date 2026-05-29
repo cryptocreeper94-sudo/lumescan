@@ -1,6 +1,6 @@
 /**
  * LumeAuto Mobile — Entitlement Gating
- * Free tier: code reading, 6 signals, 1 report/day
+ * Free tier: code reading, 3 signals (RPM, speed, coolant), reports view-only
  * Pro tier: full 42-signal engine, fuel coaching, predictive maintenance, driver scoring
  * Bypass: DarkWave/Cox internal accounts
  *

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity, Shield } from 'lucide-react-native';
+import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity, Shield, Lock } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { generateConditionReport } from '../telemetry/SimulatedEngine';
 import { sealScanToLedger, buildScanPayload, type ScanRecord } from '../telemetry/TrustLayerLedger';
 import { tick } from '../telemetry/SimulatedEngine';
+import type { Tier } from '../config/entitlement';
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   ok: <CheckCircle size={14} color={COLORS.emerald} />,
@@ -20,7 +21,8 @@ const STATUS_COLORS: Record<string, string> = {
   critical: '#ef4444',
 };
 
-export default function ConditionReportScreen({ onBack }: { onBack: () => void }) {
+export default function ConditionReportScreen({ onBack, tier }: { onBack: () => void; tier: Tier }) {
+  const isPro = tier === 'pro';
   const [report, setReport] = useState<ReturnType<typeof generateConditionReport> | null>(null);
   const [tllRecord, setTllRecord] = useState<ScanRecord | null>(null);
   const [sealing, setSealing] = useState(false);
@@ -108,13 +110,32 @@ export default function ConditionReportScreen({ onBack }: { onBack: () => void }
               <View key={j} style={styles.itemRow}>
                 {STATUS_ICONS[item.status]}
                 <Text style={styles.itemLabel}>{item.label}</Text>
-                <Text style={[styles.itemValue, { color: item.status === 'ok' ? COLORS.cyan : item.status === 'critical' ? '#ef4444' : '#f59e0b' }]}>
-                  {item.value}
-                </Text>
+                {isPro ? (
+                  <Text style={[styles.itemValue, { color: item.status === 'ok' ? COLORS.cyan : item.status === 'critical' ? '#ef4444' : '#f59e0b' }]}>
+                    {item.value}
+                  </Text>
+                ) : (
+                  <View style={styles.lockedValue}>
+                    <View style={styles.blurPill} />
+                    <Lock size={8} color={COLORS.textDim} />
+                  </View>
+                )}
               </View>
             ))}
           </View>
         ))}
+
+        {/* Free tier upgrade CTA */}
+        {!isPro && (
+          <TouchableOpacity
+            style={styles.reportUpgradeCta}
+            onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+            activeOpacity={0.8}
+          >
+            <Lock size={16} color={COLORS.cyan} />
+            <Text style={styles.reportUpgradeText}>Upgrade to Pro for full signal values, TLL verification, and export</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Summary */}
         <View style={styles.summaryCard}>
@@ -133,29 +154,47 @@ export default function ConditionReportScreen({ onBack }: { onBack: () => void }
             <Text style={styles.tllTitle}>TRUST LAYER LEDGER · {tllRecord ? 'VERIFIED' : sealing ? 'SEALING...' : 'PENDING'}</Text>
           </View>
           {tllRecord ? (
-            <>
-              {tllRecord.healthNarrative ? (
-                <Text style={styles.tllNarrative}>{tllRecord.healthNarrative}</Text>
-              ) : null}
-              <View style={styles.tllDetails}>
-                <Text style={styles.tllDetailLabel}>Record</Text>
-                <Text style={styles.tllDetailValue}>{tllRecord.scanId}</Text>
+            isPro ? (
+              <>
+                {tllRecord.healthNarrative ? (
+                  <Text style={styles.tllNarrative}>{tllRecord.healthNarrative}</Text>
+                ) : null}
+                <View style={styles.tllDetails}>
+                  <Text style={styles.tllDetailLabel}>Record</Text>
+                  <Text style={styles.tllDetailValue}>{tllRecord.scanId}</Text>
+                </View>
+                <View style={styles.tllDetails}>
+                  <Text style={styles.tllDetailLabel}>Hash</Text>
+                  <Text style={styles.tllHash}>{tllRecord.scanHash?.slice(0, 24)}...</Text>
+                </View>
+                <View style={styles.tllDetails}>
+                  <Text style={styles.tllDetailLabel}>Sealed</Text>
+                  <Text style={styles.tllDetailValue}>{new Date(tllRecord.hallmark.sealedAt).toLocaleString()}</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.tllVerifyBtn}
+                  onPress={() => Linking.openURL(tllRecord.explorerUrl)}
+                >
+                  <Text style={styles.tllVerifyText}>🛡️ View on Explorer</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View>
+                <Text style={styles.tllNarrative}>✓ Scan sealed to Trust Layer Ledger</Text>
+                <View style={styles.blurredTllBlock}>
+                  <View style={[styles.blurPill, { width: '80%', marginBottom: 6 }]} />
+                  <View style={[styles.blurPill, { width: '60%', marginBottom: 6 }]} />
+                  <View style={[styles.blurPill, { width: '70%' }]} />
+                </View>
+                <TouchableOpacity
+                  style={styles.tllVerifyBtn}
+                  onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+                >
+                  <Lock size={12} color={COLORS.cyan} />
+                  <Text style={[styles.tllVerifyText, { color: COLORS.cyan }]}>Upgrade to view verification details</Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.tllDetails}>
-                <Text style={styles.tllDetailLabel}>Hash</Text>
-                <Text style={styles.tllHash}>{tllRecord.scanHash?.slice(0, 24)}...</Text>
-              </View>
-              <View style={styles.tllDetails}>
-                <Text style={styles.tllDetailLabel}>Sealed</Text>
-                <Text style={styles.tllDetailValue}>{new Date(tllRecord.hallmark.sealedAt).toLocaleString()}</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.tllVerifyBtn}
-                onPress={() => Linking.openURL(tllRecord.explorerUrl)}
-              >
-                <Text style={styles.tllVerifyText}>🛡️ View on Explorer</Text>
-              </TouchableOpacity>
-            </>
+            )
           ) : (
             <Text style={styles.tllPending}>
               {sealing ? 'Sealing scan to Trust Layer Ledger...' : 'Connect to seal this report'}
@@ -169,7 +208,7 @@ export default function ConditionReportScreen({ onBack }: { onBack: () => void }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingBottom: 60 },
+  scrollContent: { padding: 20, paddingBottom: 60, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
   scanningContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
   scanningTitle: { color: COLORS.cyan, fontSize: 16, fontWeight: '700', letterSpacing: 2 },
   scanningSubtitle: { color: COLORS.textMuted, fontSize: 12 },
@@ -206,7 +245,12 @@ const styles = StyleSheet.create({
   tllDetailLabel: { color: COLORS.textDim, fontSize: 10, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' as const },
   tllDetailValue: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600' },
   tllHash: { color: 'rgba(16,185,129,0.5)', fontSize: 10, fontFamily: 'monospace' },
-  tllVerifyBtn: { marginTop: 14, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10, backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)', alignItems: 'center' },
+  tllVerifyBtn: { flexDirection: 'row', gap: 8, marginTop: 14, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 10, backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)', alignItems: 'center', justifyContent: 'center' },
   tllVerifyText: { color: COLORS.emerald, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  lockedValue: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  blurPill: { height: 12, width: 48, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 6 },
+  blurredTllBlock: { marginVertical: 12, gap: 4 },
+  reportUpgradeCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 16, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 12, backgroundColor: 'rgba(6,182,212,0.08)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.2)' },
+  reportUpgradeText: { color: COLORS.cyan, fontSize: 12, fontWeight: '700', letterSpacing: 0.3, flex: 1 },
   tllPending: { color: COLORS.textDim, fontSize: 12, fontStyle: 'italic' },
 });

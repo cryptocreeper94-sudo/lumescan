@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, Text, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
-import { Activity, FileText, Key, Radio, Settings as SettingsIcon } from 'lucide-react-native';
+import { Activity, FileText, Key, Radio, Settings as SettingsIcon, AlertTriangle, Wrench, Navigation, Clock } from 'lucide-react-native';
 import DashboardScreen from './src/screens/DashboardScreen';
 import ConnectionScreen from './src/screens/ConnectionScreen';
 import ConditionReportScreen from './src/screens/ConditionReportScreen';
@@ -9,12 +9,18 @@ import KeyManagementScreen from './src/screens/KeyManagementScreen';
 import RemoteStartScreen from './src/screens/RemoteStartScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import DTCScreen from './src/screens/DTCScreen';
+import MaintenanceScreen from './src/screens/MaintenanceScreen';
+import TripComputerScreen from './src/screens/TripComputerScreen';
+import ScanHistoryScreen from './src/screens/ScanHistoryScreen';
 import { COLORS } from './src/theme/colors';
 import { auth, onAuthStateChanged, type User } from './src/config/firebase';
 import { checkEntitlement, type EntitlementStatus } from './src/config/entitlement';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type AppState = 'login' | 'checking' | 'locked' | 'connection' | 'main';
-type Tab = 'dashboard' | 'report' | 'keys' | 'remote' | 'settings';
+type AppState = 'login' | 'checking' | 'locked' | 'onboarding' | 'connection' | 'main';
+type Tab = 'dashboard' | 'codes' | 'report' | 'service' | 'trip' | 'history' | 'keys' | 'remote' | 'settings';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('login');
@@ -32,7 +38,9 @@ export default function App() {
         const status = await checkEntitlement();
         setEntitlement(status);
         if (status.entitled) {
-          setAppState('connection');
+          // Check if onboarding has been completed
+          const onboarded = await AsyncStorage.getItem('@lumescan_onboarded');
+          setAppState(onboarded ? 'connection' : 'onboarding');
         } else {
           setAppState('locked');
         }
@@ -53,17 +61,25 @@ export default function App() {
   const mode05 = entitlement?.mode05Purchased || false;
   const mode06 = entitlement?.mode06Active || false;
 
-  // Consumer mode tabs: Dashboard, Report, Settings
-  // Mechanic mode tabs: Dashboard, Report, Keys, Remote, Settings
-  const tabs: { id: Tab; label: string; icon: any; mechOnly?: boolean }[] = [
+  // Consumer mode tabs: Dashboard, Codes, Report, Service, Settings
+  // Mechanic mode tabs: Dashboard, Codes, Report, Service, Keys, Remote, Settings
+  // Trip + History are accessible via Dashboard or Settings as sub-nav
+  const tabs: { id: Tab; label: string; icon: any; mechOnly?: boolean; proOnly?: boolean }[] = [
     { id: 'dashboard', label: 'Live', icon: Activity },
-    { id: 'report', label: 'Report', icon: FileText },
+    { id: 'codes', label: 'Codes', icon: AlertTriangle },
+    { id: 'trip', label: 'Trip', icon: Navigation, proOnly: true },
+    { id: 'service', label: 'Service', icon: Wrench },
+    { id: 'history', label: 'History', icon: Clock },
     { id: 'keys', label: 'Keys', icon: Key, mechOnly: true },
     { id: 'remote', label: 'Start', icon: Radio, mechOnly: true },
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
-  const visibleTabs = mechanicMode ? tabs : tabs.filter(t => !t.mechOnly);
+  const visibleTabs = tabs.filter(t => {
+    if (t.mechOnly && !mechanicMode) return false;
+    // Pro-only tabs still visible but will show upgrade screen
+    return true;
+  });
 
   // If user switches from mechanic to consumer while on a mechanic-only tab
   if (!mechanicMode && (activeTab === 'keys' || activeTab === 'remote')) {
@@ -78,7 +94,7 @@ export default function App() {
       {appState === 'login' && <LoginScreen />}
       {appState === 'checking' && (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.accent} />
+          <ActivityIndicator size="large" color={COLORS.cyan} />
           <Text style={styles.checkingText}>Verifying license...</Text>
         </View>
       )}
@@ -112,6 +128,14 @@ export default function App() {
         </View>
       )}
 
+      {/* Onboarding walkthrough — first run only */}
+      {appState === 'onboarding' && (
+        <OnboardingScreen onComplete={async () => {
+          await AsyncStorage.setItem('@lumescan_onboarded', 'true');
+          setAppState('connection');
+        }} />
+      )}
+
       {/* Connection screen */}
       {appState === 'connection' && (
         <View style={{ flex: 1 }}>
@@ -142,11 +166,23 @@ export default function App() {
                 tier={tier}
               />
             )}
+            {activeTab === 'codes' && (
+              <DTCScreen tier={tier} />
+            )}
             {activeTab === 'report' && (
               <ConditionReportScreen
                 onBack={() => setActiveTab('dashboard')}
                 tier={tier}
               />
+            )}
+            {activeTab === 'service' && (
+              <MaintenanceScreen tier={tier} />
+            )}
+            {activeTab === 'trip' && (
+              <TripComputerScreen tier={tier} />
+            )}
+            {activeTab === 'history' && (
+              <ScanHistoryScreen tier={tier} />
             )}
             {activeTab === 'keys' && (
               <KeyManagementScreen
