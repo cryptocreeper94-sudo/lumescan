@@ -13,6 +13,130 @@
 </head>
 <body>
 
+  <!-- ═══ LAUNCH GATE MODAL ═══ -->
+  <div id="launch-gate">
+    <div class="gate-card">
+      <div class="gate-badge">Launching June 23, 2026</div>
+      <h2 class="gate-title"><span>Lume Scan</span> is Almost Here</h2>
+      <p class="gate-sub">Professional OBD-II diagnostics from $9.99. First-come, first-served tiers open June 23 at 10:00 AM CST.</p>
+
+      <!-- Countdown -->
+      <div class="countdown">
+        <div class="cd-unit"><div class="cd-val" id="cd-days">--</div><div class="cd-lbl">Days</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-hrs">--</div><div class="cd-lbl">Hours</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-min">--</div><div class="cd-lbl">Mins</div></div>
+        <div class="cd-unit"><div class="cd-val" id="cd-sec">--</div><div class="cd-lbl">Secs</div></div>
+      </div>
+
+      <!-- Pricing Tiers -->
+      <div class="gate-tiers">
+        <div class="gate-tier founder">
+          <div class="gate-tier-label">🏆 Founders</div>
+          <div class="gate-tier-price">$9.99</div>
+          <div class="gate-tier-mo">+ $1.99/mo</div>
+          <div class="gate-tier-spots">First 100 users</div>
+        </div>
+        <div class="gate-tier">
+          <div class="gate-tier-label">Early Adopter</div>
+          <div class="gate-tier-price">$19.99</div>
+          <div class="gate-tier-mo">+ $2.49/mo</div>
+          <div class="gate-tier-spots">Users 101–500</div>
+        </div>
+        <div class="gate-tier">
+          <div class="gate-tier-label">Standard</div>
+          <div class="gate-tier-price">$39.99</div>
+          <div class="gate-tier-mo">+ $4.99/mo</div>
+          <div class="gate-tier-spots">Everyone else</div>
+        </div>
+      </div>
+
+      <!-- Email Capture -->
+      <div class="gate-email-success" id="gate-success">✓ You're on the list! We'll notify you 24 hours before launch.</div>
+      <div class="gate-email-wrap" id="gate-email-form">
+        <input type="email" id="gate-email" placeholder="Enter your email for early access" />
+        <button class="gate-email-btn" onclick="submitGateEmail()">Notify Me</button>
+      </div>
+
+      <!-- Explore button -->
+      <button class="gate-explore" onclick="dismissGate()">See the Product →</button>
+
+      <div class="gate-fine">
+        No payment required to join the waitlist.<br>
+        Tiers are first-come, first-served on launch day.<br>
+        US Provisional Patent 64/032,339 · DarkWave Studios LLC
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Intercept Toast -->
+  <div class="cta-intercept-toast" id="cta-toast">
+    🔒 Lume Scan launches <strong style="color:var(--accent)">June 23 at 10am CST</strong> — <a href="#" onclick="showGate();return false" style="color:var(--accent);text-decoration:underline">Join the waitlist</a>
+  </div>
+
+  <script>
+  // ── Launch Gate Logic ──
+  (function() {
+    const LAUNCH = new Date('2026-06-23T15:00:00Z'); // 10am CST = 3pm UTC
+
+    // Countdown
+    function tick() {
+      const now = Date.now(), diff = Math.max(0, LAUNCH - now);
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+      document.getElementById('cd-hrs').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-min').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-sec').textContent = String(s).padStart(2, '0');
+      if (diff > 0) requestAnimationFrame(() => setTimeout(tick, 250));
+    }
+    tick();
+
+    // Auto-dismiss if already seen this session
+    if (sessionStorage.getItem('gate-dismissed')) {
+      document.getElementById('launch-gate').classList.add('dismissed');
+    }
+  })();
+
+  function dismissGate() {
+    document.getElementById('launch-gate').classList.add('dismissed');
+    sessionStorage.setItem('gate-dismissed', '1');
+  }
+
+  function showGate() {
+    const g = document.getElementById('launch-gate');
+    g.classList.remove('dismissed');
+    sessionStorage.removeItem('gate-dismissed');
+  }
+
+  function submitGateEmail() {
+    const input = document.getElementById('gate-email');
+    const email = input.value.trim();
+    if (!email || !email.includes('@')) { input.style.borderColor = '#ef4444'; return; }
+    // Store locally
+    const list = JSON.parse(localStorage.getItem('lumescan-waitlist') || '[]');
+    if (!list.includes(email)) list.push(email);
+    localStorage.setItem('lumescan-waitlist', JSON.stringify(list));
+    // Show success
+    document.getElementById('gate-email-form').style.display = 'none';
+    document.getElementById('gate-success').classList.add('show');
+    // Auto dismiss after 2s
+    setTimeout(dismissGate, 2000);
+  }
+
+  // ── CTA Interception ──
+  document.addEventListener('click', function(e) {
+    const a = e.target.closest('a[href*="lumeauto.tech/order"], a[href*="/download.html"], .cta-btn, a[href*="/order"]');
+    if (!a) return;
+    e.preventDefault();
+    // Show toast
+    const toast = document.getElementById('cta-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  });
+  </script>
+
   <nav class="nav">
     <div class="nav-brand">Lume<span>Scan</span></div>
     <div class="nav-links">
