@@ -152,10 +152,11 @@ export function tick(): TelemetrySnapshot {
   s.sl4_runtime = Math.floor(totalRuntime / 1000);
   s.sl11_degradation = drift(s.sl11_degradation, 85, 92, 0.02);
 
-  // Computed
+  // Computed — MPG = speed(mph) / fuel_consumption(gal/hr)
   if (s.tb7_speed > 5 && s.tb2_fuelFlow > 50) {
-    s.mpgInstant = (s.tb7_speed * 0.621371) / (s.tb2_fuelFlow / 3785.41 * 3600 / 1000) * 0.1;
-    s.mpgInstant = Math.min(45, Math.max(8, s.mpgInstant));
+    const speedMph = s.tb7_speed * 0.621371;
+    const galPerHour = (s.tb2_fuelFlow / 3785.41) * 60; // cc/min → gal/hr
+    s.mpgInstant = galPerHour > 0.01 ? Math.min(45, Math.max(8, speedMph / galPerHour)) : 0;
   } else if (s.tb7_speed < 5) {
     s.mpgInstant = 0; // idling
   }

@@ -4,6 +4,7 @@ import { Key, Plus, Trash2, ShieldCheck, Radio, Lock, ExternalLink } from 'lucid
 import { COLORS } from '../theme/colors';
 import { readIMOKeys, programIMOKey, registerDongleAsKey, deleteIMOKey, type KeyInfo } from '../telemetry/OBDCommands';
 import { getWiFiStatus } from '../telemetry/WiFiConnector';
+import { getBLENativeStatus } from '../telemetry/BLEConnector';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth >= 600;
@@ -18,7 +19,8 @@ export default function KeyManagementScreen({ tier, mode05Purchased }: Props) {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [lastReceipt, setLastReceipt] = useState<string | null>(null);
-  const connected = getWiFiStatus().status === 'connected';
+  const connected = getWiFiStatus().status === 'connected' || getBLENativeStatus().status === 'connected';
+  const isSimulated = getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated;
 
   useEffect(() => {
     if (connected && mode05Purchased) loadKeys();
@@ -155,7 +157,7 @@ export default function KeyManagementScreen({ tier, mode05Purchased }: Props) {
         <View style={[styles.statusBadge, { borderColor: connected ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)', backgroundColor: connected ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)' }]}>
           <Radio size={12} color={connected ? COLORS.emerald : '#ef4444'} />
           <Text style={[styles.statusText, { color: connected ? COLORS.emerald : '#ef4444' }]}>
-            {connected ? (getWiFiStatus().isSimulated ? 'DEMO MODE' : 'ADAPTER CONNECTED') : 'NO CONNECTION'}
+            {connected ? (isSimulated ? 'DEMO MODE' : 'ADAPTER CONNECTED') : 'NO CONNECTION'}
           </Text>
         </View>
 

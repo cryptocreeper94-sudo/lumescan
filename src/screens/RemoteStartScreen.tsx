@@ -6,6 +6,7 @@ import { COLORS } from '../theme/colors';
 import { checkStartReadiness, authenticateIMO, sendRemoteStart, sendRemoteStop, pollRuntimeStatus, isEngineRunning, type ReadinessCheck, type RuntimeStatus } from '../telemetry/OBDCommands';
 import { runSafetyChecks, recordStartAttempt, type FullSafetyReport } from '../telemetry/SafetyConstraints';
 import { getWiFiStatus } from '../telemetry/WiFiConnector';
+import { getBLENativeStatus } from '../telemetry/BLEConnector';
 
 interface Props {
   tier: string;
@@ -30,7 +31,7 @@ export default function RemoteStartScreen({ tier, mode06Purchased }: Props) {
     transform: [{ scale: pulseAnim.value }],
   }));
 
-  const connected = getWiFiStatus().status === 'connected';
+  const connected = getWiFiStatus().status === 'connected' || getBLENativeStatus().status === 'connected';
 
   // Cleanup runtime poll on unmount
   useEffect(() => {

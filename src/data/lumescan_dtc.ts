@@ -70,7 +70,7 @@ export default {
   "severity": "Moderate — engine will run poorly and lack power.",
   "timeline": "Active Failure — Fix within 1-2 weeks to restore engine performance.",
   "action": "Replace Variable Valve Timing (VVT) Solenoid.",
-  "partName": "Variable Valve Timing (VVT) Solenoid.",
+  "partName": "Variable Valve Timing VVT Solenoid",
   "partPriceLow": 40,
   "partPriceHigh": 120,
   "vehicle": "Universal"
@@ -83,7 +83,7 @@ export default {
   "severity": "Moderate — can cause rough idle, stalling, and poor fuel economy.",
   "timeline": "Imminent Failure — Change oil immediately; if code returns, replace VVT solenoid within 2 weeks.",
   "action": "Perform Oil Change / Replace VVT Solenoid.",
-  "partName": "VVT Solenoid.",
+  "partName": "VVT Solenoid",
   "partPriceLow": 40,
   "partPriceHigh": 120,
   "vehicle": "Universal"
@@ -96,7 +96,7 @@ export default {
   "severity": "Moderate — may cause hesitation during acceleration and rough idle.",
   "timeline": "Active Failure — Clean or replace within 2-4 weeks.",
   "action": "Clean with MAF Sensor Cleaner, or Replace MAF Sensor.",
-  "partName": "with MAF Sensor Cleaner, or Replace MAF Sensor.",
+  "partName": "MAF Sensor",
   "partPriceLow": 50,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -109,7 +109,7 @@ export default {
   "severity": "Moderate — vehicle may enter \"Limp Mode\" or stall.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Mass Air Flow Sensor.",
-  "partName": "Mass Air Flow Sensor.",
+  "partName": "Mass Air Flow Sensor",
   "partPriceLow": 50,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -122,7 +122,7 @@ export default {
   "severity": "Low — engine will run slightly rich, reducing fuel economy.",
   "timeline": "Active Failure — Fix within 1 month.",
   "action": "Replace Intake Air Temperature Sensor.",
-  "partName": "Intake Air Temperature Sensor.",
+  "partName": "Intake Air Temperature Sensor",
   "partPriceLow": 15,
   "partPriceHigh": 40,
   "vehicle": "Universal"
@@ -135,7 +135,7 @@ export default {
   "severity": "Moderate — can cause severe starting issues and flood the engine.",
   "timeline": "Active Failure — Replace within 1 week.",
   "action": "Replace Engine Coolant Temperature Sensor.",
-  "partName": "Engine Coolant Temperature Sensor.",
+  "partName": "Engine Coolant Temperature Sensor",
   "partPriceLow": 15,
   "partPriceHigh": 35,
   "vehicle": "Universal"
@@ -148,7 +148,7 @@ export default {
   "severity": "High — engine may stall unexpectedly or refuse to accelerate.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Throttle Position Sensor (or entire Throttle Body).",
-  "partName": "Throttle Position Sensor (or entire Throttle Body).",
+  "partName": "Throttle Position Sensor",
   "partPriceLow": 30,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -161,7 +161,7 @@ export default {
   "severity": "Moderate — heater will blow cold air, and engine will run rich, wasting fuel.",
   "timeline": "Imminent Failure — Replace within 2-4 weeks.",
   "action": "Replace Coolant Thermostat.",
-  "partName": "Coolant Thermostat.",
+  "partName": "Coolant Thermostat",
   "partPriceLow": 15,
   "partPriceHigh": 45,
   "vehicle": "Universal"
@@ -174,7 +174,7 @@ export default {
   "severity": "Moderate — engine may hesitate or misfire.",
   "timeline": "Active Failure — Replace within 2-3 weeks.",
   "action": "Replace Upstream Oxygen Sensor.",
-  "partName": "Upstream Oxygen Sensor.",
+  "partName": "Upstream Oxygen Sensor",
   "partPriceLow": 40,
   "partPriceHigh": 100,
   "vehicle": "Universal"
@@ -187,7 +187,7 @@ export default {
   "severity": "Low — slight decrease in fuel economy.",
   "timeline": "Imminent Failure — Replace within 1-2 months.",
   "action": "Replace Upstream Oxygen Sensor.",
-  "partName": "Upstream Oxygen Sensor.",
+  "partName": "Upstream Oxygen Sensor",
   "partPriceLow": 40,
   "partPriceHigh": 100,
   "vehicle": "Universal"
@@ -200,7 +200,7 @@ export default {
   "severity": "Low — causes slightly higher emissions during cold starts.",
   "timeline": "Active Failure — Replace within 1-2 months.",
   "action": "Replace Upstream Oxygen Sensor.",
-  "partName": "Upstream Oxygen Sensor.",
+  "partName": "Upstream Oxygen Sensor",
   "partPriceLow": 40,
   "partPriceHigh": 100,
   "vehicle": "Universal"
@@ -213,7 +213,7 @@ export default {
   "severity": "High — can cause engine knocking, overheating, and catalytic converter damage.",
   "timeline": "Active Failure — Diagnose and fix immediately.",
   "action": "Locate Vacuum Leak / Replace Intake Gasket.",
-  "partName": "Intake Gasket.",
+  "partName": "Intake Manifold Gasket",
   "partPriceLow": 10,
   "partPriceHigh": 100,
   "vehicle": "Universal"
@@ -226,7 +226,7 @@ export default {
   "severity": "High — raw fuel dumping into the exhaust will melt the catalytic converter.",
   "timeline": "Active Failure — Fix immediately.",
   "action": "Replace Fuel Injector / Fuel Pressure Regulator.",
-  "partName": "Fuel Pressure Regulator.",
+  "partName": "Fuel Pressure Regulator",
   "partPriceLow": 40,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -239,7 +239,7 @@ export default {
   "severity": "High — can cause misfires and engine damage.",
   "timeline": "Active Failure — Diagnose and fix immediately.",
   "action": "Locate Vacuum Leak / Replace Intake Gasket.",
-  "partName": "Intake Gasket.",
+  "partName": "Intake Manifold Gasket",
   "partPriceLow": 10,
   "partPriceHigh": 100,
   "vehicle": "Universal"
@@ -252,7 +252,7 @@ export default {
   "severity": "High — will ruin spark plugs and destroy the catalytic converter.",
   "timeline": "Active Failure — Fix immediately.",
   "action": "Replace Fuel Injector / Fuel Pressure Regulator.",
-  "partName": "Fuel Pressure Regulator.",
+  "partName": "Fuel Pressure Regulator",
   "partPriceLow": 40,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -265,7 +265,7 @@ export default {
   "severity": "High — Cylinder 1 is entirely dead (dead miss).",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Fuel Injector.",
-  "partName": "Fuel Injector.",
+  "partName": "Fuel Injector",
   "partPriceLow": 40,
   "partPriceHigh": 120,
   "vehicle": "Universal"
@@ -278,7 +278,7 @@ export default {
   "severity": "High — engine shakes, lacks power, and flashes the Check Engine Light.",
   "timeline": "Active Failure — Diagnose immediately to prevent catalyst damage.",
   "action": "Check Fuel Pressure / Locate Vacuum Leak.",
-  "partName": "Locate Vacuum Leak.",
+  "partName": "Fuel Pressure Tester",
   "partPriceLow": 50,
   "partPriceHigh": 250,
   "vehicle": "Universal"
@@ -291,7 +291,7 @@ export default {
   "severity": "High — flashing CEL indicates severe raw fuel dumping into the exhaust.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Ignition Coil and Spark Plug.",
-  "partName": "Ignition Coil and Spark Plug.",
+  "partName": "Ignition Coil and Spark Plug",
   "partPriceLow": 40,
   "partPriceHigh": 80,
   "vehicle": "Universal"
@@ -304,7 +304,7 @@ export default {
   "severity": "High — will cause harsh vibrations and catalyst damage.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Ignition Coil and Spark Plug.",
-  "partName": "Ignition Coil and Spark Plug.",
+  "partName": "Ignition Coil and Spark Plug",
   "partPriceLow": 40,
   "partPriceHigh": 80,
   "vehicle": "Universal"
@@ -317,7 +317,7 @@ export default {
   "severity": "High — raw fuel destroys the catalytic converter.",
   "timeline": "Active Failure — Diagnose immediately.",
   "action": "Replace Ignition Coil and Spark Plug.",
-  "partName": "Ignition Coil and Spark Plug.",
+  "partName": "Ignition Coil and Spark Plug",
   "partPriceLow": 40,
   "partPriceHigh": 80,
   "vehicle": "Universal"
@@ -330,7 +330,7 @@ export default {
   "severity": "High — flashing CEL means stop driving.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Ignition Coil and Spark Plug.",
-  "partName": "Ignition Coil and Spark Plug.",
+  "partName": "Ignition Coil and Spark Plug",
   "partPriceLow": 40,
   "partPriceHigh": 80,
   "vehicle": "Universal"
@@ -343,7 +343,7 @@ export default {
   "severity": "Moderate — the ECM will pull ignition timing, drastically reducing engine power to protect itself.",
   "timeline": "Active Failure — Replace within 2-4 weeks.",
   "action": "Replace Knock Sensor.",
-  "partName": "Knock Sensor.",
+  "partName": "Knock Sensor",
   "partPriceLow": 35,
   "partPriceHigh": 85,
   "vehicle": "Universal"
@@ -356,7 +356,7 @@ export default {
   "severity": "Severe — engine will stall while driving and refuse to restart (crank, no start).",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Crankshaft Position Sensor.",
-  "partName": "Crankshaft Position Sensor.",
+  "partName": "Crankshaft Position Sensor",
   "partPriceLow": 40,
   "partPriceHigh": 90,
   "vehicle": "Universal"
@@ -369,7 +369,7 @@ export default {
   "severity": "Moderate — extended cranking, poor idle, potential stalling.",
   "timeline": "Active Failure — Replace within 1-2 weeks.",
   "action": "Replace Camshaft Position Sensor.",
-  "partName": "Camshaft Position Sensor.",
+  "partName": "Camshaft Position Sensor",
   "partPriceLow": 35,
   "partPriceHigh": 80,
   "vehicle": "Universal"
@@ -382,7 +382,7 @@ export default {
   "severity": "Low — engine may ping slightly on acceleration, but safe to drive. Will fail emissions testing.",
   "timeline": "Imminent Failure — Clean or replace within 1-2 months.",
   "action": "Clean EGR Passages / Replace EGR Valve.",
-  "partName": "EGR Valve.",
+  "partName": "EGR Valve",
   "partPriceLow": 50,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -395,7 +395,7 @@ export default {
   "severity": "Moderate — safe to drive short term, but reduces fuel efficiency. Will fail emissions testing.",
   "timeline": "Imminent Failure — catalytic core degrading, failure expected within 4-6 weeks.",
   "action": "Replace Catalytic Converter.",
-  "partName": "Catalytic Converter.",
+  "partName": "Catalytic Converter",
   "partPriceLow": 89,
   "partPriceHigh": 350,
   "vehicle": "Universal"
@@ -408,7 +408,7 @@ export default {
   "severity": "Moderate — safe to drive short term. Will fail emissions testing.",
   "timeline": "Imminent Failure — replace within 4-6 weeks.",
   "action": "Replace Catalytic Converter.",
-  "partName": "Catalytic Converter.",
+  "partName": "Catalytic Converter",
   "partPriceLow": 89,
   "partPriceHigh": 350,
   "vehicle": "Universal"
@@ -421,7 +421,7 @@ export default {
   "severity": "Low — no drivability issues, purely an emissions system failure.",
   "timeline": "Active Failure — Fix before next state inspection.",
   "action": "Replace Purge Valve or Gas Cap.",
-  "partName": "Purge Valve or Gas Cap.",
+  "partName": "EVAP Purge Valve",
   "partPriceLow": 15,
   "partPriceHigh": 60,
   "vehicle": "Universal"
@@ -434,7 +434,7 @@ export default {
   "severity": "Low — safe to drive indefinitely.",
   "timeline": "Imminent Failure — Address when convenient.",
   "action": "Replace Gas Cap.",
-  "partName": "Gas Cap.",
+  "partName": "Gas Cap",
   "partPriceLow": 10,
   "partPriceHigh": 25,
   "vehicle": "Universal"
@@ -447,7 +447,7 @@ export default {
   "severity": "Low — no drivability issues.",
   "timeline": "Active Failure — Check gas cap immediately.",
   "action": "Tighten or Replace Gas Cap.",
-  "partName": "Tighten or Replace Gas Cap.",
+  "partName": "Gas Cap",
   "partPriceLow": 0,
   "partPriceHigh": 25,
   "vehicle": "Universal"
@@ -460,7 +460,7 @@ export default {
   "severity": "Low — safe to drive.",
   "timeline": "Imminent Failure — Fix before next inspection.",
   "action": "Smoke Test EVAP System.",
-  "partName": "Smoke Test EVAP System.",
+  "partName": "EVAP Smoke Machine",
   "partPriceLow": 100,
   "partPriceHigh": 250,
   "vehicle": "Universal"
@@ -473,7 +473,7 @@ export default {
   "severity": "High — transmission will not shift properly, speedometer dead.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Vehicle Speed Sensor.",
-  "partName": "Vehicle Speed Sensor.",
+  "partName": "Vehicle Speed Sensor",
   "partPriceLow": 20,
   "partPriceHigh": 70,
   "vehicle": "Universal"
@@ -486,7 +486,7 @@ export default {
   "severity": "High — engine will stall at stoplights.",
   "timeline": "Active Failure — Clean or replace immediately.",
   "action": "Clean/Replace Idle Air Control Valve.",
-  "partName": "Idle Air Control Valve.",
+  "partName": "Idle Air Control Valve",
   "partPriceLow": 30,
   "partPriceHigh": 90,
   "vehicle": "Universal"
@@ -499,7 +499,7 @@ export default {
   "severity": "Moderate — usually just a bad sensor, but if actual pressure is zero, engine will seize.",
   "timeline": "Active Failure — Check oil level instantly, replace sensor.",
   "action": "Replace Oil Pressure Sensor.",
-  "partName": "Oil Pressure Sensor.",
+  "partName": "Oil Pressure Sensor",
   "partPriceLow": 15,
   "partPriceHigh": 50,
   "vehicle": "Universal"
@@ -512,7 +512,7 @@ export default {
   "severity": "Severe — vehicle may not start or run at all.",
   "timeline": "Active Failure — Requires immediate replacement.",
   "action": "Replace and Program PCM.",
-  "partName": "and Program PCM.",
+  "partName": "Engine Control Module ECM PCM",
   "partPriceLow": 200,
   "partPriceHigh": 600,
   "vehicle": "Universal"
@@ -525,7 +525,7 @@ export default {
   "severity": "High — indicates a transmission problem.",
   "timeline": "Active Failure — Scan TCM for specific codes.",
   "action": "Read Transmission Codes.",
-  "partName": "Read Transmission Codes.",
+  "partName": "OBD2 Scanner",
   "partPriceLow": 0,
   "partPriceHigh": 0,
   "vehicle": "Universal"
@@ -538,7 +538,7 @@ export default {
   "severity": "High — transmission stuck in limp mode.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Transmission Output Speed Sensor.",
-  "partName": "Transmission Output Speed Sensor.",
+  "partName": "Transmission Output Speed Sensor",
   "partPriceLow": 25,
   "partPriceHigh": 70,
   "vehicle": "Universal"
@@ -551,7 +551,7 @@ export default {
   "severity": "Severe — transmission is physically slipping.",
   "timeline": "Active Failure — Stop driving to prevent further damage.",
   "action": "Rebuild or Replace Transmission.",
-  "partName": "Rebuild or Replace Transmission.",
+  "partName": "Transmission Rebuild Kit",
   "partPriceLow": 1,
   "partPriceHigh": 500,
   "vehicle": "Universal"
@@ -564,7 +564,7 @@ export default {
   "severity": "Moderate — safe to drive, but ruins fuel economy.",
   "timeline": "Active Failure — Replace TCC solenoid.",
   "action": "Replace TCC Solenoid.",
-  "partName": "TCC Solenoid.",
+  "partName": "TCC Solenoid",
   "partPriceLow": 50,
   "partPriceHigh": 150,
   "vehicle": "Universal"
@@ -577,7 +577,7 @@ export default {
   "severity": "High — transmission will shift violently or refuse to shift.",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Shift Solenoid.",
-  "partName": "Shift Solenoid.",
+  "partName": "Shift Solenoid",
   "partPriceLow": 40,
   "partPriceHigh": 120,
   "vehicle": "Universal"
@@ -590,7 +590,7 @@ export default {
   "severity": "High — causes extremely harsh shifting.",
   "timeline": "Active Failure — Replace within 1-2 weeks.",
   "action": "Replace Transmission Fluid Pressure Sensor.",
-  "partName": "Transmission Fluid Pressure Sensor.",
+  "partName": "Transmission Fluid Pressure Sensor",
   "partPriceLow": 35,
   "partPriceHigh": 90,
   "vehicle": "Universal"
@@ -603,7 +603,7 @@ export default {
   "severity": "Severe — Engine will go into forced reduced power mode (idle only).",
   "timeline": "Active Failure — Replace immediately.",
   "action": "Replace Electronic Throttle Body or Accelerator Pedal.",
-  "partName": "Electronic Throttle Body or Accelerator Pedal.",
+  "partName": "Electronic Throttle Body",
   "partPriceLow": 100,
   "partPriceHigh": 350,
   "vehicle": "Universal"
@@ -616,7 +616,7 @@ export default {
   "severity": "Moderate — poor heater performance and reduced MPG.",
   "timeline": "Imminent Failure — Replace thermostat within 1 month.",
   "action": "Replace Coolant Thermostat.",
-  "partName": "Coolant Thermostat.",
+  "partName": "Coolant Thermostat",
   "partPriceLow": 15,
   "partPriceHigh": 45,
   "vehicle": "Universal"
@@ -629,7 +629,7 @@ export default {
   "severity": "Severe — dashboard will light up like a Christmas tree, vehicle may not start.",
   "timeline": "Active Failure — Requires advanced electrical diagnostics.",
   "action": "Diagnose CAN Bus Network.",
-  "partName": "CAN Bus Network.",
+  "partName": "CAN Bus Repair Connector",
   "partPriceLow": 150,
   "partPriceHigh": 400,
   "vehicle": "Universal"
@@ -642,7 +642,7 @@ export default {
   "severity": "Severe — engine will crank but not start.",
   "timeline": "Active Failure — Check ECM fuses and grounds immediately.",
   "action": "Check Fuses / Replace ECM.",
-  "partName": "ECM.",
+  "partName": "Engine Control Module ECM",
   "partPriceLow": 5,
   "partPriceHigh": 500,
   "vehicle": "Universal"
@@ -655,7 +655,7 @@ export default {
   "severity": "Moderate — brakes work normally, but ABS/Traction Control is disabled.",
   "timeline": "Active Failure — Replace within 1 month.",
   "action": "Replace Wheel Speed Sensor (Front Left).",
-  "partName": "Wheel Speed Sensor (Front Left).",
+  "partName": "ABS Wheel Speed Sensor Front Left",
   "partPriceLow": 25,
   "partPriceHigh": 75,
   "vehicle": "Universal"
@@ -668,7 +668,7 @@ export default {
   "severity": "Moderate — standard braking functions remain, safety systems disabled.",
   "timeline": "Active Failure — Replace within 1 month.",
   "action": "Replace Wheel Speed Sensor (Front Right).",
-  "partName": "Wheel Speed Sensor (Front Right).",
+  "partName": "ABS Wheel Speed Sensor Front Right",
   "partPriceLow": 25,
   "partPriceHigh": 75,
   "vehicle": "Universal"
@@ -681,7 +681,7 @@ export default {
   "severity": "High — points to a severe engine performance issue.",
   "timeline": "Active Failure — Fix the Check Engine Light first.",
   "action": "Diagnose Engine Codes (P-Codes).",
-  "partName": "Engine Codes (P-Codes).",
+  "partName": "OBD2 Scanner",
   "partPriceLow": 0,
   "partPriceHigh": 0,
   "vehicle": "Universal"
@@ -694,7 +694,7 @@ export default {
   "severity": "Severe — the driver's side curtain airbag WILL NOT deploy in a crash.",
   "timeline": "Active Failure — Do not drive, fix immediately.",
   "action": "Check Airbag Connectors / Replace Airbag.",
-  "partName": "Airbag.",
+  "partName": "Airbag Module",
   "partPriceLow": 100,
   "partPriceHigh": 400,
   "vehicle": "Universal"
@@ -707,7 +707,7 @@ export default {
   "severity": "Low — annoying clicking sound in dash, AC stuck on one setting.",
   "timeline": "Imminent Failure — Replace when convenient.",
   "action": "Replace Blend Door Actuator.",
-  "partName": "Blend Door Actuator.",
+  "partName": "Blend Door Actuator",
   "partPriceLow": 20,
   "partPriceHigh": 60,
   "vehicle": "Universal"

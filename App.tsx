@@ -84,18 +84,27 @@ export default function App() {
       )}
       {appState === 'locked' && (
         <View style={styles.center}>
-          <Text style={styles.lockIcon}>🔒</Text>
-          <Text style={styles.lockTitle}>Sign In Required</Text>
+          <Text style={styles.lockIcon}>🔧</Text>
+          <Text style={styles.lockTitle}>Connection Issue</Text>
           <Text style={styles.lockDesc}>
-            Sign in to access Lume Scan. Free basic scanning is included — upgrade to Pro for the full 42-signal engine.
+            We couldn't verify your license right now. You can continue in Free Mode (3 live signals) or upgrade to Pro for the full 42-signal engine.
           </Text>
+          <TouchableOpacity style={[styles.refreshBtn, { backgroundColor: 'rgba(6,182,212,0.15)', borderColor: 'rgba(6,182,212,0.3)' }]} onPress={() => {
+            setEntitlement({ entitled: true, tier: 'free', reason: 'free_tier' });
+            setAppState('connection');
+          }}>
+            <Text style={[styles.refreshBtnText, { color: '#06b6d4' }]}>Continue in Free Mode</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.refreshBtn} onPress={async () => {
             setAppState('checking');
             const status = await checkEntitlement();
             setEntitlement(status);
             setAppState(status.entitled ? 'connection' : 'locked');
           }}>
-            <Text style={styles.refreshBtnText}>Retry</Text>
+            <Text style={styles.refreshBtnText}>Retry License Check</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.refreshBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+            <Text style={[styles.refreshBtnText, { color: '#10b981' }]}>Get Lume Scan Pro →</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.signOutBtn} onPress={() => auth.signOut()}>
             <Text style={styles.signOutText}>Sign out</Text>
