@@ -1,0 +1,23 @@
+{
+  "name": "lume-scan",
+  "version": "1.0.0",
+  "entry": "src/lume/04_init.lume",
+  "output": "index.html",
+  "modules": [
+    "src/lume/00_intro.lume",
+    "src/lume/01_styles.lume",
+    "src/lume/02_shell.lume",
+    "src/lume/03_logic.lume",
+    "src/lume/04_init.lume"
+  ],
+  "compiler": {
+    "target": "html",
+    "minify": false,
+    "sourceMap": false
+  },
+  "meta": {
+    "author": "DarkWave Studios LLC",
+    "license": "Proprietary",
+    "patent": "US Provisional 64/032,339"
+  }
+}

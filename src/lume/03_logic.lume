@@ -1,0 +1,97 @@
+/// ─── LUME SCAN APPLICATION LOGIC ────────────────────────
+/// Deterministic runtime handlers
+
+firebase.initializeApp({apiKey:'AIzaSyCVPbg2gQ9K3UB3qNCrb-VHfsYM7ABZBck',authDomain:'darkwave-auth.firebaseapp.com',projectId:'darkwave-auth',storageBucket:'darkwave-auth.firebasestorage.app',messagingSenderId:'41307406912',appId:'1:41307406912:web:b82a15c90790542e2a55a5'});var db=firebase.firestore();
+    (function(){
+      var launch=new Date('2026-06-23T09:00:00-05:00').getTime();
+      function tick(){
+        var diff=launch-Date.now();
+        if(diff<=0){document.querySelector('.countdown').innerHTML='<span style="font-size:1.4rem;font-weight:900;color:var(--accent)">We are live!</span>';return;}
+        var pad=function(n){return n<10?'0'+n:''+n;};
+        document.getElementById('cd-d').textContent=pad(Math.floor(diff/86400000));
+        document.getElementById('cd-h').textContent=pad(Math.floor((diff%86400000)/3600000));
+        document.getElementById('cd-m').textContent=pad(Math.floor((diff%3600000)/60000));
+        document.getElementById('cd-s').textContent=pad(Math.floor((diff%60000)/1000));
+      }
+      tick();setInterval(tick,1000);
+    })();
+    function submitEmail(){
+      var input=document.getElementById('teaser-email');
+      var btn=document.getElementById('teaser-btn');
+      var email=input.value.trim();
+      if(!email||!email.includes('@')){input.style.borderColor='rgba(239,68,68,.5)';setTimeout(function(){input.style.borderColor='';},1200);return;}
+      try{var l=JSON.parse(localStorage.getItem('dw_launch_list')||'[]');if(!l.includes(email)){l.push(email);localStorage.setItem('dw_launch_list',JSON.stringify(l));}}catch(e){}
+      db.collection('launch_emails').add({email:email,app:'lumescan',source:window.location.hostname,timestamp:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      fetch('https://axiom42.com/api/sms/optin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Launch Subscriber',phone:'email-only',email:email,consent:true,consentTimestamp:new Date().toISOString(),consentSource:'teaser_'+window.location.hostname})}).catch(function(){});
+      btn.textContent='\u2713 You\'re on the list';
+      btn.classList.add('done');
+      input.value='';
+    }
+    document.getElementById('teaser-btn').addEventListener('click', submitEmail);
+    document.getElementById('teaser-email').addEventListener('keydown',function(e){if(e.key==='Enter')submitEmail();});
+
+// Countdown Timer
+  (function(){
+    const targetDate = new Date('June 23, 2026 09:00:00').getTime();
+    function update() {
+      const now = new Date().getTime();
+      const dist = targetDate - now;
+      if (dist < 0) return;
+      document.getElementById('gb-days').innerText = Math.floor(dist / (1000 * 60 * 60 * 24));
+      document.getElementById('gb-hours').innerText = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+      document.getElementById('gb-mins').innerText = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+      document.getElementById('gb-secs').innerText = Math.floor((dist % (1000 * 60)) / 1000).toString().padStart(2, '0');
+    }
+    update();
+    setInterval(update, 1000);
+  })();
+
+  // Lock body scroll while gate is visible
+  document.documentElement.classList.add('gb-active');
+
+  // Demo Mode
+  window.enterDemoMode = function() {
+    document.getElementById('glass-blackout-overlay').classList.add('hidden');
+    document.getElementById('gb-demo-indicator').classList.add('visible');
+    document.documentElement.classList.remove('gb-active');
+    
+    // Intercept clicks
+    document.body.addEventListener('click', function(e) {
+      // Find closest anchor or button
+      const target = e.target.closest('a, button');
+      if (!target) return;
+      
+      // Allow specific navigation or free links
+      if (target.closest('.gb-modal')) return;
+      if (target.href && (target.href.includes('chronoverse') || target.href.includes('trustshield') || target.href.startsWith('#'))) return;
+      
+      // Keywords to intercept
+      const text = (target.textContent || '').toLowerCase();
+      const href = (target.href || '').toLowerCase();
+      const isAction = target.tagName === 'BUTTON' || 
+                       href.includes('/buy') || 
+                       href.includes('.exe') || 
+                       href.includes('.apk') ||
+                       ['save', 'export', 'download', 'deploy', 'generate', 'buy', 'checkout'].some(k => text.includes(k));
+      
+      if (isAction) {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast('🔒 Feature unlocks June 23, 2026');
+      }
+    }, true);
+  };
+  document.getElementById('gb-enter-demo').addEventListener('click', window.enterDemoMode);
+
+  function showToast(msg) {
+    const container = document.getElementById('gb-toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'gb-toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('hiding');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }

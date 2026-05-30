@@ -1,0 +1,5 @@
+/// ─── LUME SCAN BOOT SEQUENCE ────────────────────────────
+/// Entry point — initializes the application
+
+buildShell()
+console.log('[LUME SCAN] Lume application mounted')

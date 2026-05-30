@@ -1,0 +1,155 @@
+/// ─── LUME SCAN APP SHELL ────────────────────────────────
+/// Deterministic DOM construction via Lume dom primitives
+
+function buildShell() {
+  define root = dom.create('div', { id: 'lumescan-site-root' })
+  root.innerHTML = `<div class="bg-canvas"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+  <div class="bg-grid"></div>
+
+  <div class="page">
+    <div class="topbar">
+      <a href="https://tlid.io" class="dw-logo">
+        <div class="dw-mark">DW</div>
+        <span class="dw-text">DarkWave Studios</span>
+      </a>
+      <a href="https://dwtl.io/presale" class="badge" target="_blank">Signal Presale Live</a>
+    </div>
+
+    <div class="hero">
+      <span class="app-icon">🔧</span>
+      <div class="chip">LAUNCHING JUNE 23, 2026</div>
+      <h1>Lume Scan</h1>
+      <p class="tagline">Deterministic OBD-II Diagnostic Engine</p>
+
+      <div class="countdown">
+        <div class="cd-block"><span class="cd-num" id="cd-d">--</span><span class="cd-label">Days</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-h">--</span><span class="cd-label">Hours</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-m">--</span><span class="cd-label">Mins</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-block"><span class="cd-num" id="cd-s">--</span><span class="cd-label">Secs</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">About Lume Scan</div>
+      <div class="desc-card">
+        <p>Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, intelligent fault code interpretation, severity analysis, and predictive maintenance timelines. No subscription required for basic diagnostics. Available on Android with iOS coming soon.</p>
+      </div>
+
+      <div class="features">
+        <div class="feat"><span class="feat-dot"></span>42 Live Engine Signals</div>
+            <div class="feat"><span class="feat-dot"></span>Intelligent Code Interpretation</div>
+            <div class="feat"><span class="feat-dot"></span>Severity Analysis</div>
+            <div class="feat"><span class="feat-dot"></span>Predictive Maintenance</div>
+            <div class="feat"><span class="feat-dot"></span>BLE & WiFi Adapters</div>
+            <div class="feat"><span class="feat-dot"></span>Zero-Subscription Diagnostics</div>
+      </div>
+    </div>
+
+    <div class="video-section">
+      <div class="section-title">See It In Action</div>
+      
+          <video controls playsinline preload="metadata" poster="" style="width:100%;border-radius:16px;border:1px solid rgba(6,182,212,.2);box-shadow:0 8px 40px rgba(0,0,0,.5);">
+            <source src="videos/demo.mp4" type="video/mp4">
+          </video>
+    </div>
+
+    <div class="notify-wrap">
+      <p class="notify-label">Get notified when Lume Scan goes live.</p>
+      <div class="capture">
+        <input type="email" id="teaser-email" placeholder="Enter your enterprise email" autocomplete="email">
+        <button id="teaser-btn" >Notify Me</button>
+      </div>
+    </div>
+
+    <div class="presale-card">
+      <h3>Signal Presale — Live Now</h3>
+      <p>Early supporters earn up to <strong style="color:var(--accent)">+25% bonus Signal ($SIG)</strong> — the token that powers access across every app in the ecosystem.</p>
+      <a href="https://dwtl.io/presale" target="_blank" class="btn-presale">Join the Presale — From $10</a>
+      <a href="https://dwtl.io" target="_blank" class="btn-secondary">Explore the Trust Layer</a>
+    </div>
+
+    <div class="footer">
+      <a href="https://axiomstudio.dev">Axiom AI</a>
+      <span>&middot;</span>
+      <a href="https://dwtl.io/presale">Signal Presale</a>
+      <span>&middot;</span>
+      <a href="https://tlid.io">TLID Domains</a>
+      <span>&middot;</span>
+      <a href="https://darkwavestudios.io">DarkWave Studios</a>
+    </div>
+  </div>
+
+  
+  
+  
+
+
+
+
+<div id="glass-blackout-overlay">
+  <div class="gb-modal">
+    <div class="gb-badge">🔒 Launching June 23, 2026 <span style="opacity:0.5; margin:0 8px;">|</span> Patent Pending</div>
+    <h1 class="gb-title">Lume Scan</h1>
+    <p class="gb-subtitle">Professional OBD-II diagnostics from $9.99. First-come, first-served tiers open June 23 at 10:00 AM CST.</p>
+    
+    <div class="gb-timer">
+      <div class="gb-time-box"><div class="num" id="gb-days">28</div><div class="lbl">Days</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-hours">00</div><div class="lbl">Hours</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-mins">00</div><div class="lbl">Mins</div></div>
+      <div class="gb-time-box"><div class="num" id="gb-secs">00</div><div class="lbl">Secs</div></div>
+    </div>
+
+    <!-- Pricing Tiers -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;text-align:center">
+      <div style="padding:16px 10px;border-radius:14px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.05)">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;color:#22d3ee">🏆 Founders</div>
+        <div style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fff;margin-bottom:2px">$9.99</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35)">+ $1.99/mo</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;font-style:italic">First 100 users</div>
+      </div>
+      <div style="padding:16px 10px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;color:#38bdf8">Early Adopter</div>
+        <div style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fff;margin-bottom:2px">$19.99</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35)">+ $2.49/mo</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;font-style:italic">Users 101–500</div>
+      </div>
+      <div style="padding:16px 10px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;color:#94a3b8">Standard</div>
+        <div style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fff;margin-bottom:2px">$39.99</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35)">+ $4.99/mo</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:4px;font-style:italic">Everyone else</div>
+      </div>
+    </div>
+    
+    <div class="gb-ctas">
+      <button class="gb-btn-primary" id="gb-enter-demo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        See the Product →
+      </button>
+      <a href="https://dwtl.io/presale" class="gb-btn-secondary">Join $SIG Presale</a>
+    </div>
+
+    <div class="gb-free-banner">
+      <p style="font-size:11px;color:#64748b;margin-bottom:12px">No payment required. Tiers are first-come, first-served on launch day.<br>US Provisional Patent 64/032,339 · DarkWave Studios LLC</p>
+      <p style="font-size:11px;color:#64748b;margin-bottom:12px">While you wait, explore our 100% Free & Ad-Free platforms:</p>
+      <div class="gb-free-links">
+        <a href="https://chronoverse.tlid.io" class="gb-free-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Chronoverse
+        </a>
+        <a href="https://trustshield.tech" class="gb-free-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          TrustShield
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gb-demo-indicator">Preview Mode</div>
+<div id="gb-toast-container"></div>`
+  dom.mount(root)
+}
