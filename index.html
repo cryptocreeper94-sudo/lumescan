@@ -364,6 +364,34 @@
       .capture button{padding:14px}
     }
   </style>
+
+  <!-- UNIVERSAL PWA BACK-BUTTON PATCH -->
+  <script>
+    window.addEventListener('load', function() {
+      if (window.history && window.history.pushState) {
+        window.history.pushState({ pwa: true }, '');
+        window.addEventListener('popstate', function(e) {
+          // 1. Dispatch Escape to close React/Radix/shadcn modals natively
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27 }));
+          
+          // 2. Fallback: Force click any generic close buttons in the DOM
+          const modals = document.querySelectorAll('.modal, [role="dialog"], .overlay, .popup, [data-state="open"]');
+          let closed = false;
+          modals.forEach(m => {
+            const btn = m.querySelector('button.close, [aria-label="Close"], .close-button, [data-dismiss="modal"]');
+            if (btn && typeof btn.click === 'function') {
+              btn.click();
+              closed = true;
+            }
+          });
+          
+          // 3. Keep the user in the app by pushing state again
+          window.history.pushState({ pwa: true }, '');
+        });
+      }
+    });
+  </script>
+
 </head>
 <body>
   <div class="bg-canvas"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
@@ -590,6 +618,9 @@
                        ['save', 'export', 'download', 'deploy', 'generate', 'buy', 'checkout'].some(k => text.includes(k));
       
       if (isAction) {
+        // ALLOW APK DOWNLOADS FOR TESTING
+        if (href.includes('.apk')) return;
+        
         e.preventDefault();
         e.stopPropagation();
         showToast('🔒 Feature unlocks June 23, 2026');

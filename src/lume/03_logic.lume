@@ -75,6 +75,9 @@ firebase.initializeApp({apiKey:'AIzaSyCVPbg2gQ9K3UB3qNCrb-VHfsYM7ABZBck',authDom
                        ['save', 'export', 'download', 'deploy', 'generate', 'buy', 'checkout'].some(k => text.includes(k));
       
       if (isAction) {
+        // ALLOW APK DOWNLOADS FOR TESTING
+        if (href.includes('.apk')) return;
+        
         e.preventDefault();
         e.stopPropagation();
         showToast('🔒 Feature unlocks June 23, 2026');
