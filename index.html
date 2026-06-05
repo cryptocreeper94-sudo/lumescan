@@ -261,6 +261,9 @@
 
 
 
+
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lume Scan — Coming Soon | DarkWave Studios</title>
@@ -509,6 +512,9 @@
   Made with Lume
 </a>
 
+
+
+
 <div id="glass-blackout-overlay">
   <div class="gb-modal">
     <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> Patent Pending</div>
@@ -554,14 +560,14 @@
   (function(){
     var ua = navigator.userAgent.toLowerCase();
     var isNative = ua.indexOf(' electron/') > -1 || ua.indexOf('capacitor') > -1 || ua.indexOf('wv') > -1;
-    var isPwa = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
 
     if (window.location.search.includes('admin_unlock=42')) {
       localStorage.setItem('gb_admin_override', 'true');
     }
     var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true';
 
-    if (isNative || isPwa || isWhitelisted) {
+    // PWA is no longer automatically allowed. Only true native apps (exe/apk) or whitelisted users bypass.
+    if (isNative || isWhitelisted) {
       var overlay = document.getElementById('glass-blackout-overlay');
       if (overlay) overlay.style.display = 'none';
       return;
