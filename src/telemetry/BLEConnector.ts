@@ -1232,11 +1232,22 @@ export function startBLENativeTelemetryLoop(
 ): () => void {
   startTime = Date.now();
   const timer = setInterval(async () => {
-    if (txCharacteristic && connectionState.status === 'connected' && !connectionState.isSimulated) {
+    if (connectionState.isSimulated) {
+      onData(simulatedTick());
+      return;
+    }
+
+    if (txCharacteristic && connectionState.status === 'connected') {
       await pollAllBLEPIDs();
       onData(buildSnapshot());
     } else {
-      onData(simulatedTick());
+      // Strict fallback: never show mock data if not in demo mode
+      const emptySnapshot: TelemetrySnapshot = {
+        rpm: 0, speed: 0, coolant: 0, engineLoad: 0,
+        throttle: 0, timing: 0, battery: 12.0,
+        dtcs: [], o2Tests: [], monitors: [], readiness: []
+      };
+      onData(emptySnapshot);
     }
   }, intervalMs);
   return () => clearInterval(timer);
