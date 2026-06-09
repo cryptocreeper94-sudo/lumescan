@@ -3,11 +3,7 @@
 <head>
 
 <style id="glass-blackout-style">
-  /* GLASS BLACKOUT STYLES */
-  html.gb-active, html.gb-active body {
-    overflow: hidden !important;
-    height: 100% !important;
-  }
+  /* GLASS BLACKOUT STYLES - MODAL ONLY */
   #glass-blackout-overlay {
     position: fixed;
     inset: 0;
@@ -59,7 +55,7 @@
     border: 1px solid rgba(34,211,238,0.2);
   }
   .gb-title {
-    font-size: 42px;
+    font-size: 32px;
     font-weight: 900;
     color: #fff;
     margin: 0 0 16px 0;
@@ -72,39 +68,12 @@
     margin: 0 0 36px 0;
     line-height: 1.6;
   }
-  .gb-timer {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 36px;
-  }
-  .gb-time-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 12px 16px;
-    min-width: 80px;
-  }
-  .gb-time-box .num {
-    font-size: 32px;
-    font-weight: 900;
-    font-family: 'JetBrains Mono', monospace;
-    color: #22d3ee;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .gb-time-box .lbl {
-    font-size: 10px;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
-  }
   .gb-ctas {
     display: flex;
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: 24px;
   }
   .gb-btn-primary {
     background: linear-gradient(135deg, #0ea5e9, #22d3ee);
@@ -218,42 +187,10 @@
     0% { transform: translateY(20px) scale(0.9); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
-
-  /* Demo Indicator */
-  #gb-demo-indicator {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(34,211,238,0.2);
-    color: #22d3ee;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    z-index: 2147483646;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    box-shadow: 0 4px 12px rgba(34,211,238,0.1);
-  }
-  #gb-demo-indicator.visible {
-    opacity: 1;
-  }
-  
-  @media (max-width: 600px) {
-    .gb-modal { padding: 32px 24px; }
-    .gb-title { font-size: 32px; }
-    .gb-time-box { min-width: 64px; padding: 10px; }
-    .gb-time-box .num { font-size: 24px; }
-    .gb-ctas { flex-direction: column; }
-    .gb-btn-primary, .gb-btn-secondary { width: 100%; justify-content: center; }
-    .gb-free-links { flex-direction: column; gap: 10px; }
-  }
 </style>
+
+
+
 
 
 
@@ -515,131 +452,46 @@
 
 
 
-<div id="glass-blackout-overlay">
+
+
+
+<div id="glass-blackout-overlay" class="hidden">
   <div class="gb-modal">
-    <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> Patent Pending</div>
-    <h1 class="gb-title">Lume Scan</h1>
-    <p class="gb-subtitle">The premier bidirectional diagnostic and fleet management suite featuring Mode 06 remote execution.</p>
-    
-    <div class="gb-timer">
-      <div class="gb-time-box"><div class="num" id="gb-days">28</div><div class="lbl">Days</div></div>
-      <div class="gb-time-box"><div class="num" id="gb-hours">00</div><div class="lbl">Hours</div></div>
-      <div class="gb-time-box"><div class="num" id="gb-mins">00</div><div class="lbl">Mins</div></div>
-      <div class="gb-time-box"><div class="num" id="gb-secs">00</div><div class="lbl">Secs</div></div>
-    </div>
+    <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> June 23, 2026</div>
+    <h1 class="gb-title">Downloads Locked</h1>
+    <p class="gb-subtitle">The executable builds of Lume Scan are restricted to authorized Beta Testers until our public launch. You may continue exploring the Web Demo without an account.</p>
     
     <div class="gb-ctas">
-      <button class="gb-btn-primary" onclick="enterDemoMode()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        Enter Demo Mode
+      <button class="gb-btn-primary" onclick="triggerBetaLogin()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Beta Testers Enter Here
       </button>
-      <a href="https://dwtl.io/presale" class="gb-btn-secondary">Join $SIG Presale</a>
+      <button class="gb-btn-secondary" onclick="closeBlackoutModal()">
+        Return to Demo
+      </button>
     </div>
 
     <div class="gb-free-banner">
       <p>While you wait, download our 100% Free & Ad-Free platforms today:</p>
       <div class="gb-free-links">
-        <a href="https://chronoverse.tlid.io" class="gb-free-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Chronoverse
-        </a>
-        <a href="https://trustshield.tech" class="gb-free-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          TrustShield
-        </a>
+        <a href="https://chronoverse.tlid.io" class="gb-free-link">Chronoverse</a>
+        <a href="https://trustshield.tech" class="gb-free-link">TrustShield</a>
       </div>
     </div>
   </div>
 </div>
 
-<div id="gb-demo-indicator">Preview Mode</div>
 <div id="gb-toast-container"></div>
 
 <script>
-  // Native/PWA/Admin Bypass
-  (function(){
-    var ua = navigator.userAgent.toLowerCase();
-    var isNative = ua.indexOf(' electron/') > -1 || ua.indexOf('capacitor') > -1 || ua.indexOf('wv') > -1;
-
-    if (window.location.search.includes('admin_unlock=42')) {
-      localStorage.setItem('gb_admin_override', 'true');
-    }
-    var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true';
-
-    // PWA is no longer automatically allowed. Only true native apps (exe/apk) or whitelisted users bypass.
-    if (isNative || isWhitelisted) {
-      var overlay = document.getElementById('glass-blackout-overlay');
-      if (overlay) overlay.style.display = 'none';
-      return;
-    }
-
-    // Lock body scroll while gate is visible
-    document.documentElement.classList.add('gb-active');
-
-    // Countdown Timer
-    const targetDate = new Date('June 23, 2026 09:00:00').getTime();
-    function update() {
-      const now = new Date().getTime();
-      const dist = targetDate - now;
-      if (dist < 0) {
-        var overlay = document.getElementById('glass-blackout-overlay');
-        if (overlay) overlay.classList.add('hidden');
-        return;
-      }
-      document.getElementById('gb-days').innerText = Math.floor(dist / (1000 * 60 * 60 * 24));
-      document.getElementById('gb-hours').innerText = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-      document.getElementById('gb-mins').innerText = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-      document.getElementById('gb-secs').innerText = Math.floor((dist % (1000 * 60)) / 1000).toString().padStart(2, '0');
-    }
-    update();
-    setInterval(update, 1000);
-  })();
-
-  // Demo Mode
-  window.enterDemoMode = function() {
+  window.closeBlackoutModal = function() {
     document.getElementById('glass-blackout-overlay').classList.add('hidden');
-    document.getElementById('gb-demo-indicator').classList.add('visible');
-    document.documentElement.classList.remove('gb-active');
-    
-    // Prevent typing in Demo Mode
-    document.body.addEventListener('keydown', function(e) {
-      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
-        if (e.key === 'Escape') return; // Allow Escape for modals
-        e.preventDefault();
-        e.stopPropagation();
-        showToast('🔒 Input disabled in Preview Mode');
-      }
-    }, true);
+  };
 
-    // Intercept clicks
-    document.body.addEventListener('click', function(e) {
-      // Find closest anchor or button
-      const target = e.target.closest('a, button');
-      if (!target) return;
-      
-      // Allow specific navigation or free links
-      if (target.closest('.gb-modal') || target.closest('#gb-demo-indicator')) return;
-      
-      // Keywords to intercept
-      const text = (target.textContent || '').toLowerCase();
-      const href = (target.href || '').toLowerCase();
-      const isAction = target.tagName === 'BUTTON' || 
-                       href.includes('/buy') || 
-                       href.includes('.exe') || 
-                       href.includes('.apk') ||
-                       href.includes('/checkout') ||
-                       ['save', 'export', 'download', 'deploy', 'generate', 'buy', 'checkout', 'upgrade', 'subscribe', 'run', 'execute', 'send', 'submit'].some(k => text.includes(k));
-      
-      if (isAction) {
-        e.preventDefault();
-        e.stopPropagation();
-        showToast('🔒 Feature unlocks June 23, 2026');
-        return;
-      }
-      
-      if (target.href && (target.href.includes('chronoverse') || target.href.includes('trustshield') || target.href.startsWith('#'))) return;
-      if (target.href && (target.href.includes(window.location.host))) return;
-    }, true); // Use capture phase
+  window.triggerBetaLogin = function() {
+    window.closeBlackoutModal();
+    window.dispatchEvent(new CustomEvent('betaTesterLogin'));
+    showToast('🔑 Please sign in with your authorized Google account.');
   };
 
   function showToast(msg) {
@@ -654,7 +506,41 @@
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
+
+  // Intercept Download Clicks
+  (function(){
+    if (window.location.search.includes('admin_unlock=42')) {
+      localStorage.setItem('gb_admin_override', 'true');
+    }
+
+    document.body.addEventListener('click', function(e) {
+      const target = e.target.closest('a, button');
+      if (!target) return;
+      
+      const text = (target.textContent || '').toLowerCase();
+      const href = (target.href || '').toLowerCase();
+      
+      // Target Executables and APKs
+      const isDownloadAction = href.includes('.exe') || 
+                               href.includes('.apk') || 
+                               href.includes('.dmg') ||
+                               href.includes('.appimage') ||
+                               (target.hasAttribute('download'));
+      
+      if (isDownloadAction) {
+        var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true' || localStorage.getItem('beta_tester_unlocked') === 'true';
+        var isNative = navigator.userAgent.toLowerCase().includes(' electron/') || navigator.userAgent.toLowerCase().includes('capacitor') || navigator.userAgent.toLowerCase().includes('wv');
+        
+        if (!isWhitelisted && !isNative) {
+          e.preventDefault();
+          e.stopPropagation();
+          document.getElementById('glass-blackout-overlay').classList.remove('hidden');
+        }
+      }
+    }, true);
+  })();
 </script>
 
+  <script src="https://nexus.tlid.io/beacon.js" defer></script>
 </body>
 </html>
