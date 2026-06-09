@@ -15,8 +15,11 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  initializeAuth,
+  getReactNativePersistence,
   type User,
 } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── DarkWave Auth — same project as Trust Hub / web app ──
 const firebaseConfig = {
@@ -29,7 +32,20 @@ const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
+
+let auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} catch (e: any) {
+  // If initializeAuth fails (e.g. auth/already-initialized during hot reload), fallback to getAuth
+  if (e.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+  } else {
+    throw e;
+  }
+}
 
 // ── Domain Whitelist (shared with web) ──
 const ALLOWED_DOMAINS = ['coxautoinc.com', 'darkwavestudios.com'];
