@@ -4,7 +4,7 @@ The **Lume Scan** mobile application — a professional OBD-II diagnostic tool b
 
 ## Download
 
-**Android APK**: [Download LumeScan v1.0.0](https://expo.dev/artifacts/eas/swv6JsxEjzQkSbDjyBJN8e.apk)
+**Android APK**: [Download LumeScan v1.0.0](https://expo.dev/artifacts/eas/fI3q7mrfIRY5WY9fsxw5_4oFiZ-WcFU_RLG6L_O2zFE.apk)
 **iOS App Store**: *Pending App Store Review.* (Requires an active $99/yr Apple Developer Program account to distribute via TestFlight or App Store).
 
 ## Features
