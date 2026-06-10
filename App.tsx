@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, Text, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Linking, ActivityIndicator, BackHandler } from 'react-native';
 import { Activity, FileText, Key, Radio, Settings as SettingsIcon, AlertTriangle, Wrench, Navigation, Clock } from 'lucide-react-native';
 import DashboardScreen from './src/screens/DashboardScreen';
 import ConnectionScreen from './src/screens/ConnectionScreen';
@@ -29,6 +29,7 @@ export default function App() {
   const [authInitialized, setAuthInitialized] = useState(false);
   const [entitlement, setEntitlement] = useState<EntitlementStatus | null>(null);
   const [mechanicMode, setMechanicMode] = useState(false);
+  const [preferredName, setPreferredName] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -52,6 +53,44 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Load preferred display name from AsyncStorage
+  useEffect(() => {
+    if (user?.uid) {
+      AsyncStorage.getItem(`@lumescan_${user.uid}_displayName`).then((saved) => {
+        if (saved) setPreferredName(saved);
+      });
+    } else {
+      setPreferredName(null);
+    }
+  }, [user]);
+
+  // ── Android Back Button Handler ──
+  // Navigates within the app instead of exiting
+  useEffect(() => {
+    const backAction = () => {
+      if (appState === 'main') {
+        if (activeTab !== 'dashboard') {
+          // Go back to dashboard from any tab
+          setActiveTab('dashboard');
+          return true; // Prevent default (exit)
+        } else {
+          // On dashboard, go back to connection screen
+          setAppState('connection');
+          return true;
+        }
+      }
+      if (appState === 'connection') {
+        // On connection screen, allow default back (exit)
+        return false;
+      }
+      // For other states, prevent accidental exit
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [appState, activeTab]);
 
   if (!authInitialized) {
     return <View style={styles.container} />;
@@ -145,7 +184,7 @@ export default function App() {
                 {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
                 {', '}
                 <Text style={styles.greetingName}>
-                  {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Driver'}
+                  {preferredName || user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Driver'}
                 </Text>
                 {' 👋'}
               </Text>

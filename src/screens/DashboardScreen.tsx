@@ -10,6 +10,7 @@ import { decodeVIN } from '../telemetry/VINDecoder';
 import { auth } from '../config/firebase';
 import type { Tier } from '../config/entitlement';
 import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 600;
@@ -284,6 +285,17 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
   const [vehicleName, setVehicleName] = useState<string | null>(null);
   const vinReadRef = useRef(false);
 
+  // ── Display Name (user-configurable via Settings) ──
+  const [preferredName, setPreferredName] = useState<string | null>(null);
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      AsyncStorage.getItem(`@lumescan_${uid}_displayName`).then((saved) => {
+        if (saved) setPreferredName(saved);
+      });
+    }
+  }, []);
+
   // ── Throttled UI State to prevent layout seizure ──
   const [uiState, setUiState] = useState<{ summary: any; alerts: FailureAlert[]; mode: string; modeColor: string } | null>(null);
   const dataRef = useRef(data);
@@ -326,7 +338,8 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
   const getGreeting = () => {
     const hour = new Date().getHours();
     const user = auth.currentUser;
-    const name = user?.displayName || user?.email?.split('@')[0] || 'Driver';
+    // Priority: user-set preference > Firebase displayName > email username
+    const name = preferredName || user?.displayName || user?.email?.split('@')[0] || 'Driver';
     const firstName = name.split(' ')[0];
     if (hour >= 5 && hour < 12) return `Good morning, ${firstName}.`;
     if (hour >= 12 && hour < 17) return `Good afternoon, ${firstName}.`;
@@ -380,7 +393,26 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     opacity: pulseAnim.value === 1 ? 0.8 : 1,
   }));
 
-  if (!data) return null;
+  if (!data) return (
+    <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+        <Animated.View style={[animatedStyle]}>
+          <Activity size={48} color={COLORS.cyan} />
+        </Animated.View>
+        <Text style={{ color: COLORS.textMain, fontSize: 18, fontWeight: '800', marginTop: 24, letterSpacing: 1 }}>
+          Initializing Scan
+        </Text>
+        <Text style={{ color: COLORS.textMuted, fontSize: 12, marginTop: 8, textAlign: 'center', lineHeight: 20 }}>
+          Reading vehicle telemetry...{'\n'}This may take a few seconds on first connect.
+        </Text>
+        <View style={{ marginTop: 32, flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.cyan, opacity: 0.3 }} />
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.cyan, opacity: 0.6 }} />
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.cyan }} />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 
   const signalGroups = getAllSignals(useFahrenheit);
   const totalSignals = signalGroups.reduce((sum, g) => sum + g.signals.length, 0);
@@ -579,12 +611,12 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scrollContent: { padding: 20, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 20 },
+  scrollContent: { padding: 20, paddingTop: 50, paddingBottom: 40, maxWidth: 700, alignSelf: 'center' as const, width: '100%' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800', letterSpacing: 1 },
   headerTitleSub: { color: COLORS.textMuted, fontWeight: '400' },
-  greeting: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 12, fontStyle: 'italic' },
+  greeting: { fontSize: 14, color: COLORS.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 16, marginTop: 4, fontStyle: 'italic' },
   vehicleBadge: { alignSelf: 'center', backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.15)', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 12 },
   vehicleBadgeText: { color: COLORS.emerald, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, textAlign: 'center' },
   summaryPanel: { backgroundColor: 'rgba(6,182,212,0.04)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.12)', borderRadius: 14, padding: 16, marginBottom: 16 },

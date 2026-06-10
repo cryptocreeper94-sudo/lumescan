@@ -85,10 +85,17 @@ export default function DTCScreen({ tier }: Props) {
   const DEMO_PENDING = ['P0300'];
   const DEMO_PERMANENT: string[] = [];
 
+  // Auto-scan on first visit
+  useEffect(() => {
+    if (!hasScanned && (connected || isSimulated)) {
+      handleScan();
+    }
+  }, []);
+
   const handleScan = async () => {
     setScanning(true);
     setHasScanned(false);
-    await new Promise(r => setTimeout(r, 2000)); // Simulated scan delay
+    await new Promise(r => setTimeout(r, 1500)); // Brief pause for ELM327 readiness
 
     if (isSimulated || !connected) {
       // Demo mode
@@ -96,34 +103,35 @@ export default function DTCScreen({ tier }: Props) {
       setPendingDTCs(DEMO_PENDING.map(code => ({ code, type: 'pending', alert: lookupDTC(code) })));
       setPermanentDTCs(DEMO_PERMANENT.map(code => ({ code, type: 'permanent', alert: lookupDTC(code) })));
     } else {
-      // Real adapter — check BLE first, fall back to WiFi
+      // Real adapter — use static imports (already imported at top)
       try {
-        const ble = require('../telemetry/BLEConnector');
-        const wifi = require('../telemetry/WiFiConnector');
-        const bleConnected = ble.getBLENativeStatus().status === 'connected';
-        const wifiConnected = wifi.getWiFiStatus().status === 'connected' && !wifi.getWiFiStatus().isSimulated;
+        const bleConnected = getBLENativeStatus().status === 'connected';
+        const wifiConnected = getWiFiStatus().status === 'connected' && !getWiFiStatus().isSimulated;
 
         let active: string[] = [];
         let pending: string[] = [];
         let permanent: string[] = [];
 
         if (bleConnected) {
-          // BLE adapter — Mode 03, 07, 0A
-          active = await ble.readDTCs();
-          pending = await ble.readPendingDTCs();
-          permanent = await ble.readPermanentDTCs();
+          // BLE adapter — use properly imported functions
+          const bleMod = require('../telemetry/BLEConnector');
+          try { active = await bleMod.readDTCs(); } catch (e: any) { console.warn('[DTC] Mode 03 read failed:', e?.message); }
+          try { pending = await bleMod.readPendingDTCs(); } catch (e: any) { console.warn('[DTC] Mode 07 read failed:', e?.message); }
+          try { permanent = await bleMod.readPermanentDTCs(); } catch (e: any) { console.warn('[DTC] Mode 0A read failed:', e?.message); }
         } else if (wifiConnected) {
-          // WiFi adapter — Mode 03, 07, 0A
-          active = await wifi.readDTCsWiFi();
-          pending = await wifi.readPendingDTCsWiFi();
-          permanent = await wifi.readPermanentDTCsWiFi();
+          // WiFi adapter
+          const wifiMod = require('../telemetry/WiFiConnector');
+          try { active = await wifiMod.readDTCsWiFi(); } catch (e: any) { console.warn('[DTC] WiFi Mode 03 read failed:', e?.message); }
+          try { pending = await wifiMod.readPendingDTCsWiFi(); } catch (e: any) { console.warn('[DTC] WiFi Mode 07 read failed:', e?.message); }
+          try { permanent = await wifiMod.readPermanentDTCsWiFi(); } catch (e: any) { console.warn('[DTC] WiFi Mode 0A read failed:', e?.message); }
         }
 
         setActiveDTCs(active.map((code: string) => ({ code, type: 'active', alert: lookupDTC(code) })));
         setPendingDTCs(pending.map((code: string) => ({ code, type: 'pending', alert: lookupDTC(code) })));
         setPermanentDTCs(permanent.map((code: string) => ({ code, type: 'permanent', alert: lookupDTC(code) })));
-      } catch (e) {
-        Alert.alert('Scan Error', 'Failed to read DTCs from vehicle. Check adapter connection.');
+      } catch (e: any) {
+        console.error('[DTC] Scan failed:', e);
+        Alert.alert('Scan Error', `Failed to read DTCs from vehicle: ${e?.message || 'Unknown error'}. Check adapter connection and try again.`);
       }
     }
     setScanning(false);

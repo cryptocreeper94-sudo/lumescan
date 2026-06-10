@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking } from 'react-native';
-import { Settings, User, Shield, Wrench, Radio, LogOut, ExternalLink, ChevronRight, Key, Zap } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking, TextInput } from 'react-native';
+import { Settings, User, Shield, Wrench, Radio, LogOut, ExternalLink, ChevronRight, Key, Zap, Edit3, Check } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import { COLORS } from '../theme/colors';
 import { auth } from '../config/firebase';
 import { getWiFiStatus, disconnectWiFi } from '../telemetry/WiFiConnector';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   mechanicMode: boolean;
@@ -17,6 +18,30 @@ interface Props {
 export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, mode05Purchased, mode06Purchased }: Props) {
   const user = auth.currentUser;
   const wifiStatus = getWiFiStatus();
+  const uid = user?.uid || 'anon';
+
+  // ── Display Name preference (tenant-scoped by UID) ──
+  const [displayName, setDisplayName] = useState(user?.displayName || user?.email?.split('@')[0] || 'Driver');
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(displayName);
+
+  useEffect(() => {
+    // Load saved display name for this user
+    AsyncStorage.getItem(`@lumescan_${uid}_displayName`).then((saved) => {
+      if (saved) {
+        setDisplayName(saved);
+        setNameInput(saved);
+      }
+    });
+  }, [uid]);
+
+  const saveDisplayName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    await AsyncStorage.setItem(`@lumescan_${uid}_displayName`, trimmed);
+    setDisplayName(trimmed);
+    setEditingName(false);
+  };
 
   const handleSignOut = () => {
     Alert.alert('Sign Out', 'Are you sure?', [
@@ -45,7 +70,34 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
           <View style={styles.row}>
             <User size={16} color={COLORS.cyan} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.rowTitle}>{user?.displayName || 'User'}</Text>
+              {editingName ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <TextInput
+                    style={{
+                      flex: 1, color: COLORS.textMain, fontSize: 14, fontWeight: '600',
+                      borderBottomWidth: 1, borderBottomColor: COLORS.cyan, paddingVertical: 4,
+                    }}
+                    value={nameInput}
+                    onChangeText={setNameInput}
+                    autoFocus
+                    placeholder="Your preferred name"
+                    placeholderTextColor={COLORS.textDim}
+                    onSubmitEditing={saveDisplayName}
+                    returnKeyType="done"
+                  />
+                  <TouchableOpacity onPress={saveDisplayName}>
+                    <Check size={18} color={COLORS.emerald} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                  onPress={() => { setNameInput(displayName); setEditingName(true); }}
+                >
+                  <Text style={styles.rowTitle}>{displayName}</Text>
+                  <Edit3 size={12} color={COLORS.textDim} />
+                </TouchableOpacity>
+              )}
               <Text style={styles.rowSub}>{user?.email}</Text>
             </View>
           </View>

@@ -151,6 +151,9 @@ export default function LoginScreen() {
                   placeholderTextColor={COLORS.textDim}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  importantForAutofill="no"
                   value={email}
                   onChangeText={setEmail}
                   editable={!loading}
@@ -165,6 +168,9 @@ export default function LoginScreen() {
                     placeholder="Jason Smith"
                     placeholderTextColor={COLORS.textDim}
                     autoCapitalize="words"
+                    autoComplete="name"
+                    textContentType="name"
+                    importantForAutofill="no"
                     value={displayName}
                     onChangeText={setDisplayName}
                     editable={!loading}
@@ -180,6 +186,9 @@ export default function LoginScreen() {
                     placeholder="••••••••"
                     placeholderTextColor={COLORS.textDim}
                     secureTextEntry={!showPassword}
+                    autoComplete="off"
+                    textContentType="password"
+                    importantForAutofill="no"
                     value={password}
                     onChangeText={setPassword}
                     editable={!loading}
