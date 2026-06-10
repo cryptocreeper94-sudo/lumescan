@@ -4,7 +4,8 @@ import {
   SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator,
   ScrollView, Alert,
 } from 'react-native';
-import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn } from 'lucide-react-native';
+import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react-native';
+import { IS_COX } from '../config/variant';
 import { COLORS } from '../theme/colors';
 import { signInWithEmail, registerWithEmail, signInWithGoogleCredential } from '../config/firebase';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -21,6 +22,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [showPassword, setShowPassword] = useState(false);
 
   // ── Google SSO via expo-auth-session ──
   const [_request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -102,15 +104,15 @@ export default function LoginScreen() {
               <View style={styles.iconWrapper}>
                 <ActivitySquare size={48} color={COLORS.cyan} />
               </View>
-              <Text style={styles.title}>LUME<Text style={styles.titleSub}>AUTO</Text></Text>
+              <Text style={styles.title}>LumeScan<Text style={styles.titleSub}> Pro</Text></Text>
               <Text style={styles.subtitle}>DETERMINISTIC DIAGNOSTIC ENGINE</Text>
             </View>
 
             {/* Login Form */}
             <View style={styles.formContainer}>
               <View style={styles.securityBadge}>
-                <ShieldCheck size={14} color={COLORS.emerald} />
-                <Text style={styles.securityText}>AUTHORIZED PERSONNEL ONLY</Text>
+              <ShieldCheck size={14} color={COLORS.emerald} />
+                <Text style={styles.securityText}>{IS_COX ? 'AUTHORIZED PERSONNEL ONLY' : 'SECURE LOGIN'}</Text>
               </View>
 
               {error && (
@@ -120,28 +122,32 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              {/* Google SSO */}
-              <TouchableOpacity
-                style={styles.googleBtn}
-                onPress={() => promptAsync()}
-                disabled={loading}
-              >
-                <Text style={styles.googleIcon}>G</Text>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </TouchableOpacity>
+              {/* Google SSO — consumer only */}
+              {!IS_COX && (
+                <>
+                  <TouchableOpacity
+                    style={styles.googleBtn}
+                    onPress={() => promptAsync()}
+                    disabled={loading}
+                  >
+                    <Text style={styles.googleIcon}>G</Text>
+                    <Text style={styles.googleBtnText}>Continue with Google</Text>
+                  </TouchableOpacity>
 
-              {/* Divider */}
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>OR</Text>
-                <View style={styles.dividerLine} />
-              </View>
+                  {/* Divider */}
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>OR</Text>
+                    <View style={styles.dividerLine} />
+                  </View>
+                </>
+              )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>INSPECTOR ID / EMAIL</Text>
+                <Text style={styles.label}>{IS_COX ? 'COX EMAIL' : 'EMAIL ADDRESS'}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="inspector@manheim.com"
+                  placeholder={IS_COX ? 'your.name@coxautoinc.com' : 'you@gmail.com'}
                   placeholderTextColor={COLORS.textDim}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -167,16 +173,27 @@ export default function LoginScreen() {
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>SECURITY KEY</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor={COLORS.textDim}
-                  secureTextEntry
-                  value={password}
-                  onChangeText={setPassword}
-                  editable={!loading}
-                />
+                <Text style={styles.label}>{IS_COX ? 'SECURITY KEY' : 'PASSWORD'}</Text>
+                <View style={styles.passwordRow}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="••••••••"
+                    placeholderTextColor={COLORS.textDim}
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    editable={!loading}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeBtn}
+                    onPress={() => setShowPassword(!showPassword)}
+                    activeOpacity={0.6}
+                  >
+                    {showPassword
+                      ? <EyeOff size={18} color={COLORS.textMuted} />
+                      : <Eye size={18} color={COLORS.textMuted} />}
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <TouchableOpacity
@@ -394,6 +411,27 @@ const styles = StyleSheet.create({
     color: COLORS.textMain,
     fontSize: 14,
     fontFamily: 'monospace',
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  passwordInput: {
+    flex: 1,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    borderRightWidth: 0,
+  },
+  eyeBtn: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loginBtn: {
     backgroundColor: COLORS.cyan,

@@ -291,12 +291,54 @@ function computeMPG(r: Record<string, number>): number {
   return Math.min(50, Math.max(0, speedMph / fuelFlowGph));
 }
 
+// ── Governance Mode with Hysteresis ──
+let currentMode_obd = 'Nominal';
+let modeHoldStart_obd = Date.now();
+const MIN_HOLD_MS_OBD = 3000;
+
 function computeMode(r: Record<string, number>): string {
-  if (r.mil) return 'Lifecycle Warning';
-  if ((r.engineLoad || 0) > 70) return 'Throughput Alert';
-  if (Math.abs(r.stftB1 || 0) > 15) return 'Process Drift';
-  if ((r.speed || 0) < 5) return 'Nominal';
-  return 'Flow State';
+  if ((r.rpm || 0) < 100) {
+    currentMode_obd = 'Nominal';
+    modeHoldStart_obd = Date.now();
+    return currentMode_obd;
+  }
+
+  let candidateMode: string;
+
+  if (r.mil) {
+    candidateMode = 'Lifecycle Warning';
+  } else if ((r.engineLoad || 0) > 75) {
+    candidateMode = 'Throughput Alert';
+  } else if (currentMode_obd === 'Throughput Alert' && (r.engineLoad || 0) > 60) {
+    candidateMode = 'Throughput Alert';
+  } else if (Math.abs(r.stftB1 || 0) > 18) {
+    candidateMode = 'Process Drift';
+  } else if (currentMode_obd === 'Process Drift' && Math.abs(r.stftB1 || 0) > 12) {
+    candidateMode = 'Process Drift';
+  } else if ((r.speed || 0) < 3) {
+    candidateMode = 'Nominal';
+  } else if (currentMode_obd === 'Nominal' && (r.speed || 0) < 8) {
+    candidateMode = 'Nominal';
+  } else {
+    candidateMode = 'Flow State';
+  }
+
+  if (candidateMode === 'Lifecycle Warning') {
+    currentMode_obd = candidateMode;
+    modeHoldStart_obd = Date.now();
+    return currentMode_obd;
+  }
+
+  if (candidateMode !== currentMode_obd) {
+    if (Date.now() - modeHoldStart_obd >= MIN_HOLD_MS_OBD) {
+      currentMode_obd = candidateMode;
+      modeHoldStart_obd = Date.now();
+    }
+  } else {
+    modeHoldStart_obd = Date.now();
+  }
+
+  return currentMode_obd;
 }
 
 /**

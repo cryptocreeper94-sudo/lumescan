@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lume Scan",
     "slug": "lume-auto",
-    "version": "1.1.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -58,6 +58,7 @@
       "expo-web-browser"
     ],
     "extra": {
+      "appVariant": "consumer",
       "eas": {
         "projectId": "4da0a734-89f0-4618-b41e-2e57abdbf36f"
       },

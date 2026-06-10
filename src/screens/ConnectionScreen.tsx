@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, Dimensions, TextInput } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, Dimensions, TextInput, ScrollView } from 'react-native';
 import { Wifi, Bluetooth, Activity, ChevronRight, Zap } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, {
@@ -137,13 +137,13 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* Header */}
         <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
           <View style={styles.logoRow}>
             <Activity size={28} color={COLORS.cyan} />
-            <Text style={styles.logoText}>LUME<Text style={styles.logoSub}>AUTO</Text></Text>
+            <Text style={styles.logoText}>LumeScan<Text style={styles.logoSub}> Pro</Text></Text>
           </View>
           <Text style={styles.tagline}>Deterministic Vehicle Governance</Text>
         </Animated.View>
@@ -236,7 +236,7 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
           WiFi: Any ELM327 WiFi · OBDLink MX WiFi{'\n'}
           42 Nodes · 4 Primitives · Zero AI · US Patent 64/032,339
         </Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

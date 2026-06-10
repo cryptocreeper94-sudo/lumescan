@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText, Lock, Thermometer } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
-import { startWiFiTelemetryLoop, getWiFiStatus } from '../telemetry/WiFiConnector';
-import { startBLENativeTelemetryLoop, getBLENativeStatus } from '../telemetry/BLEConnector';
+import { startWiFiTelemetryLoop, getWiFiStatus, readVehicleInfoWiFi } from '../telemetry/WiFiConnector';
+import { startBLENativeTelemetryLoop, getBLENativeStatus, readVehicleInfo as readVehicleInfoBLE } from '../telemetry/BLEConnector';
+import { decodeVIN } from '../telemetry/VINDecoder';
 import { auth } from '../config/firebase';
 import type { Tier } from '../config/entitlement';
 import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
@@ -279,6 +280,49 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
   const pulseAnim = useSharedValue(1);
   const isPro = tier === 'pro';
 
+  // ── Vehicle Identification (auto-read VIN on first connect) ──
+  const [vehicleName, setVehicleName] = useState<string | null>(null);
+  const vinReadRef = useRef(false);
+
+  // ── Throttled UI State to prevent layout seizure ──
+  const [uiState, setUiState] = useState<{ summary: any; alerts: FailureAlert[]; mode: string; modeColor: string } | null>(null);
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
+  useEffect(() => {
+    // Update the slow-moving UI components (alerts, summary) once every 1.5 seconds
+    const timer = setInterval(() => {
+      const d = dataRef.current;
+      if (d) {
+        const modeColor = d.governanceMode === 'Flow State' ? COLORS.emerald
+          : d.governanceMode === 'Throughput Alert' ? '#f59e0b'
+          : COLORS.cyan;
+        setUiState({
+          summary: getPlainEnglishSummary(d, useFahrenheit),
+          alerts: getActiveAlerts(d, 'Universal', useFahrenheit),
+          mode: d.governanceMode,
+          modeColor
+        });
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [useFahrenheit]);
+
+  // Initial population of uiState to prevent empty render on first load
+  useEffect(() => {
+    if (data && !uiState) {
+        const modeColor = data.governanceMode === 'Flow State' ? COLORS.emerald
+          : data.governanceMode === 'Throughput Alert' ? '#f59e0b'
+          : COLORS.cyan;
+        setUiState({
+          summary: getPlainEnglishSummary(data, useFahrenheit),
+          alerts: getActiveAlerts(data, 'Universal', useFahrenheit),
+          mode: data.governanceMode,
+          modeColor
+        });
+    }
+  }, [data, uiState, useFahrenheit]);
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     const user = auth.currentUser;
@@ -303,6 +347,31 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     const stop = useBLE
       ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 150)
       : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 150);
+
+    // Auto-read VIN once on first connect
+    if (!vinReadRef.current) {
+      vinReadRef.current = true;
+      const isSimulated = getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated;
+      if (isSimulated) {
+        setVehicleName('2019 Ford F-150 5.0L V8');
+      } else {
+        // Read VIN in background — non-blocking
+        (async () => {
+          try {
+            const info = useBLE ? await readVehicleInfoBLE() : await readVehicleInfoWiFi();
+            if (info.vin) {
+              const decoded = decodeVIN(info.vin);
+              setVehicleName(decoded.displayName);
+            } else {
+              setVehicleName('Vehicle Connected');
+            }
+          } catch {
+            setVehicleName('Vehicle Connected');
+          }
+        })();
+      }
+    }
+
     return () => stop();
   }, []);
 
@@ -313,13 +382,12 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
   if (!data) return null;
 
-  const modeColor = data.governanceMode === 'Flow State' ? COLORS.emerald
-    : data.governanceMode === 'Throughput Alert' ? '#f59e0b'
-    : COLORS.cyan;
-
-  const alerts = getActiveAlerts(data, 'Universal', useFahrenheit);
   const signalGroups = getAllSignals(useFahrenheit);
   const totalSignals = signalGroups.reduce((sum, g) => sum + g.signals.length, 0);
+
+  const modeColor = uiState?.modeColor || COLORS.cyan;
+  const alerts = uiState?.alerts || [];
+  const summary = uiState?.summary;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -329,7 +397,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <ActivitySquare size={24} color={COLORS.cyan} />
-            <Text style={styles.headerTitle}>LUME<Text style={styles.headerTitleSub}>AUTO</Text></Text>
+            <Text style={styles.headerTitle}>LumeScan<Text style={styles.headerTitleSub}> Pro</Text></Text>
           </View>
           <View style={styles.connectionBadge}>
             <Animated.View style={[styles.statusDot, animatedStyle]} />
@@ -346,6 +414,13 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
         {/* Personalized Greeting */}
         <Text style={styles.greeting}>{getGreeting()}</Text>
+
+        {/* Vehicle Identification Badge */}
+        {vehicleName && (
+          <View style={styles.vehicleBadge}>
+            <Text style={styles.vehicleBadgeText}>🚗 {vehicleName}</Text>
+          </View>
+        )}
 
         {/* °F/°C Toggle + Plain English Health Summary */}
         <View style={styles.tempToggleRow}>
@@ -368,17 +443,14 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
         </View>
 
         {/* Plain English Health Summary */}
-        {(() => {
-          const summary = getPlainEnglishSummary(data, useFahrenheit);
-          return (
-            <View style={styles.summaryPanel}>
-              <Text style={styles.summaryHeadline}>{summary.emoji} {summary.headline}</Text>
-              {summary.details.map((detail, i) => (
-                <Text key={i} style={styles.summaryDetail}>• {detail}</Text>
-              ))}
-            </View>
-          );
-        })()}
+        {summary && (
+          <View style={styles.summaryPanel}>
+            <Text style={styles.summaryHeadline}>{summary.emoji} {summary.headline}</Text>
+            {summary.details.map((detail: string, i: number) => (
+              <Text key={i} style={styles.summaryDetail}>• {detail}</Text>
+            ))}
+          </View>
+        )}
 
         {/* Tier Badge */}
         {!isPro && (
@@ -395,7 +467,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
         {/* Mode Badge */}
         <View style={[styles.modeBadge, { borderColor: modeColor }]}>
-          <Text style={[styles.modeText, { color: modeColor }]}>{data.governanceMode.toUpperCase()}</Text>
+          <Text style={[styles.modeText, { color: modeColor }]}>{(uiState?.mode || 'Nominal').toUpperCase()}</Text>
         </View>
 
         {/* Main Telemetry Ring */}
@@ -513,6 +585,8 @@ const styles = StyleSheet.create({
   headerTitle: { color: COLORS.textMain, fontSize: 20, fontWeight: '800', letterSpacing: 1 },
   headerTitleSub: { color: COLORS.textMuted, fontWeight: '400' },
   greeting: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500', textAlign: 'center', marginBottom: 12, fontStyle: 'italic' },
+  vehicleBadge: { alignSelf: 'center', backgroundColor: 'rgba(16,185,129,0.06)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.15)', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 12 },
+  vehicleBadgeText: { color: COLORS.emerald, fontSize: 12, fontWeight: '700', letterSpacing: 0.5, textAlign: 'center' },
   summaryPanel: { backgroundColor: 'rgba(6,182,212,0.04)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.12)', borderRadius: 14, padding: 16, marginBottom: 16 },
   summaryHeadline: { color: COLORS.textMain, fontSize: 16, fontWeight: '700', marginBottom: 10, lineHeight: 22 },
   summaryDetail: { color: COLORS.textMuted, fontSize: 13, lineHeight: 20, marginBottom: 8, paddingLeft: 4 },

@@ -15,11 +15,11 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  initializeAuth,
-  getReactNativePersistence,
   type User,
+  type Auth,
 } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IS_COX } from './variant';
 
 // ── DarkWave Auth — same project as Trust Hub / web app ──
 const firebaseConfig = {
@@ -33,22 +33,10 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-let auth;
-try {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-} catch (e: any) {
-  // If initializeAuth fails (e.g. auth/already-initialized during hot reload), fallback to getAuth
-  if (e.code === 'auth/already-initialized') {
-    auth = getAuth(app);
-  } else {
-    throw e;
-  }
-}
+let auth: Auth = getAuth(app);
 
 // ── Domain Whitelist (shared with web) ──
-const ALLOWED_DOMAINS = ['coxautoinc.com', 'darkwavestudios.com'];
+const ALLOWED_DOMAINS = ['coxautoinc.com'];
 const ALLOWED_EMAILS = [
   'kathytidwell74@gmail.com',
   'rtaron@bellsouth.net',
@@ -60,11 +48,14 @@ const ALLOWED_EMAILS = [
 
 function validateEmailDomain(email: string | null): void {
   if (!email) throw new Error('No email address found on this account.');
+  // Consumer builds: open registration — anyone can sign up
+  if (!IS_COX) return;
+  // Cox builds: restrict to authorized domains/emails only
   const lower = email.trim().toLowerCase();
   const domain = lower.split('@')[1];
   if (ALLOWED_EMAILS.includes(lower)) return;
   if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
-    throw new Error('Access restricted to authorized email addresses.');
+    throw new Error('Access restricted to authorized Cox email addresses.');
   }
 }
 

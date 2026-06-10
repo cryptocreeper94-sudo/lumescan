@@ -1214,12 +1214,61 @@ function computeMPG(r: Record<string, number>): number {
   return gph > 0.01 ? Math.min(50, (r.speed * 0.621371) / gph) : 0;
 }
 
+// ── Governance Mode with Hysteresis ──
+// Prevents seizure-like flickering by requiring a mode to be sustained
+// for MIN_HOLD_MS before the UI switches. Dead zones on thresholds
+// prevent bouncing when values hover near boundaries.
+let currentMode_ble = 'Nominal';
+let modeHoldStart_ble = Date.now();
+const MIN_HOLD_MS_BLE = 3000;
+
 function computeMode(r: Record<string, number>): string {
-  if (r.mil) return 'Lifecycle Warning';
-  if ((r.engineLoad || 0) > 70) return 'Throughput Alert';
-  if (Math.abs(r.stftB1 || 0) > 15) return 'Process Drift';
-  if ((r.speed || 0) < 5) return 'Nominal';
-  return 'Flow State';
+  // Key-on / Engine-off: ECU is powered but values are garbage.
+  // Lock to Nominal — there's nothing to govern if the engine isn't running.
+  if ((r.rpm || 0) < 100) {
+    currentMode_ble = 'Nominal';
+    modeHoldStart_ble = Date.now();
+    return currentMode_ble;
+  }
+
+  let candidateMode: string;
+
+  if (r.mil) {
+    candidateMode = 'Lifecycle Warning';
+  } else if ((r.engineLoad || 0) > 75) {
+    candidateMode = 'Throughput Alert';
+  } else if (currentMode_ble === 'Throughput Alert' && (r.engineLoad || 0) > 60) {
+    candidateMode = 'Throughput Alert';
+  } else if (Math.abs(r.stftB1 || 0) > 18) {
+    candidateMode = 'Process Drift';
+  } else if (currentMode_ble === 'Process Drift' && Math.abs(r.stftB1 || 0) > 12) {
+    candidateMode = 'Process Drift';
+  } else if ((r.speed || 0) < 3) {
+    candidateMode = 'Nominal';
+  } else if (currentMode_ble === 'Nominal' && (r.speed || 0) < 8) {
+    candidateMode = 'Nominal';
+  } else {
+    candidateMode = 'Flow State';
+  }
+
+  // MIL always switches immediately (safety-critical)
+  if (candidateMode === 'Lifecycle Warning') {
+    currentMode_ble = candidateMode;
+    modeHoldStart_ble = Date.now();
+    return currentMode_ble;
+  }
+
+  // If candidate differs from current, only switch after sustained hold
+  if (candidateMode !== currentMode_ble) {
+    if (Date.now() - modeHoldStart_ble >= MIN_HOLD_MS_BLE) {
+      currentMode_ble = candidateMode;
+      modeHoldStart_ble = Date.now();
+    }
+  } else {
+    modeHoldStart_ble = Date.now();
+  }
+
+  return currentMode_ble;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1243,9 +1292,15 @@ export function startBLENativeTelemetryLoop(
     } else {
       // Strict fallback: never show mock data if not in demo mode
       const emptySnapshot: TelemetrySnapshot = {
-        rpm: 0, speed: 0, coolant: 0, engineLoad: 0,
-        throttle: 0, timing: 0, battery: 12.0,
-        dtcs: [], o2Tests: [], monitors: [], readiness: []
+        timestamp: Date.now(),
+        tb1_maf: 0, tb2_fuelFlow: 0, tb3_map: 0, tb4_iat: 0, tb5_throttle: 0,
+        tb6_rpm: 0, tb7_speed: 0, tb8_volEff: 0, tb9_afr: 14.7, tb10_baro: 101.3,
+        pr1_timing: 0, pr2_stftB1: 0, pr3_ltftB1: 0, pr4_stftB2: 0, pr5_ltftB2: 0,
+        pr6_combEff: 0, pr7_engLoad: 0, pr8_absLoad: 0,
+        fs1_o2UpB1: 0, fs2_o2DnB1: 0, fs5_catTempB1: 0, fs7_catEff: 0, fs10_driverScore: 0,
+        sl1_coolant: 0, sl3_battery: 12.0, sl4_runtime: 0, sl7_mil: false, sl8_dtcCount: 0,
+        activeDTCs: [], sl11_degradation: 0,
+        mpgInstant: 0, mpgRecovery: 0, governanceMode: 'Disconnected',
       };
       onData(emptySnapshot);
     }

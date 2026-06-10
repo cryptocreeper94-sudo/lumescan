@@ -19,6 +19,24 @@
         "buildType": "apk"
       }
     },
+    "cox": {
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "cox"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "consumer": {
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "consumer"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production": {
       "ios": {
         "simulator": false
