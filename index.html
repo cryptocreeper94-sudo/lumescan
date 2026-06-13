@@ -94,9 +94,13 @@
     /* Hero Section */
     .hero {
       position: relative; padding: 220px 24px 140px; text-align: center;
-      background: linear-gradient(to bottom, rgba(3,4,8,0.3), var(--bg)), url('img/lumescan_score_photo_1781388213467.png') center/cover no-repeat;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); overflow: hidden;
     }
+    .hero-slider { position:absolute; inset:0; z-index:-1; overflow:hidden; }
+    .hero-slide { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transform:scale(1); transition:opacity 2s ease-in-out, transform 6s linear; }
+    .hero-slide.active { opacity:0.3; transform:scale(1.08); }
+    .hero-slider::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(3,4,8,0.5) 0%, var(--bg) 100%); }
+
     .hero-badge {
       display: inline-block; padding: 8px 16px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
       border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--text);
@@ -235,9 +239,15 @@
 
   <!-- Hero -->
   <section class="hero">
+    <div class="hero-slider">
+      <div class="hero-slide active" style="background-image:url('img/lumescan_score_photo_1781388213467.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/lumescan_engine_photo_1781388173574.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/lumescan_predictive_photo_1781388194425.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/lumescan_repair_photo_1781388203702.png')"></div>
+    </div>
     <div class="hero-badge">Professional Diagnostic Engine</div>
-    <h1>LumeScan Pro</h1>
-    <p>You are looking at a $5,000 dealership-grade diagnostic tablet compressed into a native mobile app. Experience deterministic 42-node real-time engine scanning, intelligent code translation, and massive preventative alerts that save engines. Yours for just $39.99 one-time.</p>
+    <h1>The New Standard<br>in Vehicle Telemetry.</h1>
+    <p>LumeScan Pro is a $5,000 dealership-grade diagnostic tablet compressed into a native mobile app. Experience deterministic 42-node real-time engine scanning, intelligent code translation, and massive preventative alerts that save engines. Yours for just $39.99 one-time.</p>
 
     <div class="hero-actions">
       <a href="lumescan.apk" download class="btn-primary">Download Android APK</a>
@@ -547,6 +557,17 @@
 
   <!-- Carousel & Logic Scripts -->
   <script>
+    // Hero Ken Burns Slider
+    const heroSlides = document.querySelectorAll('.hero-slide');
+    if(heroSlides.length > 0) {
+      let heroCur = 0;
+      setInterval(() => {
+        heroSlides[heroCur].classList.remove('active');
+        heroCur = (heroCur + 1) % heroSlides.length;
+        heroSlides[heroCur].classList.add('active');
+      }, 5000);
+    }
+
     // Countdown
     (function(){
       var launch = new Date('2026-06-23T09:00:00-05:00').getTime();
