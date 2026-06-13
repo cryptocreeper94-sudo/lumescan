@@ -189,357 +189,580 @@
   }
 </style>
 
-
-
-
-
-
-
-
-
-
-
-
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lume Scan — Coming Soon | DarkWave Studios</title>
-  <meta name="description" content="Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live e...">
+  <title>Lume Scan | Deterministic Diagnostic Engine</title>
+  <meta name="description" content="Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, code interpretation, and predictive maintenance.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{--accent:#06b6d4;--accent-rgb:6,182,212;--bg:#030712;--text:#f0f4f8;--text-dim:rgba(240,244,248,.55);--text-muted:rgba(240,244,248,.28);--border:rgba(255,255,255,.06);--border-accent:rgba(var(--accent-rgb),.18)}
-    html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    :root{
+      --accent:#0ea5e9;
+      --accent-grad:linear-gradient(135deg, #0ea5e9, #38bdf8, #8b5cf6);
+      --bg:#020617;
+      --surface:rgba(15, 23, 42, 0.6);
+      --text:#f8fafc;
+      --text-dim:#94a3b8;
+      --border:rgba(56, 189, 248, 0.15);
+    }
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
+      line-height: 1.6;
+    }
 
-    .bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-    .orb{position:absolute;border-radius:50%;filter:blur(140px);opacity:.1;animation:drift 28s ease-in-out infinite alternate}
-    .orb-1{width:600px;height:600px;background:var(--accent);top:-200px;left:-100px}
-    .orb-2{width:500px;height:500px;background:#8b5cf6;bottom:-200px;right:-100px;animation-delay:8s}
-    @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(50px,-30px) scale(1.05)}}
-    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px}
+    /* Ambient Backgrounds */
+    .bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:-1;}
+    .orb{position:absolute;border-radius:50%;filter:blur(160px);opacity:0.15;animation:drift 30s ease-in-out infinite alternate;}
+    .orb-1{width:800px;height:800px;background:#0ea5e9;top:-300px;left:-200px;}
+    .orb-2{width:700px;height:700px;background:#8b5cf6;bottom:-200px;right:-100px;animation-delay:5s;}
+    @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(100px,-50px) scale(1.1)}}
+    
+    .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:60px 60px;}
 
-    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 60px;max-width:800px;margin:0 auto}
+    /* Navigation */
+    .nav{
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(2, 6, 23, 0.7);
+    }
+    .nav-brand{font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center;gap:10px;}
+    .nav-brand span{color:var(--accent);}
+    .nav-links{display:flex;gap:32px;align-items:center;}
+    .nav-links a{color:var(--text-dim);text-decoration:none;font-weight:600;font-size:14px;transition:all 0.2s;}
+    .nav-links a:hover{color:var(--text);}
+    .btn-nav{background:var(--text);color:var(--bg);padding:10px 24px;border-radius:999px;font-weight:800;font-size:13px;text-decoration:none;transition:all 0.3s;}
+    .btn-nav:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(255,255,255,0.15);}
 
-    .topbar{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:48px}
-    .dw-logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;opacity:.7;transition:opacity .2s}
-    .dw-logo:hover{opacity:1}
-    .dw-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000}
-    .dw-text{font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
-    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);font-size:9px;font-weight:800;color:#f9a8d4;letter-spacing:.1em;text-transform:uppercase;text-decoration:none}
-    .badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#ec4899;animation:blink 1.2s ease-in-out infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    /* Hero Section */
+    .hero{
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 160px 20px 80px; position: relative;
+    }
+    .hero-badge{
+      display:inline-flex;padding:6px 18px;border-radius:999px;
+      background:rgba(14, 165, 233, 0.1);border:1px solid rgba(14, 165, 233, 0.3);
+      color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+      margin-bottom:24px;font-family:'JetBrains Mono',monospace;
+    }
+    .hero h1{
+      font-family:'Outfit',sans-serif;
+      font-size:clamp(3rem, 8vw, 6rem);
+      font-weight:900;
+      line-height:0.95;
+      letter-spacing:-0.03em;
+      margin-bottom:24px;
+      background:var(--accent-grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .hero p{
+      font-size:clamp(1.1rem, 2vw, 1.4rem);
+      color:var(--text-dim);
+      max-width:700px;
+      margin:0 auto 48px;
+    }
 
-    .hero{text-align:center;width:100%;margin-bottom:40px}
-    .app-icon{font-size:4rem;margin-bottom:16px;display:block;filter:drop-shadow(0 0 30px rgba(var(--accent-rgb),.25));animation:float 4s ease-in-out infinite}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-    .chip{display:inline-flex;padding:4px 14px;border-radius:999px;background:rgba(var(--accent-rgb),.08);border:1px solid var(--border-accent);font-size:10px;font-weight:800;color:var(--accent);margin-bottom:16px;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
-    h1{font-size:clamp(2.2rem,6vw,3.5rem);font-weight:900;letter-spacing:-.04em;line-height:1.08;margin-bottom:12px;background:linear-gradient(135deg,var(--text) 0%,var(--accent) 60%,#8b5cf6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .tagline{font-size:1.05rem;color:var(--text-dim);line-height:1.7;margin-bottom:24px}
+    /* Countdown Matrix */
+    .countdown-matrix{
+      display:flex;gap:16px;justify-content:center;margin-bottom:48px;
+      background:rgba(0,0,0,0.3);padding:24px;border-radius:24px;
+      border:1px solid rgba(255,255,255,0.05);
+      backdrop-filter:blur(10px);
+    }
+    .cd-block{display:flex;flex-direction:column;align-items:center;min-width:80px;}
+    .cd-num{
+      font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:800;
+      color:var(--text);text-shadow:0 0 20px rgba(14, 165, 233, 0.5);
+    }
+    .cd-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-top:4px;}
+    .cd-sep{font-size:2.5rem;font-weight:800;color:rgba(255,255,255,0.1);padding:0 8px;}
 
-    .countdown{display:flex;align-items:flex-start;justify-content:center;gap:8px;margin-bottom:32px}
-    .cd-block{display:flex;flex-direction:column;align-items:center}
-    .cd-num{font-size:clamp(1.8rem,4.5vw,2.4rem);font-weight:900;font-family:'JetBrains Mono',monospace;background:rgba(var(--accent-rgb),.06);border:1px solid rgba(var(--accent-rgb),.12);border-radius:10px;padding:10px 14px;min-width:64px;text-align:center;line-height:1}
-    .cd-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.14em;margin-top:5px;font-weight:600}
-    .cd-sep{font-size:1.6rem;font-weight:900;color:var(--accent);opacity:.3;padding:10px 0}
+    /* Download Buttons */
+    .hero-actions{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{
+      background:var(--accent-grad);color:#000;
+      padding:18px 40px;border-radius:16px;font-size:16px;font-weight:800;
+      text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+      transition:all 0.3s;border:none;cursor:pointer;
+    }
+    .btn-primary:hover{transform:translateY(-3px);box-shadow:0 15px 30px rgba(14, 165, 233, 0.4);}
+    .btn-secondary{
+      background:rgba(255,255,255,0.03);color:var(--text);
+      padding:18px 40px;border-radius:16px;font-size:16px;font-weight:700;
+      text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+      border:1px solid rgba(255,255,255,0.1);transition:all 0.3s;
+    }
+    .btn-secondary:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);}
 
-    .section{width:100%;margin-bottom:40px}
-    .section-title{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.16em;margin-bottom:16px;text-align:center}
+    /* Sections */
+    .section{padding:120px 20px;max-width:1200px;margin:0 auto;}
+    .section-header{text-align:center;margin-bottom:80px;}
+    .section-title{font-family:'Outfit',sans-serif;font-size:3rem;font-weight:900;margin-bottom:16px;}
+    .section-subtitle{font-size:1.2rem;color:var(--text-dim);max-width:600px;margin:0 auto;}
 
-    .desc-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin-bottom:32px}
-    .desc-card p{font-size:15px;color:var(--text-dim);line-height:1.8}
+    /* Features Grid */
+    .grid-3{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:24px;}
+    .card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:24px;padding:40px;transition:all 0.4s;
+      backdrop-filter:blur(10px);position:relative;overflow:hidden;
+    }
+    .card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+    }
+    .card:hover{transform:translateY(-10px);box-shadow:0 30px 60px rgba(0,0,0,0.5);border-color:rgba(14,165,233,0.4);}
+    .card-icon{font-size:3rem;margin-bottom:24px;display:inline-block;background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .card h3{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+    .card p{color:var(--text-dim);font-size:1.05rem;}
 
-    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:32px}
-    .feat{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);font-weight:500;padding:10px 14px;background:rgba(var(--accent-rgb),.03);border:1px solid rgba(var(--accent-rgb),.08);border-radius:10px}
-    .feat-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+    /* Governance Modes */
+    .modes-container{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px;}
+    .mode-card{
+      background:linear-gradient(135deg, rgba(15,23,42,0.8), rgba(2,6,23,0.9));
+      border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:40px;
+    }
+    .mode-badge{display:inline-block;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.1);font-size:12px;font-weight:800;margin-bottom:20px;letter-spacing:1px;}
+    
+    /* Pricing Table */
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px;margin-top:60px;}
+    .price-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:24px;padding:40px;text-align:center;
+      display:flex;flex-direction:column;
+    }
+    .price-card.featured{
+      background:linear-gradient(180deg, rgba(14,165,233,0.1) 0%, rgba(15,23,42,0.6) 100%);
+      border-color:var(--accent);transform:scale(1.05);
+    }
+    .price-tier{font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;}
+    .price-card.featured .price-tier{color:var(--accent);}
+    .price-amount{font-size:3.5rem;font-weight:900;font-family:'Outfit',sans-serif;margin-bottom:8px;}
+    .price-sub{font-size:14px;color:var(--text-dim);margin-bottom:32px;}
+    .price-features{text-align:left;margin-bottom:40px;flex-grow:1;}
+    .p-feat{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:15px;}
+    .p-feat i{color:var(--accent);font-style:normal;}
+    .p-feat.disabled{opacity:0.4;}
+    .p-feat.disabled i{color:#ef4444;}
 
-    .video-section{width:100%;margin-bottom:40px}
+    /* Competitor Comparison */
+    .compare-table{
+      width:100%;border-collapse:collapse;margin-top:40px;
+      background:rgba(255,255,255,0.02);border-radius:24px;overflow:hidden;
+      border:1px solid rgba(255,255,255,0.05);
+    }
+    .compare-table th, .compare-table td{padding:20px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.05);}
+    .compare-table th{background:rgba(0,0,0,0.3);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);}
+    .compare-table tr:last-child td{border-bottom:none;}
+    .highlight-cell{color:var(--accent);font-weight:800;}
 
-    .notify-wrap{text-align:center;margin-bottom:40px;width:100%}
-    .notify-label{font-size:12px;color:var(--text-muted);margin-bottom:12px}
-    .capture{display:flex;gap:8px;max-width:420px;margin:0 auto}
-    .capture input{flex:1;min-width:0;background:rgba(255,255,255,.04);border:1px solid var(--border-accent);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text);font-family:inherit;outline:none;transition:all .2s}
-    .capture input:focus{border-color:var(--accent);box-shadow:0 0 16px rgba(var(--accent-rgb),.1)}
-    .capture input::placeholder{color:var(--text-muted)}
-    .capture button{padding:12px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent),rgba(var(--accent-rgb),.7));color:#000;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s;flex-shrink:0}
-    .capture button:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(var(--accent-rgb),.25)}
-    .capture button.done{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.25);pointer-events:none}
+    /* Ecosystem Scroll */
+    .eco-scroll{
+      display:flex;gap:20px;overflow-x:auto;padding:20px 0 40px;
+      scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    }
+    .eco-scroll::-webkit-scrollbar{display:none;}
+    .eco-card{
+      min-width:280px;background:var(--surface);border:1px solid rgba(255,255,255,0.05);
+      border-radius:20px;padding:24px;text-decoration:none;color:var(--text);
+      transition:all 0.3s;
+    }
+    .eco-card:hover{background:rgba(255,255,255,0.05);transform:translateY(-5px);}
+    .eco-card h4{font-size:1.2rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 
-    .presale-card{background:linear-gradient(135deg,rgba(var(--accent-rgb),.04),rgba(139,92,246,.04));border:1px solid rgba(var(--accent-rgb),.12);border-radius:16px;padding:24px;text-align:center;position:relative;overflow:hidden;margin-bottom:32px}
-    .presale-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#8b5cf6,#ec4899)}
-    .presale-card h3{font-size:1.1rem;font-weight:800;margin-bottom:6px}
-    .presale-card p{font-size:12px;color:var(--text-dim);margin-bottom:16px;line-height:1.6}
-    .btn-presale{display:block;width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;transition:all .3s;margin-bottom:8px}
-    .btn-presale:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(var(--accent-rgb),.2)}
-    .btn-secondary{display:block;width:100%;padding:10px;border-radius:10px;border:1px solid var(--border-accent);background:transparent;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;transition:all .2s}
+    /* Footer */
+    footer{
+      padding:60px 20px;border-top:1px solid rgba(255,255,255,0.05);
+      text-align:center;background:#000;
+    }
+    .footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap;}
+    .footer-links a{color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:600;}
+    .footer-links a:hover{color:var(--accent);}
 
-    .footer{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
-    .footer a{font-size:10px;color:var(--text-muted);text-decoration:none;transition:color .2s}
-    .footer a:hover{color:var(--accent)}
-    .footer span{color:var(--border)}
-
-    @media(max-width:540px){
-      .features{grid-template-columns:1fr}
-      .capture{flex-direction:column}
-      .capture button{width:100%}
-      .countdown{gap:4px}
-      .cd-num{padding:8px 8px;min-width:52px;font-size:1.4rem}
-      .topbar{flex-direction:column;gap:12px;text-align:center}
-      .desc-card{padding:20px 16px}
-      .desc-card p{font-size:14px}
-      .presale-card{padding:20px 16px}
-      .section-title{font-size:10px}
-      h1{margin-bottom:8px}
-      .tagline{font-size:.95rem}
-      .page{padding:24px 16px 40px}
-      .capture button{padding:14px}
+    @media(max-width:900px){
+      .modes-container{grid-template-columns:1fr;}
+      .price-card.featured{transform:scale(1);}
+      .nav-links{display:none;}
+    }
+    @media(max-width:600px){
+      .hero h1{font-size:2.5rem;}
+      .countdown-matrix{flex-wrap:wrap;gap:8px;padding:16px;}
+      .cd-num{font-size:2rem;}
+      .btn-primary, .btn-secondary{width:100%;justify-content:center;}
+      .compare-table{font-size:12px;}
+      .compare-table th, .compare-table td{padding:12px;}
     }
   </style>
-
-  <!-- UNIVERSAL PWA BACK-BUTTON PATCH -->
-  <script>
-    window.addEventListener('load', function() {
-      if (window.history && window.history.pushState) {
-        window.history.pushState({ pwa: true }, '');
-        window.addEventListener('popstate', function(e) {
-          // 1. Dispatch Escape to close React/Radix/shadcn modals natively
-          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27 }));
-          
-          // 2. Fallback: Force click any generic close buttons in the DOM
-          const modals = document.querySelectorAll('.modal, [role="dialog"], .overlay, .popup, [data-state="open"]');
-          let closed = false;
-          modals.forEach(m => {
-            const btn = m.querySelector('button.close, [aria-label="Close"], .close-button, [data-dismiss="modal"]');
-            if (btn && typeof btn.click === 'function') {
-              btn.click();
-              closed = true;
-            }
-          });
-          
-          // 3. Keep the user in the app by pushing state again
-          window.history.pushState({ pwa: true }, '');
-        });
-      }
-    });
-  </script>
-
 </head>
 <body>
+
+  <!-- Backgrounds -->
   <div class="bg-canvas"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="bg-grid"></div>
 
-  <div class="page">
-    <div class="topbar">
-      <a href="https://tlid.io" class="dw-logo">
-        <div class="dw-mark">DW</div>
-        <span class="dw-text">DarkWave Studios</span>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-brand">🔧 Lume<span>Scan</span></div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#modes">Governance Modes</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#ecosystem">Ecosystem</a>
+    </div>
+    <a href="download.apk" class="btn-nav">Download APK</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">Axiom 42 Engine Integration</div>
+    <h1>The Deterministic<br>Diagnostic Engine</h1>
+    <p>Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, code interpretation, and predictive maintenance.</p>
+
+    <div class="countdown-matrix">
+      <div class="cd-block"><span class="cd-num" id="cd-d">--</span><span class="cd-label">Days</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-block"><span class="cd-num" id="cd-h">--</span><span class="cd-label">Hours</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-block"><span class="cd-num" id="cd-m">--</span><span class="cd-label">Mins</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-block"><span class="cd-num" id="cd-s">--</span><span class="cd-label">Secs</span></div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="lumescan.apk" class="btn-primary" download>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Android APK
       </a>
-      <a href="https://dwtl.io/presale" class="badge" target="_blank">Signal Presale Live</a>
+      <a href="https://dwtl.io/presale" class="btn-secondary" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Signal Presale
+      </a>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" class="section">
+    <div class="section-header">
+      <h2 class="section-title">Beyond Basic Code Readers</h2>
+      <p class="section-subtitle">Lume Scan replaces thousand-dollar dealership scan tools with military-grade mobile software.</p>
     </div>
 
-    <div class="hero">
-      <span class="app-icon">🔧</span>
-      <div class="chip">LAUNCHING JUNE 23, 2026</div>
-      <h1>Lume Scan</h1>
-      <p class="tagline">Deterministic OBD-II Diagnostic Engine</p>
-
-      <div class="countdown">
-        <div class="cd-block"><span class="cd-num" id="cd-d">--</span><span class="cd-label">Days</span></div>
-        <span class="cd-sep">:</span>
-        <div class="cd-block"><span class="cd-num" id="cd-h">--</span><span class="cd-label">Hours</span></div>
-        <span class="cd-sep">:</span>
-        <div class="cd-block"><span class="cd-num" id="cd-m">--</span><span class="cd-label">Mins</span></div>
-        <span class="cd-sep">:</span>
-        <div class="cd-block"><span class="cd-num" id="cd-s">--</span><span class="cd-label">Secs</span></div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>42 Live Signals</h3>
+        <p>Monitor RPM, Coolant Temp, Timing Advance, O2 Voltages, and Mass Air Flow in pure real-time with zero latency drops.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>Intelligent Interpretation</h3>
+        <p>Never google a P-code again. The Axiom 42 deterministic engine translates complex faults into plain English diagnostic steps.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚠️</div>
+        <h3>Severity Analysis</h3>
+        <p>Instantly know if a check engine light means "pull over immediately" or "schedule service next week."</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⏳</div>
+        <h3>Predictive Maintenance</h3>
+        <p>Advanced algorithmic tracking of oil degradation, brake wear patterns, and filter lifespans using OEM threshold logic.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h3>Universal Hardware</h3>
+        <p>Bring your own device. Works seamlessly with any ELM327-compatible BLE 5.0 or WiFi OBD-II adapter.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h3>Trust Layer Verified</h3>
+        <p>All operational diagnostic reports can be optionally anchored to the DarkWave Trust Layer for immutable provenance.</p>
       </div>
     </div>
+  </section>
 
-    <div class="section">
-      <div class="section-title">About Lume Scan</div>
-      <div class="desc-card">
-        <p>Lume Scan is the first deterministic automotive diagnostic platform. Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, intelligent fault code interpretation, severity analysis, and predictive maintenance timelines. No subscription required for basic diagnostics. Available on Android with iOS coming soon.</p>
-      </div>
-
-      <div class="features">
-        <div class="feat"><span class="feat-dot"></span>42 Live Engine Signals</div>
-            <div class="feat"><span class="feat-dot"></span>Intelligent Code Interpretation</div>
-            <div class="feat"><span class="feat-dot"></span>Severity Analysis</div>
-            <div class="feat"><span class="feat-dot"></span>Predictive Maintenance</div>
-            <div class="feat"><span class="feat-dot"></span>BLE & WiFi Adapters</div>
-            <div class="feat"><span class="feat-dot"></span>Zero-Subscription Diagnostics</div>
-      </div>
+  <!-- Governance Modes -->
+  <section id="modes" class="section" style="padding-top:0;">
+    <div class="section-header">
+      <h2 class="section-title">Advanced Governance Modes</h2>
+      <p class="section-subtitle">Enterprise-grade firmware extensions unlocked via subscription.</p>
     </div>
 
-    <div class="video-section">
-      <div class="section-title">See It In Action</div>
+    <div class="modes-container">
+      <div class="mode-card">
+        <div class="mode-badge">MODE 05</div>
+        <h3 style="font-size:2rem;margin-bottom:16px;">IMMO Key Management</h3>
+        <p style="color:var(--text-dim);margin-bottom:24px;">Complete dealer-level key programming. Read, write, and delete transponders over UDS via CAN bus. Requires active DarkWave VSP credential authentication.</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
+          <span style="font-weight:700;">$199.00 Unlock</span>
+          <span style="color:var(--accent);font-weight:800;">$8.99 / key</span>
+        </div>
+      </div>
       
-          <video controls playsinline preload="metadata" poster="" style="width:100%;border-radius:16px;border:1px solid rgba(6,182,212,.2);box-shadow:0 8px 40px rgba(0,0,0,.5);">
-            <source src="videos/demo.mp4" type="video/mp4">
-          </video>
+      <div class="mode-card">
+        <div class="mode-badge">MODE 06</div>
+        <h3 style="font-size:2rem;margin-bottom:16px;">Remote Start Governance</h3>
+        <p style="color:var(--text-dim);margin-bottom:24px;">Total CAN-bus remote start without aftermarket wiring or OEM subscriptions. Features tamper-evident geofencing, runtime limits, and hood-open auto-stop.</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
+          <span style="font-weight:700;">Software Sub</span>
+          <span style="color:var(--accent);font-weight:800;">$9.99 / mo</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="section">
+    <div class="section-header">
+      <h2 class="section-title">Transparent, Tiered Access</h2>
+      <p class="section-subtitle">No massive upfront hardware costs. Buy the license once, subscribe for the cloud fabric.</p>
     </div>
 
-    <div class="notify-wrap">
-      <p class="notify-label">Get notified when Lume Scan goes live.</p>
-      <div class="capture">
-        <input type="email" id="teaser-email" placeholder="Enter your enterprise email" autocomplete="email">
-        <button id="teaser-btn" >Notify Me</button>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="price-card">
+        <div class="price-tier">Free Tier</div>
+        <div class="price-amount">$0</div>
+        <div class="price-sub">Forever Free</div>
+        <div class="price-features">
+          <div class="p-feat"><i>✓</i> Code Reading & Clearing</div>
+          <div class="p-feat"><i>✓</i> 3 Live Signals (RPM, Speed, Coolant)</div>
+          <div class="p-feat disabled"><i>✕</i> 42 Live Engine Signals</div>
+          <div class="p-feat disabled"><i>✕</i> Code Interpretation</div>
+          <div class="p-feat disabled"><i>✕</i> Mode 05 / 06 Access</div>
+        </div>
+        <a href="lumescan.apk" download class="btn-secondary">Download Free</a>
+      </div>
+
+      <!-- Founders -->
+      <div class="price-card featured">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;font-weight:900;font-size:12px;padding:4px 16px;border-radius:999px;letter-spacing:1px;box-shadow:0 0 20px rgba(14,165,233,0.5);">FIRST 100 USERS</div>
+        <div class="price-tier">Founders Club</div>
+        <div class="price-amount">$9.99</div>
+        <div class="price-sub">+ $1.99/mo Service</div>
+        <div class="price-features">
+          <div class="p-feat"><i>✓</i> Full 42 Signal Engine</div>
+          <div class="p-feat"><i>✓</i> Intelligent Interpretation</div>
+          <div class="p-feat"><i>✓</i> Predictive Maintenance</div>
+          <div class="p-feat"><i>✓</i> TLL Anchoring Access</div>
+          <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
+        </div>
+        <a href="javascript:void(0)" class="btn-primary">Claim Founder Slot</a>
+      </div>
+
+      <!-- Standard -->
+      <div class="price-card">
+        <div class="price-tier">Standard Pro</div>
+        <div class="price-amount">$39.99</div>
+        <div class="price-sub">+ $4.99/mo Service</div>
+        <div class="price-features">
+          <div class="p-feat"><i>✓</i> Full 42 Signal Engine</div>
+          <div class="p-feat"><i>✓</i> Intelligent Interpretation</div>
+          <div class="p-feat"><i>✓</i> Predictive Maintenance</div>
+          <div class="p-feat"><i>✓</i> TLL Anchoring Access</div>
+          <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
+        </div>
+        <a href="javascript:void(0)" class="btn-secondary">Join Waitlist</a>
       </div>
     </div>
 
-    <div class="presale-card">
-      <h3>Signal Presale — Live Now</h3>
-      <p>Early supporters earn up to <strong style="color:var(--accent)">+25% bonus Signal ($SIG)</strong> — the token that powers access across every app in the ecosystem.</p>
-      <a href="https://dwtl.io/presale" target="_blank" class="btn-presale">Join the Presale — From $10</a>
-      <a href="https://dwtl.io" target="_blank" class="btn-secondary">Explore the Trust Layer</a>
+    <div class="section-header" style="margin-top:80px; margin-bottom:40px;">
+      <h2 class="section-title" style="font-size:2rem;">Industry Comparison</h2>
     </div>
+    <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Competitor</th>
+            <th>Upfront Hardware Cost</th>
+            <th>Equivalent Lume Pricing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Autel IM608 Pro II</td>
+            <td>$5,500.00</td>
+            <td class="highlight-cell">$199 Mode 05 + $8.99/key</td>
+          </tr>
+          <tr>
+            <td>Smart Pro Key Programmer</td>
+            <td>$3,500.00 + $25/key</td>
+            <td class="highlight-cell">$199 Mode 05 + $8.99/key</td>
+          </tr>
+          <tr>
+            <td>FordPass / GM OnStar Remote</td>
+            <td>$300.00 - $360.00 / year</td>
+            <td class="highlight-cell">$9.99 / mo ($120/yr) Mode 06</td>
+          </tr>
+          <tr>
+            <td>Compustar Hardwire Install</td>
+            <td>$400.00 - $800.00 + wire splicing</td>
+            <td class="highlight-cell">$9.99 / mo, Zero Wiring</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-    <div class="footer">
-      <a href="https://axiomstudio.dev">Axiom AI</a>
-      <span>&middot;</span>
-      <a href="https://dwtl.io/presale">Signal Presale</a>
-      <span>&middot;</span>
-      <a href="https://tlid.io">TLID Domains</a>
-      <span>&middot;</span>
+  <!-- Ecosystem -->
+  <section id="ecosystem" class="section" style="padding-top:40px; padding-bottom:80px;">
+    <div class="section-header" style="margin-bottom:40px;">
+      <h2 class="section-title" style="font-size:2rem;">Part of the DarkWave Ecosystem</h2>
+      <p class="section-subtitle">Lume Scan is just one node in a 42-app deterministic environment.</p>
+    </div>
+    
+    <div class="eco-scroll">
+      <a href="https://dwtl.io" class="eco-card">
+        <h4>🛡️ Trust Layer Ledger</h4>
+        <p style="font-size:13px;color:var(--text-dim);">Verified identity, Signal token, and decentralized governance connecting all 42 apps.</p>
+      </a>
+      <a href="https://lumeauto.tech" class="eco-card">
+        <h4>🚗 Lume Auto</h4>
+        <p style="font-size:13px;color:var(--text-dim);">The parent platform for verified diagnostics, fleet governance & vehicle intelligence.</p>
+      </a>
+      <a href="https://axiomstudio.dev" class="eco-card">
+        <h4>⚡ Axiom Studio</h4>
+        <p style="font-size:13px;color:var(--text-dim);">The Apex Predator IDE. Multi-agent AI coding environment used to build this platform.</p>
+      </a>
+      <a href="https://garagebot.io" class="eco-card">
+        <h4>🔧 GarageBot</h4>
+        <p style="font-size:13px;color:var(--text-dim);">AI-assisted parts sourcing for everything from automotive to aviation mechanics.</p>
+      </a>
+      <a href="https://trustshield.tech" class="eco-card">
+        <h4>🔐 Trust Shield</h4>
+        <p style="font-size:13px;color:var(--text-dim);">100% Free, Ad-Free offline encrypted local vault.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
       <a href="https://darkwavestudios.io">DarkWave Studios</a>
+      <a href="https://dwtl.io">Trust Layer</a>
+      <a href="https://lumeauto.tech">Lume Auto</a>
+      <a href="https://lume42.com">Lume42 Labs</a>
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">© 2026 DarkWave Studios LLC. US Patent Pending 64/032,339.</p>
+    <p style="font-size:11px;color:rgba(255,255,255,0.2);max-width:600px;margin:0 auto;">Google Play and the Google Play logo are trademarks of Google LLC. All other trademarks are property of their respective owners. OBD-II capabilities vary by vehicle make and model year.</p>
+  </footer>
+
+  <!-- BLACKOUT OVERLAY HTML -->
+  <div id="glass-blackout-overlay" class="hidden">
+    <div class="gb-modal">
+      <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> June 23, 2026</div>
+      <h1 class="gb-title">Downloads Locked</h1>
+      <p class="gb-subtitle">The executable builds of Lume Scan are restricted to authorized Beta Testers until our public launch. You may continue exploring the Web Demo without an account.</p>
+      
+      <div class="gb-ctas">
+        <button class="gb-btn-primary" onclick="triggerBetaLogin()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Beta Testers Enter Here
+        </button>
+        <button class="gb-btn-secondary" onclick="closeBlackoutModal()">
+          Return to Demo
+        </button>
+      </div>
+
+      <div class="gb-free-banner">
+        <p>While you wait, download our 100% Free & Ad-Free platforms today:</p>
+        <div class="gb-free-links">
+          <a href="https://chronoverse.tlid.io" class="gb-free-link">Chronoverse</a>
+          <a href="https://trustshield.tech" class="gb-free-link">TrustShield</a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <div id="gb-toast-container"></div>
+
+  <!-- Countdown Script -->
   <script>
-    firebase.initializeApp({apiKey:'AIzaSyCVPbg2gQ9K3UB3qNCrb-VHfsYM7ABZBck',authDomain:'darkwave-auth.firebaseapp.com',projectId:'darkwave-auth',storageBucket:'darkwave-auth.firebasestorage.app',messagingSenderId:'41307406912',appId:'1:41307406912:web:b82a15c90790542e2a55a5'});var db=firebase.firestore();
     (function(){
       var launch=new Date('2026-06-23T09:00:00-05:00').getTime();
       function tick(){
         var diff=launch-Date.now();
-        if(diff<=0){document.querySelector('.countdown').innerHTML='<span style="font-size:1.4rem;font-weight:900;color:var(--accent)">We are live!</span>';return;}
+        if(diff<=0){
+          var m = document.querySelector('.countdown-matrix');
+          if(m) m.innerHTML='<span style="font-size:2rem;font-weight:900;color:var(--accent)">We are live!</span>';
+          return;
+        }
         var pad=function(n){return n<10?'0'+n:''+n;};
-        document.getElementById('cd-d').textContent=pad(Math.floor(diff/86400000));
-        document.getElementById('cd-h').textContent=pad(Math.floor((diff%86400000)/3600000));
-        document.getElementById('cd-m').textContent=pad(Math.floor((diff%3600000)/60000));
-        document.getElementById('cd-s').textContent=pad(Math.floor((diff%60000)/1000));
+        var dEl=document.getElementById('cd-d'); if(dEl) dEl.textContent=pad(Math.floor(diff/86400000));
+        var hEl=document.getElementById('cd-h'); if(hEl) hEl.textContent=pad(Math.floor((diff%86400000)/3600000));
+        var mEl=document.getElementById('cd-m'); if(mEl) mEl.textContent=pad(Math.floor((diff%3600000)/60000));
+        var sEl=document.getElementById('cd-s'); if(sEl) sEl.textContent=pad(Math.floor((diff%60000)/1000));
       }
       tick();setInterval(tick,1000);
     })();
-    function submitEmail(){
-      var input=document.getElementById('teaser-email');
-      var btn=document.getElementById('teaser-btn');
-      var email=input.value.trim();
-      if(!email||!email.includes('@')){input.style.borderColor='rgba(239,68,68,.5)';setTimeout(function(){input.style.borderColor='';},1200);return;}
-      try{var l=JSON.parse(localStorage.getItem('dw_launch_list')||'[]');if(!l.includes(email)){l.push(email);localStorage.setItem('dw_launch_list',JSON.stringify(l));}}catch(e){}
-      db.collection('launch_emails').add({email:email,app:'lumescan',source:window.location.hostname,timestamp:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
-      fetch('https://axiom42.com/api/sms/optin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Launch Subscriber',phone:'email-only',email:email,consent:true,consentTimestamp:new Date().toISOString(),consentSource:'teaser_'+window.location.hostname})}).catch(function(){});
-      btn.textContent='\u2713 You\'re on the list';
-      btn.classList.add('done');
-      input.value='';
-    }
-    document.getElementById('teaser-btn').addEventListener('click', submitEmail);
-    document.getElementById('teaser-email').addEventListener('keydown',function(e){if(e.key==='Enter')submitEmail();});
   </script>
 
+  <!-- Blackout Overlay Script -->
+  <script>
+    window.closeBlackoutModal = function() {
+      document.getElementById('glass-blackout-overlay').classList.add('hidden');
+    };
 
+    window.triggerBetaLogin = function() {
+      window.closeBlackoutModal();
+      window.dispatchEvent(new CustomEvent('betaTesterLogin'));
+      showToast('🔑 Please sign in with your authorized Google account.');
+    };
 
-
-
-
-
-<!-- Made with Lume -->
-<a href="https://lume-lang.org" target="_blank" rel="noopener" id="lume-badge" style="position:fixed;bottom:12px;right:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(2,6,23,0.88);border:1px solid rgba(34,211,238,0.3);border-radius:20px;color:#22d3ee;font-size:11px;font-weight:700;text-decoration:none;z-index:9999;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 0.3s;font-family:Inter,system-ui,sans-serif;letter-spacing:0.02em;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-  Made with Lume
-</a>
-
-
-
-
-
-
-
-<div id="glass-blackout-overlay" class="hidden">
-  <div class="gb-modal">
-    <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> June 23, 2026</div>
-    <h1 class="gb-title">Downloads Locked</h1>
-    <p class="gb-subtitle">The executable builds of Lume Scan are restricted to authorized Beta Testers until our public launch. You may continue exploring the Web Demo without an account.</p>
-    
-    <div class="gb-ctas">
-      <button class="gb-btn-primary" onclick="triggerBetaLogin()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Beta Testers Enter Here
-      </button>
-      <button class="gb-btn-secondary" onclick="closeBlackoutModal()">
-        Return to Demo
-      </button>
-    </div>
-
-    <div class="gb-free-banner">
-      <p>While you wait, download our 100% Free & Ad-Free platforms today:</p>
-      <div class="gb-free-links">
-        <a href="https://chronoverse.tlid.io" class="gb-free-link">Chronoverse</a>
-        <a href="https://trustshield.tech" class="gb-free-link">TrustShield</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="gb-toast-container"></div>
-
-<script>
-  window.closeBlackoutModal = function() {
-    document.getElementById('glass-blackout-overlay').classList.add('hidden');
-  };
-
-  window.triggerBetaLogin = function() {
-    window.closeBlackoutModal();
-    window.dispatchEvent(new CustomEvent('betaTesterLogin'));
-    showToast('🔑 Please sign in with your authorized Google account.');
-  };
-
-  function showToast(msg) {
-    const container = document.getElementById('gb-toast-container');
-    const toast = document.createElement('div');
-    toast.className = 'gb-toast';
-    toast.textContent = msg;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.classList.add('hiding');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  // Intercept Download Clicks
-  (function(){
-    if (window.location.search.includes('admin_unlock=42')) {
-      localStorage.setItem('gb_admin_override', 'true');
+    function showToast(msg) {
+      const container = document.getElementById('gb-toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'gb-toast';
+      toast.textContent = msg;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
-    document.body.addEventListener('click', function(e) {
-      const target = e.target.closest('a, button');
-      if (!target) return;
-      
-      const text = (target.textContent || '').toLowerCase();
-      const href = (target.href || '').toLowerCase();
-      
-      // Target Executables and APKs
-      const isDownloadAction = href.includes('.exe') || 
-                               href.includes('.apk') || 
-                               href.includes('.dmg') ||
-                               href.includes('.appimage') ||
-                               (target.hasAttribute('download'));
-      
-      if (isDownloadAction) {
-        var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true' || localStorage.getItem('beta_tester_unlocked') === 'true';
-        var isNative = navigator.userAgent.toLowerCase().includes(' electron/') || navigator.userAgent.toLowerCase().includes('capacitor') || navigator.userAgent.toLowerCase().includes('wv');
-        
-        if (!isWhitelisted && !isNative) {
-          e.preventDefault();
-          e.stopPropagation();
-          document.getElementById('glass-blackout-overlay').classList.remove('hidden');
-        }
+    // Intercept Download Clicks
+    (function(){
+      if (window.location.search.includes('admin_unlock=42')) {
+        localStorage.setItem('gb_admin_override', 'true');
       }
-    }, true);
-  })();
-</script>
+
+      document.body.addEventListener('click', function(e) {
+        const target = e.target.closest('a, button');
+        if (!target) return;
+        
+        const text = (target.textContent || '').toLowerCase();
+        const href = (target.href || '').toLowerCase();
+        
+        // Target Executables and APKs
+        const isDownloadAction = href.includes('.exe') || 
+                                 href.includes('.apk') || 
+                                 href.includes('.dmg') ||
+                                 href.includes('.appimage') ||
+                                 (target.hasAttribute('download'));
+        
+        if (isDownloadAction) {
+          var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true' || localStorage.getItem('beta_tester_unlocked') === 'true';
+          var isNative = navigator.userAgent.toLowerCase().includes(' electron/') || navigator.userAgent.toLowerCase().includes('capacitor') || navigator.userAgent.toLowerCase().includes('wv');
+          
+          if (!isWhitelisted && !isNative) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('glass-blackout-overlay').classList.remove('hidden');
+          }
+        }
+      }, true);
+    })();
+  </script>
 
   <script src="https://nexus.tlid.io/beacon.js" defer></script>
 </body>
