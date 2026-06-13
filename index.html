@@ -270,6 +270,12 @@
       margin:0 auto 48px;
     }
 
+    /* Ken Burns Slideshow */
+    .hero-slider{position:absolute;inset:0;z-index:-1;overflow:hidden;}
+    .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transform:scale(1);transition:opacity 2s ease-in-out, transform 6s linear;}
+    .hero-slide.active{opacity:0.3;transform:scale(1.08);}
+    .hero-slider::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, rgba(2,6,23,0.3) 0%, rgba(2,6,23,1) 100%);}
+
     /* Countdown Matrix */
     .countdown-matrix{
       display:flex;gap:16px;justify-content:center;margin-bottom:48px;
@@ -422,6 +428,12 @@
 
   <!-- Hero Section -->
   <section class="hero">
+    <div class="hero-slider">
+      <div class="hero-slide active" style="background-image:url('img/hero-1.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/hero-2.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/hero-3.png')"></div>
+      <div class="hero-slide" style="background-image:url('img/hero-4.png')"></div>
+    </div>
     <div class="hero-badge">Axiom 42 Engine Integration</div>
     <h1>The Deterministic<br>Diagnostic Engine</h1>
     <p>Connect any standard OBD-II Bluetooth adapter and unlock real-time access to 42 live engine signals, code interpretation, and predictive maintenance.</p>
@@ -765,5 +777,18 @@
   </script>
 
   <script src="https://nexus.tlid.io/beacon.js" defer></script>
+  
+  <!-- Ken Burns Script -->
+  <script>
+    const slides=document.querySelectorAll('.hero-slide');
+    if(slides.length > 0) {
+      let cur=0;
+      setInterval(()=>{
+        slides[cur].classList.remove('active');
+        cur=(cur+1)%slides.length;
+        slides[cur].classList.add('active');
+      }, 5000);
+    }
+  </script>
 </body>
 </html>
