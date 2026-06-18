@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 
 type ConnectionMode = 'idle' | 'wifi' | 'ble';
 
-export default function ConnectionScreen({ onConnect }: { onConnect: () => void }) {
+export default function ConnectionScreen({ onConnect, greeting }: { onConnect: () => void; greeting?: { text: string; name: string } }) {
   const [wifiStatus, setWifiStatus] = useState<WiFiConnection>({
     status: 'disconnected', host: null, error: null, isSimulated: false, adapterInfo: null,
   });
@@ -139,6 +139,15 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
+        {/* Greeting (from logged-in user) */}
+        {greeting && (
+          <Animated.View entering={FadeIn.duration(600)} style={styles.greetingRow}>
+            <Text style={styles.greetingText}>
+              {greeting.text}, <Text style={styles.greetingName}>{greeting.name}</Text> 👋
+            </Text>
+          </Animated.View>
+        )}
+
         {/* Header */}
         <Animated.View entering={FadeIn.duration(800)} style={styles.header}>
           <View style={styles.logoRow}>
@@ -244,6 +253,9 @@ export default function ConnectionScreen({ onConnect }: { onConnect: () => void 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  greetingRow: { alignItems: 'center', marginBottom: 12 },
+  greetingText: { color: 'rgba(255,255,255,0.6)', fontSize: 16, fontWeight: '500' },
+  greetingName: { color: '#10b981', fontWeight: '800' },
   header: { alignItems: 'center', marginBottom: 16 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
   logoText: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: 3 },

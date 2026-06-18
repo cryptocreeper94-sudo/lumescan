@@ -178,19 +178,10 @@ export default function App() {
       {/* Connection screen */}
       {appState === 'connection' && (
         <View style={{ flex: 1 }}>
-          {user && (
-            <View style={styles.greetingBar}>
-              <Text style={styles.greetingText}>
-                {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}
-                {', '}
-                <Text style={styles.greetingName}>
-                  {preferredName || user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Driver'}
-                </Text>
-                {' 👋'}
-              </Text>
-            </View>
-          )}
-          <ConnectionScreen onConnect={() => setAppState('main')} />
+          <ConnectionScreen onConnect={() => setAppState('main')} greeting={user ? {
+            text: new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening',
+            name: preferredName || user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Driver',
+          } : undefined} />
         </View>
       )}
 
