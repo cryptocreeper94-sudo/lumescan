@@ -364,7 +364,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     // Auto-read VIN once on first connect
     if (!vinReadRef.current) {
       vinReadRef.current = true;
-      const isSimulated = getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated;
+      const isSimulated = useBLE ? getBLENativeStatus().isSimulated : getWiFiStatus().isSimulated;
       if (isSimulated) {
         setVehicleName('2019 Ford F-150 5.0L V8');
       } else {

@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { probeForAdapter, WiFiConnection, enterDemoMode } from '../telemetry/WiFiConnector';
 import { connectBLENative, BLEConnection, enterBLEDemoMode } from '../telemetry/BLEConnector';
+import { exportLog } from '../telemetry/FlightRecorder';
 
 const { width } = Dimensions.get('window');
 
@@ -125,6 +126,13 @@ export default function ConnectionScreen({ onConnect, greeting }: { onConnect: (
     setTimeout(onConnect, 500);
   }
 
+  async function handleExportLog() {
+    const success = await exportLog();
+    if (!success) {
+      Alert.alert('Empty Log', 'No diagnostic events have been recorded yet.');
+    }
+  }
+
   const statusColor: Record<string, string> = {
     disconnected: COLORS.textMuted,
     scanning: COLORS.cyan,
@@ -222,6 +230,11 @@ export default function ConnectionScreen({ onConnect, greeting }: { onConnect: (
             <Text style={[styles.secondaryBtnText, { color: COLORS.emerald }]}>DEMO MODE</Text>
             <Text style={styles.secondaryBtnSub}>Simulated 2019 F-150 · No adapter needed</Text>
           </TouchableOpacity>
+
+          {/* Export Log */}
+          <TouchableOpacity style={styles.exportBtn} onPress={handleExportLog}>
+            <Text style={styles.exportBtnText}>EXPORT DIAGNOSTIC LOG</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Quick Setup */}
@@ -298,6 +311,12 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: { fontSize: 12, fontWeight: '700', letterSpacing: 2 },
   secondaryBtnSub: { fontSize: 10, color: COLORS.textDim },
+  exportBtn: {
+    alignItems: 'center', paddingVertical: 10, marginTop: 4,
+  },
+  exportBtnText: {
+    fontSize: 10, fontWeight: '700', letterSpacing: 1, color: COLORS.textDim, textDecorationLine: 'underline',
+  },
   infoContainer: { width: '100%', marginBottom: 12 },
   infoTitle: { fontSize: 10, fontWeight: '700', color: COLORS.textDim, letterSpacing: 3, marginBottom: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 3 },

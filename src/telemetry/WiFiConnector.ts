@@ -10,6 +10,7 @@
 
 import { TelemetrySnapshot, tick as simulatedTick } from './SimulatedEngine';
 import TcpSocket from 'react-native-tcp-socket';
+import { logEvent } from './FlightRecorder';
 
 // Default WiFi ELM327 connection parameters
 const DEFAULT_HOST = '192.168.0.10';  // Most common
@@ -82,11 +83,13 @@ class ELM327Socket {
           port: port,
         }, () => {
           console.log('[LumeScan WiFi] TCP connected to ' + host + ':' + port);
+          logEvent('WiFi', 'INFO', `TCP connected to ${host}:${port}`);
           resolve(true);
         });
         this.socket.setTimeout(5000);
         this.socket.on('timeout', () => {
           console.warn('[LumeScan WiFi] TCP connection timed out');
+          logEvent('WiFi', 'ERROR', 'TCP connection timed out');
           if (this.socket) {
             this.socket.destroy();
             this.socket = null;
@@ -97,6 +100,7 @@ class ELM327Socket {
         this.socket.on('data', (data: Buffer | string) => {
           // Convert Buffer to string if necessary
           const text = typeof data === 'string' ? data : data.toString('utf8');
+          logEvent('WiFi', 'RX', text.trim() || '<empty buffer>');
           this.buffer += text;
           if (this.buffer.includes('>')) {
             const response = this.buffer.replace(/>/g, '').trim();
@@ -110,6 +114,7 @@ class ELM327Socket {
         
         this.socket.on('error', (error: any) => {
           console.warn('[LumeScan WiFi] TCP Error: ', error);
+          logEvent('WiFi', 'ERROR', `TCP Error: ${error?.message || error}`);
           if (this.socket) {
             this.socket.destroy();
             this.socket = null;
@@ -119,6 +124,7 @@ class ELM327Socket {
         
         this.socket.on('close', () => {
           console.log('[LumeScan WiFi] TCP disconnected');
+          logEvent('WiFi', 'INFO', 'TCP disconnected');
         });
 
       } catch {
@@ -133,6 +139,7 @@ class ELM327Socket {
     return new Promise((resolve) => {
       this.responseResolve = resolve;
       this.buffer = '';
+      logEvent('WiFi', 'TX', cmd);
       this.socket.write(cmd + '\r');
       setTimeout(() => {
         if (this.responseResolve) {

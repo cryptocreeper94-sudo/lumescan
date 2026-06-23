@@ -21,6 +21,7 @@
 import { BleManager, Device, Characteristic, Subscription } from 'react-native-ble-plx';
 import { TelemetrySnapshot, tick as simulatedTick } from './SimulatedEngine';
 import { Platform, PermissionsAndroid } from 'react-native';
+import { logEvent } from './FlightRecorder';
 
 // ═══════════════════════════════════════════════════════════════
 // Adapter Discovery — Name-Based (Universal)
@@ -306,6 +307,7 @@ async function sendBLECommand(cmd: string, timeoutMs: number = 3000): Promise<st
     responseBuffer = '';
 
     const data = encodeBase64(cmd + '\r');
+    logEvent('BLE', 'TX', cmd);
     
     // Try writeWithResponse first, fall back to writeWithoutResponse
     const writePromise = txCharacteristic!.isWritableWithResponse
@@ -352,6 +354,7 @@ function setupNotifications(): boolean {
       if (!char?.value) return;
 
       const chunk = decodeBase64(char.value);
+      logEvent('BLE', 'RX', chunk.trim() || '<empty buffer>');
       responseBuffer += chunk;
 
       // ELM327 sends '>' when it's ready for the next command
