@@ -438,6 +438,17 @@ export async function connectBLENative(
       try {
         // Connect with timeout
         connectedDevice = await device.connect({ timeout: 8000 });
+        
+        // Negotiate MTU before discovering services (Crucial for Android)
+        if (Platform.OS === 'android') {
+          try {
+            await connectedDevice.requestMTU(512);
+            console.log('[LumeScan] Negotiated MTU to 512 bytes');
+          } catch (e: any) {
+            console.warn('[LumeScan] MTU negotiation failed (often ignorable):', e?.message);
+          }
+        }
+        
         await connectedDevice.discoverAllServicesAndCharacteristics();
 
         // Discover TX/RX characteristics

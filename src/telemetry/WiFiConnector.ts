@@ -9,6 +9,7 @@
  */
 
 import { TelemetrySnapshot, tick as simulatedTick } from './SimulatedEngine';
+import TcpSocket from 'react-native-tcp-socket';
 
 // Default WiFi ELM327 connection parameters
 const DEFAULT_HOST = '192.168.0.10';  // Most common
@@ -65,54 +66,30 @@ const PIDS: { cmd: string; parse: (hex: string) => Record<string, number>; optio
 ];
 
 /**
- * Send an AT/OBD command via TCP and read the response.
- * Uses fetch to a local TCP-to-HTTP bridge, or raw TCP via React Native's
- * networking layer.
- */
-async function sendCommand(cmd: string, timeoutMs: number = 2000): Promise<string> {
-  return new Promise((resolve) => {
-    try {
-      const xhr = new XMLHttpRequest();
-      const url = `http://${connectionState.host}:${DEFAULT_PORT}`;
-      
-      // For raw TCP, we use a lightweight approach:
-      // Send the command as the request body, read response
-      xhr.open('GET', `http://${connectionState.host}:${DEFAULT_PORT}/${cmd}`, true);
-      xhr.timeout = timeoutMs;
-      xhr.onload = () => resolve(xhr.responseText || '');
-      xhr.onerror = () => resolve('');
-      xhr.ontimeout = () => resolve('');
-      xhr.send();
-    } catch {
-      resolve('');
-    }
-  });
-}
-
-/**
- * TCP socket approach using React Native's raw TCP
+ * TCP socket approach using React Native's raw TCP via react-native-tcp-socket
  * This is the primary connection method for WiFi ELM327
  */
 class ELM327Socket {
-  private ws: WebSocket | null = null;
+  private socket: any = null;
   private responseResolve: ((value: string) => void) | null = null;
   private buffer = '';
 
   async connect(host: string, port: number): Promise<boolean> {
     return new Promise((resolve) => {
       try {
-        // Use a WebSocket-style TCP connection
-        // Most modern WiFi ELM327 adapters support this
-        const url = `ws://${host}:${port}`;
-        this.ws = new WebSocket(url);
-        
-        this.ws.onopen = () => {
-          console.log('[Lume-Auto] TCP connected');
+        this.socket = TcpSocket.createConnection({
+          host: host,
+          port: port,
+        }, () => {
+          console.log('[LumeScan WiFi] TCP connected to ' + host + ':' + port);
           resolve(true);
-        };
+        });
+        this.socket.setTimeout(5000);
         
-        this.ws.onmessage = (event) => {
-          this.buffer += event.data;
+        this.socket.on('data', (data: Buffer | string) => {
+          // Convert Buffer to string if necessary
+          const text = typeof data === 'string' ? data : data.toString('utf8');
+          this.buffer += text;
           if (this.buffer.includes('>')) {
             const response = this.buffer.replace(/>/g, '').trim();
             this.buffer = '';
@@ -121,17 +98,17 @@ class ELM327Socket {
               this.responseResolve = null;
             }
           }
-        };
+        });
         
-        this.ws.onerror = () => {
+        this.socket.on('error', (error: any) => {
+          console.warn('[LumeScan WiFi] TCP Error: ', error);
           resolve(false);
-        };
+        });
         
-        this.ws.onclose = () => {
-          console.log('[Lume-Auto] TCP disconnected');
-        };
+        this.socket.on('close', () => {
+          console.log('[LumeScan WiFi] TCP disconnected');
+        });
 
-        setTimeout(() => resolve(false), 3000);
       } catch {
         resolve(false);
       }
@@ -139,12 +116,12 @@ class ELM327Socket {
   }
 
   async send(cmd: string, timeoutMs: number = 2000): Promise<string> {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return '';
+    if (!this.socket) return '';
     
     return new Promise((resolve) => {
       this.responseResolve = resolve;
       this.buffer = '';
-      this.ws!.send(cmd + '\r');
+      this.socket.write(cmd + '\r');
       setTimeout(() => {
         if (this.responseResolve) {
           this.responseResolve(this.buffer || '');
@@ -155,14 +132,14 @@ class ELM327Socket {
   }
 
   close() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    if (this.socket) {
+      this.socket.destroy();
+      this.socket = null;
     }
   }
 
   get isConnected(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN;
+    return this.socket !== null;
   }
 }
 
