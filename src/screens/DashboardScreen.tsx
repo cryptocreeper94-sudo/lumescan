@@ -434,10 +434,12 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
           <View style={styles.connectionBadge}>
             <Animated.View style={[styles.statusDot, animatedStyle]} />
             <Text style={styles.connectionText}>
-              {getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated
-                ? 'DEMO MODE'
-                : getBLENativeStatus().status === 'connected'
-                  ? `BLE: ${getBLENativeStatus().deviceName || 'CONNECTED'}`
+              {getBLENativeStatus().status === 'connected'
+                ? getBLENativeStatus().isSimulated
+                  ? 'DEMO MODE'
+                  : `BLE: ${getBLENativeStatus().deviceName || 'CONNECTED'}`
+                : getWiFiStatus().isSimulated
+                  ? 'DEMO MODE'
                   : 'WIFI CONNECTED'
               }
             </Text>
