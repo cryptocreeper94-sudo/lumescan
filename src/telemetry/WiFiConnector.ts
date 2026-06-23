@@ -85,6 +85,14 @@ class ELM327Socket {
           resolve(true);
         });
         this.socket.setTimeout(5000);
+        this.socket.on('timeout', () => {
+          console.warn('[LumeScan WiFi] TCP connection timed out');
+          if (this.socket) {
+            this.socket.destroy();
+            this.socket = null;
+          }
+          resolve(false);
+        });
         
         this.socket.on('data', (data: Buffer | string) => {
           // Convert Buffer to string if necessary
@@ -102,6 +110,10 @@ class ELM327Socket {
         
         this.socket.on('error', (error: any) => {
           console.warn('[LumeScan WiFi] TCP Error: ', error);
+          if (this.socket) {
+            this.socket.destroy();
+            this.socket = null;
+          }
           resolve(false);
         });
         
