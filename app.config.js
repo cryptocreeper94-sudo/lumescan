@@ -1,13 +1,13 @@
 /**
  * LumeScan — Dynamic Expo Config
  * Reads APP_VARIANT env var from EAS build profiles to switch between
- * Cox (enterprise) and Consumer (public) builds from the same codebase.
+ * Enterprise (restricted) and Consumer (public) builds from the same codebase.
  *
- * Cox build:      eas build -p android --profile cox
- * Consumer build: eas build -p android --profile consumer
+ * Enterprise build: eas build -p android --profile enterprise
+ * Consumer build:   eas build -p android --profile consumer
  */
 
-const IS_COX = process.env.APP_VARIANT === 'cox';
+const IS_ENTERPRISE = process.env.APP_VARIANT === 'enterprise';
 
 module.exports = () => {
   // Load the static app.json as the base
@@ -15,10 +15,10 @@ module.exports = () => {
 
   return {
     ...base,
-    name: IS_COX ? 'Lume Scan · Cox' : 'LumeScan Pro',
+    name: IS_ENTERPRISE ? 'LumeScan Enterprise' : 'LumeScan Pro',
     extra: {
       ...base.extra,
-      appVariant: IS_COX ? 'cox' : 'consumer',
+      appVariant: IS_ENTERPRISE ? 'enterprise' : 'consumer',
     },
   };
 };

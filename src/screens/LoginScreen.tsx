@@ -5,7 +5,7 @@ import {
   ScrollView, Alert,
 } from 'react-native';
 import { ActivitySquare, ShieldCheck, AlertCircle, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react-native';
-import { IS_COX } from '../config/variant';
+import { IS_ENTERPRISE } from '../config/variant';
 import { COLORS } from '../theme/colors';
 import { signInWithEmail, registerWithEmail, signInWithGoogleCredential } from '../config/firebase';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -112,7 +112,7 @@ export default function LoginScreen() {
             <View style={styles.formContainer}>
               <View style={styles.securityBadge}>
               <ShieldCheck size={14} color={COLORS.emerald} />
-                <Text style={styles.securityText}>{IS_COX ? 'AUTHORIZED PERSONNEL ONLY' : 'SECURE LOGIN'}</Text>
+                <Text style={styles.securityText}>{IS_ENTERPRISE ? 'AUTHORIZED PERSONNEL ONLY' : 'SECURE LOGIN'}</Text>
               </View>
 
               {error && (
@@ -123,7 +123,7 @@ export default function LoginScreen() {
               )}
 
               {/* Google SSO — consumer only */}
-              {!IS_COX && (
+              {!IS_ENTERPRISE && (
                 <>
                   <TouchableOpacity
                     style={styles.googleBtn}
@@ -144,10 +144,10 @@ export default function LoginScreen() {
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>{IS_COX ? 'COX EMAIL' : 'EMAIL ADDRESS'}</Text>
+                <Text style={styles.label}>{IS_ENTERPRISE ? 'ENTERPRISE EMAIL' : 'EMAIL ADDRESS'}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder={IS_COX ? 'your.name@coxautoinc.com' : 'you@gmail.com'}
+                  placeholder={IS_ENTERPRISE ? 'your.name@company.com' : 'you@gmail.com'}
                   placeholderTextColor={COLORS.textDim}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -179,7 +179,7 @@ export default function LoginScreen() {
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>{IS_COX ? 'SECURITY KEY' : 'PASSWORD'}</Text>
+                <Text style={styles.label}>{IS_ENTERPRISE ? 'SECURITY KEY' : 'PASSWORD'}</Text>
                 <View style={styles.passwordRow}>
                   <TextInput
                     style={[styles.input, styles.passwordInput]}

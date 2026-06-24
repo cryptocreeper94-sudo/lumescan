@@ -19,10 +19,10 @@
         "buildType": "apk"
       }
     },
-    "cox": {
+    "enterprise": {
       "distribution": "internal",
       "env": {
-        "APP_VARIANT": "cox"
+        "APP_VARIANT": "enterprise"
       },
       "android": {
         "buildType": "apk"

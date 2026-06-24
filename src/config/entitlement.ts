@@ -2,7 +2,7 @@
  * LumeAuto Mobile — Entitlement Gating
  * Free tier: code reading, 3 signals (RPM, speed, coolant), reports view-only
  * Pro tier: full 42-signal engine, fuel coaching, predictive maintenance, driver scoring
- * Bypass: DarkWave/Cox internal accounts
+ * Bypass: DarkWave internal accounts
  *
  * DarkWave Studios LLC — Copyright 2026
  */
@@ -10,8 +10,8 @@
 import { auth } from './firebase';
 
 // ── Bypass Domains & Emails ──
-// These accounts skip the paygate entirely (Cox internal testing, DarkWave team)
-const BYPASS_DOMAINS = ['coxautoinc.com', 'darkwavestudios.com', 'manheim.com'];
+// These accounts skip the paygate entirely (DarkWave team, authorized testers)
+const BYPASS_DOMAINS = ['darkwavestudios.com'];
 const BYPASS_EMAILS = [
   'kathytidwell74@gmail.com',
   'rtaron@bellsouth.net',
@@ -19,6 +19,8 @@ const BYPASS_EMAILS = [
   'averymackenna@gmail.com',
   'barrycline33@gmail.com',
   'pcdirect97@gmail.com',
+  'celladorstudios@gmail.com',
+  'gladevillej@gmail.com',
 ];
 
 const FIRESTORE_PROJECT = 'darkwave-auth';
@@ -75,7 +77,7 @@ export async function checkEntitlement(): Promise<EntitlementStatus> {
   const email = user.email.toLowerCase();
   const domain = email.split('@')[1];
 
-  // ── Cox / DarkWave bypass → Pro ──
+  // ── DarkWave bypass → Pro ──
   if (BYPASS_DOMAINS.includes(domain)) {
     return { entitled: true, tier: 'pro', reason: 'bypass_domain', email, mode05Purchased: true, mode06Active: true };
   }
