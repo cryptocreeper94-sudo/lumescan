@@ -195,9 +195,11 @@
 
         const isWhitelisted = WHITELIST.includes(user.email.toLowerCase());
         if (isWhitelisted) {
+          localStorage.setItem('beta_tester_unlocked', 'true');
           ui.successPanel.style.display = 'block';
           ui.deniedPanel.style.display = 'none';
         } else {
+          localStorage.removeItem('beta_tester_unlocked');
           ui.successPanel.style.display = 'none';
           ui.deniedPanel.style.display = 'block';
           ui.deniedReason.textContent = `Access Denied: ${user.email} is not on the beta tester whitelist.`;
