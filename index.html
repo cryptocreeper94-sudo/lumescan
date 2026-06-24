@@ -664,8 +664,7 @@
     };
     window.triggerBetaLogin = function() {
       window.closeBlackoutModal();
-      window.dispatchEvent(new CustomEvent('betaTesterLogin'));
-      showToast('🔑 Please sign in with your authorized Google account.');
+      window.location.href = '/beta.html';
     };
     function showToast(msg) {
       const container = document.getElementById('gb-toast-container');
