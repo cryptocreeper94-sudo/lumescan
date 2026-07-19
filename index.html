@@ -370,56 +370,70 @@
       <p class="section-subtitle">LumeScan Pro natively supports the entire spectrum of OBD-II Diagnostic Modes, alongside our proprietary enterprise firmware unlocks.</p>
     </div>
 
-    <div class="modes-list-grid">
-      <div class="mode-item">
-        <div class="m-num">01</div>
-        <div class="m-details"><h4>Current Powertrain Data</h4><p>Real-time access to the 42 live engine signals, sensors, and state.</p></div>
-      </div>
-      <div class="mode-item">
-        <div class="m-num">02</div>
-        <div class="m-details"><h4>Freeze Frame Data</h4><p>Snapshot of engine parameters at the exact moment a fault occurred.</p></div>
-      </div>
-      <div class="mode-item">
-        <div class="m-num">03</div>
-        <div class="m-details"><h4>Read Emission DTCs</h4><p>Pull confirmed Diagnostic Trouble Codes from the ECU.</p></div>
-      </div>
-      <div class="mode-item">
-        <div class="m-num">04</div>
-        <div class="m-details"><h4>Clear Emission DTCs</h4><p>Clear Check Engine Lights and reset learned ECU parameters.</p></div>
-      </div>
-      
-      <!-- COMING SOON - HIGHLIGHTED -->
-      <div class="mode-item highlight-mode">
-        <div class="m-num">05</div>
-        <div class="m-details">
-          <h4 style="color:var(--highlight);">IMMO Key Management <span style="font-size:10px; background:var(--highlight); color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px;">COMING SOON</span></h4>
-          <p>Read, write, and safely delete transponders over UDS via the CAN bus. Requires active DarkWave VSP credential. <strong>(Release: Q3 2026)</strong></p>
+    <div class="carousel-wrap" id="modes-carousel">
+      <div class="carousel-track">
+        
+        <div class="carousel-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">01</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Current Powertrain Data</h3><p style="color: var(--text-dim); line-height: 1.6;">Real-time access to the 42 live engine signals, sensors, and state. Stream RPM, coolant temp, timing advance, O2 voltages, fuel rail pressure, and mass air flow simultaneously.</p></div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: flex-start; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">02</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Freeze Frame Data</h3><p style="color: var(--text-dim); line-height: 1.6;">Snapshot of engine parameters at the exact moment a fault occurred. Critical for diagnosing intermittent issues.</p></div>
+          </div>
         </div>
-      </div>
-      
-      <div class="mode-item highlight-mode">
-        <div class="m-num">06</div>
-        <div class="m-details">
-          <h4 style="color:var(--highlight);">Remote Start Governance <span style="font-size:10px; background:var(--highlight); color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px;">COMING SOON</span></h4>
-          <p>Total CAN-bus controlled remote start without aftermarket wiring. Includes tamper-evident geofencing and runtime limits. <strong>(Release: Q3 2026)</strong></p>
-        </div>
-      </div>
 
-      <div class="mode-item">
-        <div class="m-num">07</div>
-        <div class="m-details"><h4>Pending DTCs</h4><p>Read trouble codes that have been detected but not yet confirmed.</p></div>
+        <div class="carousel-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">03</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Read Emission DTCs</h3><p style="color: var(--text-dim); line-height: 1.6;">Pull confirmed Diagnostic Trouble Codes from the ECU with plain-English severity descriptions.</p></div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: flex-start; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">04</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Clear Emission DTCs</h3><p style="color: var(--text-dim); line-height: 1.6;">Clear Check Engine Lights and reset learned ECU parameters with a single tap.</p></div>
+          </div>
+        </div>
+
+        <div class="carousel-card" style="background: rgba(59, 130, 246, 0.05); border: 1px solid var(--highlight); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: var(--highlight); flex-shrink: 0;">05</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: var(--highlight);">IMMO Key Management <span style="font-size:10px; background:var(--highlight); color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px;">COMING SOON</span></h3><p style="color: var(--text-dim); line-height: 1.6;">Read, write, and safely delete transponders over UDS via the CAN bus. Requires active DarkWave VSP credential. <strong>(Release: Q3 2026)</strong></p></div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: flex-start; border-top: 1px solid rgba(59, 130, 246, 0.2); padding-top: 24px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: var(--highlight); flex-shrink: 0;">06</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: var(--highlight);">Remote Start Governance <span style="font-size:10px; background:var(--highlight); color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px;">COMING SOON</span></h3><p style="color: var(--text-dim); line-height: 1.6;">Total CAN-bus controlled remote start without aftermarket wiring. Includes tamper-evident geofencing and runtime limits. <strong>(Release: Q3 2026)</strong></p></div>
+          </div>
+        </div>
+
+        <div class="carousel-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">07</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Pending DTCs</h3><p style="color: var(--text-dim); line-height: 1.6;">Read trouble codes that have been detected but not yet confirmed by the ECU monitoring cycle.</p></div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: flex-start; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">08</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Bi-Directional Control</h3><p style="color: var(--text-dim); line-height: 1.6;">Actuate solenoids, relays, and test specific onboard systems directly from your device.</p></div>
+          </div>
+        </div>
+
+        <div class="carousel-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="display: flex; gap: 24px; align-items: flex-start;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">09</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Vehicle Information</h3><p style="color: var(--text-dim); line-height: 1.6;">Read VIN, Calibration IDs (CALID), and Verification Numbers (CVN) directly from the ECU.</p></div>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: flex-start; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 900; color: rgba(255,255,255,0.15); flex-shrink: 0;">0A</div>
+            <div><h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 8px;">Permanent DTCs</h3><p style="color: var(--text-dim); line-height: 1.6;">Read emissions-related codes that cannot be wiped without fixing the underlying issue.</p></div>
+          </div>
+        </div>
+
       </div>
-      <div class="mode-item">
-        <div class="m-num">08</div>
-        <div class="m-details"><h4>Bi-Directional Control</h4><p>Actuate solenoids, relays, and test specific onboard systems.</p></div>
-      </div>
-      <div class="mode-item">
-        <div class="m-num">09</div>
-        <div class="m-details"><h4>Vehicle Information</h4><p>Read VIN, Calibration IDs (CALID), and Verification Numbers (CVN).</p></div>
-      </div>
-      <div class="mode-item">
-        <div class="m-num">0A</div>
-        <div class="m-details"><h4>Permanent DTCs</h4><p>Read emissions-related codes that cannot be wiped without fixing.</p></div>
+      
+      <div class="carousel-controls">
+        <button class="carousel-btn" onclick="scrollCarousel('modes-carousel', -1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-btn" onclick="scrollCarousel('modes-carousel', 1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
     </div>
   </section>
