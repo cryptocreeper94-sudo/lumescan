@@ -1124,6 +1124,23 @@ export async function pollAllBLEPIDs(): Promise<void> {
 // Telemetry Snapshot Builder
 // ═══════════════════════════════════════════════════════════════
 
+// ── Signal Smoothing ──
+let bleSmoothedRPM = 0;
+let bleSmoothedSpeed = 0;
+const BLE_EMA_ALPHA = 0.3;
+
+function bleSmoothRPM(raw: number): number {
+  if (raw < 100) { bleSmoothedRPM = 0; return 0; }
+  bleSmoothedRPM = bleSmoothedRPM === 0 ? raw : BLE_EMA_ALPHA * raw + (1 - BLE_EMA_ALPHA) * bleSmoothedRPM;
+  return Math.round(bleSmoothedRPM);
+}
+
+function bleSmoothSpeed(raw: number): number {
+  if (raw < 3) { bleSmoothedSpeed = 0; return 0; }
+  bleSmoothedSpeed = bleSmoothedSpeed === 0 ? raw : BLE_EMA_ALPHA * raw + (1 - BLE_EMA_ALPHA) * bleSmoothedSpeed;
+  return Math.round(bleSmoothedSpeed);
+}
+
 function buildSnapshot(): TelemetrySnapshot {
   const r = rawValues;
   const now = Date.now();
@@ -1171,8 +1188,8 @@ function buildSnapshot(): TelemetrySnapshot {
     tb3_map: r.map || 0,
     tb4_iat: r.iat || 25,
     tb5_throttle: r.throttle || 0,
-    tb6_rpm: r.rpm || 0,
-    tb7_speed: r.speed || 0,
+    tb6_rpm: bleSmoothRPM(r.rpm || 0),
+    tb7_speed: bleSmoothSpeed(r.speed || 0),
     tb8_volEff: r.maf && r.rpm ? Math.min(100, (r.maf / (r.rpm * 0.005)) * 100) : 85,
     tb9_afr: afr,
     tb10_baro: r.baro || 101.3, // Real PID 0133 or fallback

@@ -31,7 +31,17 @@ export default function App() {
   const [mechanicMode, setMechanicMode] = useState(false);
   const [preferredName, setPreferredName] = useState<string | null>(null);
 
+  // ── DEV BYPASS: Skip Firebase auth entirely for testing ──
+  // Set to true to go straight to the app with Pro tier unlocked
+  const DEV_BYPASS_AUTH = true;
+
   useEffect(() => {
+    if (DEV_BYPASS_AUTH) {
+      setEntitlement({ entitled: true, tier: 'pro', reason: 'bypass_email', email: 'dev@test.local', mode05Purchased: true, mode06Active: true });
+      setAppState('connection');
+      setAuthInitialized(true);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {

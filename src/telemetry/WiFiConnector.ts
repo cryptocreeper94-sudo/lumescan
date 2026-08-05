@@ -37,6 +37,12 @@ let connectionState: WiFiConnection = {
 let rawValues: Record<string, number> = {};
 let startTime = Date.now();
 
+// ── Signal Smoothing ──
+// EMA (exponential moving average) prevents jitter on noisy OBD signals
+let smoothedRPM = 0;
+let smoothedSpeed = 0;
+const EMA_ALPHA = 0.3; // Lower = smoother but more lag
+
 const PIDS: { cmd: string; parse: (hex: string) => Record<string, number>; optional?: boolean }[] = [
   // ── Throughput Base (TB) ──
   { cmd: '010C', parse: (h) => ({ rpm: (parseInt(h.slice(0, 2), 16) * 256 + parseInt(h.slice(2, 4), 16)) / 4 }) },
@@ -288,8 +294,8 @@ export function buildSnapshot(): TelemetrySnapshot {
     tb3_map: r.map || 0,
     tb4_iat: r.iat || 25,
     tb5_throttle: r.throttle || 0,
-    tb6_rpm: r.rpm || 0,
-    tb7_speed: r.speed || 0,
+    tb6_rpm: smoothRPM(r.rpm || 0),
+    tb7_speed: smoothSpeed(r.speed || 0),
     tb8_volEff: r.maf && r.rpm ? Math.min(100, (r.maf / (r.rpm * 0.005)) * 100) : 85,
     tb9_afr: afr,
     tb10_baro: r.baro || 101.3,
@@ -317,6 +323,24 @@ export function buildSnapshot(): TelemetrySnapshot {
     mpgRecovery: mpgRecovery,
     governanceMode: computeMode(r),
   };
+}
+
+/**
+ * Smooth RPM using EMA. At key-on/engine-off (<100 RPM), snap to 0.
+ */
+function smoothRPM(raw: number): number {
+  if (raw < 100) { smoothedRPM = 0; return 0; }
+  smoothedRPM = smoothedRPM === 0 ? raw : EMA_ALPHA * raw + (1 - EMA_ALPHA) * smoothedRPM;
+  return Math.round(smoothedRPM);
+}
+
+/**
+ * Smooth speed. Below 3 km/h snap to 0 (idle noise). EMA above that.
+ */
+function smoothSpeed(raw: number): number {
+  if (raw < 3) { smoothedSpeed = 0; return 0; }
+  smoothedSpeed = smoothedSpeed === 0 ? raw : EMA_ALPHA * raw + (1 - EMA_ALPHA) * smoothedSpeed;
+  return Math.round(smoothedSpeed);
 }
 
 function computeDriverScore(r: Record<string, number>): number {
