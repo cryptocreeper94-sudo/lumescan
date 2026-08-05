@@ -26,7 +26,7 @@
     "react-native-ble-plx": "^3.5.1",
     "react-native-reanimated": "~4.1.1",
     "react-native-svg": "15.12.1",
-    "react-native-tcp-socket": "^6.4.1"
+    "react-native-tcp-socket": "^6.4.2"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
