@@ -100,6 +100,75 @@ let rawValues: Record<string, number> = {};
 let startTime = Date.now();
 
 // ═══════════════════════════════════════════════════════════════
+// Signal Smoothing & Spike Rejection
+// Cheap BLE ELM327 clones frequently return garbled hex that
+// parses as wild values (94 mph while idling). This EMA filter
+// rejects spikes and produces stable, trustworthy readings.
+// ═══════════════════════════════════════════════════════════════
+
+// Valid OBD-II ranges for each signal (SAE J1979)
+const SIGNAL_RANGES: Record<string, { min: number; max: number; maxDelta: number }> = {
+  rpm:        { min: 0,    max: 16383, maxDelta: 2000 },  // RPM can't jump >2000 in 300ms
+  speed:      { min: 0,    max: 255,   maxDelta: 30 },    // km/h can't jump >30 in 300ms
+  maf:        { min: 0,    max: 655.35,maxDelta: 50 },
+  throttle:   { min: 0,    max: 100,   maxDelta: 40 },
+  engineLoad: { min: 0,    max: 100,   maxDelta: 30 },
+  coolant:    { min: -40,  max: 215,   maxDelta: 5 },     // Temp changes slowly
+  iat:        { min: -40,  max: 215,   maxDelta: 5 },
+  map:        { min: 0,    max: 255,   maxDelta: 50 },
+  timing:     { min: -64,  max: 63.5,  maxDelta: 15 },
+  stftB1:     { min: -100, max: 99.2,  maxDelta: 20 },
+  ltftB1:     { min: -100, max: 99.2,  maxDelta: 5 },
+  stftB2:     { min: -100, max: 99.2,  maxDelta: 20 },
+  ltftB2:     { min: -100, max: 99.2,  maxDelta: 5 },
+  o2B1S1:     { min: 0,    max: 1.275, maxDelta: 0.5 },
+  o2B1S2:     { min: 0,    max: 1.275, maxDelta: 0.3 },
+  battery:    { min: 0,    max: 65.535,maxDelta: 2 },
+  baro:       { min: 0,    max: 255,   maxDelta: 5 },
+  absLoad:    { min: 0,    max: 25700, maxDelta: 5000 },
+  catTempB1:  { min: -40,  max: 6513.5,maxDelta: 50 },
+};
+
+let smoothedValues: Record<string, number> = {};
+const EMA_ALPHA = 0.3; // 0 = ignore new data, 1 = no smoothing. 0.3 = smooth but responsive
+
+/**
+ * Validate and smooth a single signal value.
+ * Rejects out-of-range values and spikes that exceed maxDelta.
+ * Returns the smoothed value, or the previous value if rejected.
+ */
+function validateAndSmooth(key: string, newVal: number): number {
+  const range = SIGNAL_RANGES[key];
+  if (!range) {
+    // No range defined — pass through without smoothing
+    smoothedValues[key] = newVal;
+    return newVal;
+  }
+
+  // Reject NaN and values outside valid OBD-II range
+  if (isNaN(newVal) || newVal < range.min || newVal > range.max) {
+    return smoothedValues[key] ?? 0;
+  }
+
+  // If no previous value, accept this one as initial
+  if (smoothedValues[key] === undefined) {
+    smoothedValues[key] = newVal;
+    return newVal;
+  }
+
+  // Spike detection: reject if delta exceeds maxDelta (adapter noise)
+  const delta = Math.abs(newVal - smoothedValues[key]);
+  if (delta > range.maxDelta) {
+    // Likely corrupted data — keep previous smoothed value
+    return smoothedValues[key];
+  }
+
+  // Exponential moving average
+  smoothedValues[key] = smoothedValues[key] * (1 - EMA_ALPHA) + newVal * EMA_ALPHA;
+  return smoothedValues[key];
+}
+
+// ═══════════════════════════════════════════════════════════════
 // OBD-II PID Definitions (SAE J1979 — universal)
 // ═══════════════════════════════════════════════════════════════
 
@@ -518,6 +587,7 @@ export async function connectBLENative(
         onStatusChange({ ...connectionState });
         startTime = Date.now();
         rawValues = {}; // Reset values for new connection
+        smoothedValues = {}; // Reset signal smoothing for new session
 
         // Handle unexpected disconnect
         manager.onDeviceDisconnected(connectedDevice.id, () => {
@@ -981,16 +1051,34 @@ export async function readVehicleInfo(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
   // PID 02 — VIN (17 characters)
-  const vinResp = await sendBLECommand('0902\r', 5000);
+  // VIN is a multi-frame response — cheap adapters need longer timeout and may
+  // return multiple "4902" lines that need concatenation.
+  // Try with headers off first (simpler), then with headers on as fallback.
+  const vinResp = await sendBLECommand('0902\r', 8000);
   if (vinResp && !vinResp.includes('NO DATA')) {
-    const clean = vinResp.replace(/[\s\r\n]/g, '');
-    // Response: 4902 01 XXXXXXXXXX... (multi-line possible)
-    // Find "4902" header, skip count byte, rest is VIN in hex
-    const idx = clean.toUpperCase().indexOf('4902');
-    if (idx >= 0) {
-      // Skip header (4902) + count byte (2 chars) = 6 chars
-      const vinHex = clean.substring(idx + 6);
-      const vin = hexToAscii(vinHex);
+    const upper = vinResp.replace(/[\s\r\n]/g, '').toUpperCase();
+    // Collect ALL hex data after every '4902' header (multi-frame response)
+    let allVinHex = '';
+    let searchPos = 0;
+    while (true) {
+      const idx = upper.indexOf('4902', searchPos);
+      if (idx < 0) break;
+      // Skip header (4902) + count/sequence byte (2 chars) = 6 chars
+      const frameData = upper.substring(idx + 6);
+      // Take data until next header or end — each frame has up to ~14 hex chars of VIN data
+      const nextHeader = frameData.indexOf('4902');
+      allVinHex += nextHeader >= 0 ? frameData.substring(0, nextHeader) : frameData;
+      searchPos = idx + 6;
+    }
+    // Also try single-frame parse as fallback (some adapters concatenate everything)
+    if (!allVinHex) {
+      const singleIdx = upper.indexOf('4902');
+      if (singleIdx >= 0) allVinHex = upper.substring(singleIdx + 6);
+    }
+    if (allVinHex) {
+      // Remove padding bytes (00) and non-VIN characters
+      const vin = hexToAscii(allVinHex).replace(/[^A-Z0-9]/gi, '');
+      console.log(`[LumeScan] Raw VIN hex: ${allVinHex}, Decoded: "${vin}"`);
       if (vin.length >= 17) info.vin = vin.substring(0, 17);
       else if (vin.length > 0) info.vin = vin;
     }
@@ -1103,8 +1191,11 @@ export async function pollAllBLEPIDs(): Promise<void> {
     const hex = await readPID(cmd);
     if (hex && hex.length >= 2) {
       try {
-        const values = parse(hex);
-        Object.assign(rawValues, values);
+        const parsed = parse(hex);
+        // Validate and smooth each signal before storing
+        for (const [key, val] of Object.entries(parsed)) {
+          rawValues[key] = validateAndSmooth(key, val);
+        }
       } catch {
         // Skip malformed responses — adapter noise
       }
@@ -1354,6 +1445,7 @@ function cleanup(): void {
   responseBuffer = '';
   responseResolve = null;
   rawValues = {};
+  smoothedValues = {};
   supportedPIDs = new Set();
   pidSupportQueried = false;
 }

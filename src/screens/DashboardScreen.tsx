@@ -358,8 +358,8 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     const bleConn = getBLENativeStatus();
     const useBLE = bleConn.status === 'connected';
     const stop = useBLE
-      ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 150)
-      : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 150);
+      ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 300)
+      : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 300);
 
     // Auto-read VIN once on first connect
     if (!vinReadRef.current) {
