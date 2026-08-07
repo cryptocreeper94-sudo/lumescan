@@ -155,6 +155,10 @@ class ELM327Socket {
 
   private async execute(cmd: string, timeoutMs: number): Promise<string> {
     if (!this.socket) return '';
+    // Strip any trailing CR from the caller — we append exactly one below.
+    // "CMD\r\r" makes the ELM327 REPEAT the previous command (bare CR is the
+    // ELM327 'repeat' shortcut), producing phantom duplicate responses.
+    cmd = cmd.replace(/[\r\n]+$/, '');
 
     // Drain window: if the previous command timed out, give its late
     // response a moment to arrive, then throw it away.
@@ -632,6 +636,48 @@ function hexToAscii(hex: string): string {
   return str.trim();
 }
 
+/**
+ * Normalize a (possibly multi-frame) Mode 09 response into one hex string.
+ * CAN vehicles return ISO-TP segmented output ("014" length line + "0:", "1:"
+ * frame-index prefixes) which are NOT hex data — this strips them.
+ */
+function cleanMultiFrame(resp: string): string {
+  return resp
+    .replace(/SEARCHING\.*/gi, '')
+    .split(/[\r\n]+/)
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && !/^[0-9A-F]{1,3}$/i.test(l)) // drop ISO-TP length line
+    .map(l => l.replace(/^[0-9A-F]{1,2}:\s*/i, ''))            // drop frame-index prefix
+    .join('')
+    .replace(/[\s>]/g, '')
+    .toUpperCase();
+}
+
+/**
+ * Extract a VIN from a raw Mode 09 PID 02 response. Handles CAN ISO-TP
+ * segmented frames AND legacy multi-line "4902 0N ..." responses.
+ */
+function extractVIN(resp: string): string | null {
+  const upper = cleanMultiFrame(resp);
+  let allHex = '';
+  let pos = 0;
+  while (true) {
+    const idx = upper.indexOf('4902', pos);
+    if (idx < 0) break;
+    const rest = upper.substring(idx + 6); // skip 4902 + count/sequence byte
+    const next = rest.indexOf('4902');
+    allHex += next >= 0 ? rest.substring(0, next) : rest;
+    pos = idx + 6;
+  }
+  if (!allHex) return null;
+  const ascii = hexToAscii(allHex).replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  // A real VIN is exactly 17 chars and never contains I, O, or Q
+  const match = ascii.match(/[A-HJ-NPR-Z0-9]{17}/);
+  if (match) return match[0];
+  logEvent('WiFi', 'ERROR', `VIN decode incomplete — ascii: "${ascii}" from hex: "${allHex}"`);
+  return ascii.length >= 11 ? ascii : null;
+}
+
 // ── Mode 02: Freeze Frame ──
 export async function readFreezeFrameWiFi(): Promise<FreezeFrameData | null> {
   const dtcResp = await sendWiFiOBD('0202', 3000);
@@ -836,15 +882,11 @@ export async function readPendingDTCsWiFi(): Promise<string[]> {
 export async function readVehicleInfoWiFi(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
-  // VIN
-  const vinResp = await sendWiFiOBD('0902', 5000);
-  if (vinResp) {
-    const idx = vinResp.toUpperCase().indexOf('4902');
-    if (idx >= 0) {
-      const vin = hexToAscii(vinResp.substring(idx + 6));
-      if (vin.length >= 17) info.vin = vin.substring(0, 17);
-      else if (vin.length > 0) info.vin = vin;
-    }
+  // VIN — multi-frame response; cheap adapters need a longer timeout
+  const vinResp = await sendWiFiOBD('0902', 8000);
+  if (vinResp && !vinResp.includes('NO DATA')) {
+    const vin = extractVIN(vinResp);
+    if (vin) info.vin = vin;
   }
 
   // Calibration ID

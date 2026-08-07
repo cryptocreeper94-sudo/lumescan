@@ -368,19 +368,25 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
       if (isSimulated) {
         setVehicleName('2019 Ford F-150 5.0L V8');
       } else {
-        // Read VIN in background — non-blocking
+        // Read VIN in background — non-blocking, with retries.
+        // A single attempt right at mount often fires before the vehicle is
+        // answering (e.g. ignition just turned on), so retry a few times
+        // before settling for the generic label.
         (async () => {
-          try {
-            const info = useBLE ? await readVehicleInfoBLE() : await readVehicleInfoWiFi();
-            if (info.vin) {
-              const decoded = decodeVIN(info.vin);
-              setVehicleName(decoded.displayName);
-            } else {
-              setVehicleName('Vehicle Connected');
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              const info = useBLE ? await readVehicleInfoBLE() : await readVehicleInfoWiFi();
+              if (info.vin) {
+                const decoded = decodeVIN(info.vin);
+                setVehicleName(decoded.displayName);
+                return;
+              }
+            } catch {
+              // fall through to retry
             }
-          } catch {
-            setVehicleName('Vehicle Connected');
+            await new Promise(r => setTimeout(r, 6000));
           }
+          setVehicleName('Vehicle Connected');
         })();
       }
     }

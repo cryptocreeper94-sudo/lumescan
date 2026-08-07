@@ -386,6 +386,10 @@ async function sendBLECommand(cmd: string, timeoutMs: number = 3000): Promise<st
 
 async function executeBLECommand(cmd: string, timeoutMs: number): Promise<string> {
   if (!txCharacteristic || !connectedDevice) return '';
+  // Strip any trailing CR from the caller — we append exactly one below.
+  // "CMD\r\r" makes the ELM327 REPEAT the previous command (a bare CR is
+  // the ELM327 'repeat' shortcut), producing phantom duplicate responses.
+  cmd = cmd.replace(/[\r\n]+$/, '');
 
   // Drain window: if the previous command timed out, give its late response
   // a moment to arrive, then throw it away.
@@ -1120,6 +1124,56 @@ function hexToAscii(hex: string): string {
   return str.trim();
 }
 
+/**
+ * Normalize a (possibly multi-frame) Mode 09 response into one hex string.
+ * CAN vehicles return ISO-TP segmented output like:
+ *   014
+ *   0: 49 02 01 31 46 54
+ *   1: 45 57 31 45 50 34
+ *   2: ...
+ * The length line ("014") and frame-index prefixes ("0:", "1:") are NOT hex
+ * data — naively concatenating them corrupts the decode. This strips them.
+ */
+function cleanMultiFrame(resp: string): string {
+  return resp
+    .replace(/SEARCHING\.*/gi, '')
+    .split(/[\r\n]+/)
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && !/^[0-9A-F]{1,3}$/i.test(l)) // drop ISO-TP length line
+    .map(l => l.replace(/^[0-9A-F]{1,2}:\s*/i, ''))            // drop frame-index prefix
+    .join('')
+    .replace(/[\s>]/g, '')
+    .toUpperCase();
+}
+
+/**
+ * Extract a VIN from a raw Mode 09 PID 02 response.
+ * Handles CAN ISO-TP segmented frames AND legacy multi-line "4902 0N ..."
+ * responses. Returns a validated 17-char VIN when possible.
+ */
+function extractVIN(resp: string): string | null {
+  const upper = cleanMultiFrame(resp);
+  // Collect hex after every 4902 header (legacy adapters repeat it per frame),
+  // skipping the count/sequence byte that follows each header
+  let allHex = '';
+  let pos = 0;
+  while (true) {
+    const idx = upper.indexOf('4902', pos);
+    if (idx < 0) break;
+    const rest = upper.substring(idx + 6);
+    const next = rest.indexOf('4902');
+    allHex += next >= 0 ? rest.substring(0, next) : rest;
+    pos = idx + 6;
+  }
+  if (!allHex) return null;
+  const ascii = hexToAscii(allHex).replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  // A real VIN is exactly 17 chars and never contains I, O, or Q
+  const match = ascii.match(/[A-HJ-NPR-Z0-9]{17}/);
+  if (match) return match[0];
+  logEvent('BLE', 'ERROR', `VIN decode incomplete — ascii: "${ascii}" from hex: "${allHex}"`);
+  return ascii.length >= 11 ? ascii : null; // partial VIN still better than nothing
+}
+
 export async function readVehicleInfo(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
@@ -1127,34 +1181,10 @@ export async function readVehicleInfo(): Promise<VehicleInfo> {
   // VIN is a multi-frame response — cheap adapters need longer timeout and may
   // return multiple "4902" lines that need concatenation.
   // Try with headers off first (simpler), then with headers on as fallback.
-  const vinResp = await sendBLECommand('0902\r', 8000);
+  const vinResp = await sendBLECommand('0902', 8000);
   if (vinResp && !vinResp.includes('NO DATA')) {
-    const upper = vinResp.replace(/[\s\r\n]/g, '').toUpperCase();
-    // Collect ALL hex data after every '4902' header (multi-frame response)
-    let allVinHex = '';
-    let searchPos = 0;
-    while (true) {
-      const idx = upper.indexOf('4902', searchPos);
-      if (idx < 0) break;
-      // Skip header (4902) + count/sequence byte (2 chars) = 6 chars
-      const frameData = upper.substring(idx + 6);
-      // Take data until next header or end — each frame has up to ~14 hex chars of VIN data
-      const nextHeader = frameData.indexOf('4902');
-      allVinHex += nextHeader >= 0 ? frameData.substring(0, nextHeader) : frameData;
-      searchPos = idx + 6;
-    }
-    // Also try single-frame parse as fallback (some adapters concatenate everything)
-    if (!allVinHex) {
-      const singleIdx = upper.indexOf('4902');
-      if (singleIdx >= 0) allVinHex = upper.substring(singleIdx + 6);
-    }
-    if (allVinHex) {
-      // Remove padding bytes (00) and non-VIN characters
-      const vin = hexToAscii(allVinHex).replace(/[^A-Z0-9]/gi, '');
-      console.log(`[LumeScan] Raw VIN hex: ${allVinHex}, Decoded: "${vin}"`);
-      if (vin.length >= 17) info.vin = vin.substring(0, 17);
-      else if (vin.length > 0) info.vin = vin;
-    }
+    const vin = extractVIN(vinResp);
+    if (vin) info.vin = vin;
   }
 
   // PID 04 — Calibration ID
