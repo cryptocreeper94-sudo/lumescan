@@ -355,8 +355,14 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
       ),
       -1, true
     );
+    // Transport selection: a LIVE adapter always outranks demo/simulated
+    // state. Stale demo state on one transport must never take precedence
+    // over a real scan on the other.
     const bleConn = getBLENativeStatus();
-    const useBLE = bleConn.status === 'connected';
+    const wifiConn = getWiFiStatus();
+    const bleLive = bleConn.status === 'connected' && !bleConn.isSimulated;
+    const wifiLive = wifiConn.status === 'connected' && !wifiConn.isSimulated;
+    const useBLE = bleLive ? true : wifiLive ? false : bleConn.status === 'connected';
     const stop = useBLE
       ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 300)
       : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 300);
@@ -364,9 +370,11 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     // Auto-read VIN once on first connect
     if (!vinReadRef.current) {
       vinReadRef.current = true;
-      const isSimulated = useBLE ? getBLENativeStatus().isSimulated : getWiFiStatus().isSimulated;
-      if (isSimulated) {
-        setVehicleName('2019 Ford F-150 5.0L V8');
+      const isSimulated = useBLE ? bleConn.isSimulated : wifiConn.isSimulated;
+      // The demo vehicle label is ONLY shown when the active transport is
+      // actually the simulator — never as a fallback for a live scan.
+      if (isSimulated && !bleLive && !wifiLive) {
+        setVehicleName('2019 Ford F-150 5.0L V8 (Demo)');
       } else {
         // Read VIN in background — non-blocking, with retries.
         // A single attempt right at mount often fires before the vehicle is
