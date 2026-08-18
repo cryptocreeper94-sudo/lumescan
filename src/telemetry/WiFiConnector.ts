@@ -80,6 +80,13 @@ class ELM327Socket {
   private socket: any = null;
   private responseResolve: ((value: string) => void) | null = null;
   private buffer = '';
+  // Command serialization: exactly ONE command in flight at a time.
+  // Overlapping telemetry sweeps used to overwrite responseResolve and
+  // attribute responses to the wrong PID (root cause of wrong/blank data).
+  private commandChain: Promise<unknown> = Promise.resolve();
+  // Set on timeout: the adapter may still send a late response, which the
+  // next command drains and discards before transmitting.
+  private needsDrain = false;
 
   async connect(host: string, port: number): Promise<boolean> {
     return new Promise((resolve) => {
@@ -140,18 +147,55 @@ class ELM327Socket {
   }
 
   async send(cmd: string, timeoutMs: number = 2000): Promise<string> {
+    const run = this.commandChain.then(() => this.execute(cmd, timeoutMs));
+    // Keep the chain alive even if a command fails
+    this.commandChain = run.catch(() => {});
+    return run;
+  }
+
+  private async execute(cmd: string, timeoutMs: number): Promise<string> {
     if (!this.socket) return '';
-    
-    return new Promise((resolve) => {
-      this.responseResolve = resolve;
+    // Strip any trailing CR from the caller — we append exactly one below.
+    // "CMD\r\r" makes the ELM327 REPEAT the previous command (bare CR is the
+    // ELM327 'repeat' shortcut), producing phantom duplicate responses.
+    cmd = cmd.replace(/[\r\n]+$/, '');
+
+    // Drain window: if the previous command timed out, give its late
+    // response a moment to arrive, then throw it away.
+    if (this.needsDrain) {
+      this.needsDrain = false;
+      await delay(300);
       this.buffer = '';
+    }
+    if (!this.socket) return '';
+
+    return new Promise((resolve) => {
+      let settled = false;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+
+      const finish = (value: string, timedOut: boolean = false) => {
+        if (settled) return;
+        settled = true;
+        this.responseResolve = null;
+        this.buffer = '';
+        if (timedOut) this.needsDrain = true;
+        if (timer) clearTimeout(timer);
+        resolve(value);
+      };
+
+      this.buffer = '';
+      this.responseResolve = finish;
       logEvent('WiFi', 'TX', cmd);
-      this.socket.write(cmd + '\r');
-      setTimeout(() => {
-        if (this.responseResolve) {
-          this.responseResolve(this.buffer || '');
-          this.responseResolve = null;
-        }
+      try {
+        this.socket.write(cmd + '\r');
+      } catch (err: any) {
+        logEvent('WiFi', 'ERROR', `Write failed for ${cmd}: ${err?.message || err}`);
+        finish('');
+        return;
+      }
+      timer = setTimeout(() => {
+        logEvent('WiFi', 'ERROR', `Timeout after ${timeoutMs}ms waiting for response to ${cmd}`);
+        finish((this.buffer || '').replace(/[\r\n>]/g, ' ').trim(), true);
       }, timeoutMs);
     });
   }
@@ -161,6 +205,10 @@ class ELM327Socket {
       this.socket.destroy();
       this.socket = null;
     }
+    this.buffer = '';
+    this.responseResolve = null;
+    this.commandChain = Promise.resolve(); // Invalidate queued commands
+    this.needsDrain = false;
   }
 
   get isConnected(): boolean {
@@ -193,25 +241,79 @@ export async function probeForAdapter(
       connectionState = { status: 'initializing', host, error: null, isSimulated: false, adapterInfo: null };
       onStatusChange({ ...connectionState });
 
-      // Initialize ELM327
-      await elmSocket.send('ATZ');     // Reset
-      await delay(1000);
-      const echoOff = await elmSocket.send('ATE0');    // Echo off
-      await elmSocket.send('ATL0');    // Linefeeds off
-      await elmSocket.send('ATS0');    // Spaces off
-      await elmSocket.send('ATH0');    // Headers off
-      const proto = await elmSocket.send('ATSP0');     // Auto-detect protocol
+      // Reset adapter — should reply with a version string (e.g. "ELM327 v1.5")
+      let resetResp = await elmSocket.send('ATZ', 6000);
+      await delay(1500);
+      if (!resetResp || !/ELM|OBD|STN|V[0-9]/i.test(resetResp)) {
+        logEvent('WiFi', 'ERROR', `ATZ returned unexpected response: "${resetResp}"`);
+        // Some adapters swallow the ATZ banner — try once more before judging
+        const retryReset = await elmSocket.send('ATZ', 6000);
+        await delay(1500);
+        if (!retryReset && !resetResp) {
+          logEvent('WiFi', 'ERROR', 'Adapter TCP port open but serial channel silent — trying next host');
+          elmSocket.close();
+          continue;
+        }
+      }
+
+      // Configure for OBD-II — verify each response (ELM327 replies "OK")
+      for (const c of ['ATE0', 'ATL0', 'ATS0', 'ATH0']) {
+        const r = await elmSocket.send(c, 2000);
+        if (!r.toUpperCase().includes('OK')) {
+          logEvent('WiFi', 'ERROR', `${c} did not return OK: "${r}"`);
+        }
+        await delay(100);
+      }
+      await elmSocket.send('ATSP0', 2000);   // Auto-detect vehicle protocol
+      await delay(100);
       const info = await elmSocket.send('ATI');        // Get adapter info
+
+      // Test connectivity — a REAL RPM reading ("41 0C ...") is the only
+      // proof the adapter can talk to the vehicle.
+      const isLiveData = (resp: string) =>
+        resp.replace(/[\s\r\n]/g, '').toUpperCase().includes('410C');
+
+      let testResponse = await elmSocket.send('010C', 5000);
+      let protocolOk = isLiveData(testResponse);
+      if (!protocolOk) {
+        for (const p of ['ATSP6' /* CAN 11-bit 500k */, 'ATSP8' /* CAN 11-bit 250k */]) {
+          logEvent('WiFi', 'INFO', `Retrying with ${p}...`);
+          await elmSocket.send(p, 2000);
+          await delay(500);
+          testResponse = await elmSocket.send('010C', 5000);
+          if (isLiveData(testResponse)) { protocolOk = true; break; }
+        }
+      }
+
+      let vehicleWarning: string | null = null;
+      if (!protocolOk) {
+        const raw = testResponse.trim() || '(no response)';
+        logEvent('WiFi', 'ERROR', `Vehicle test failed. Last 010C response: "${raw}"`);
+        if (/NO ?DATA/i.test(testResponse)) {
+          // Adapter reached the bus but the vehicle isn't answering (common
+          // with ignition off). Connect in a degraded state with a clear message.
+          vehicleWarning = 'Adapter connected, but the vehicle is not responding yet. Turn the ignition ON (engine running is best).';
+        } else {
+          elmSocket.close();
+          connectionState = {
+            status: 'error', host: null, isSimulated: false, adapterInfo: null,
+            error: `The adapter never returned vehicle data (last response: ${raw}). It may not be fully plugged into the OBD port.`,
+          };
+          onStatusChange({ ...connectionState });
+          return false;
+        }
+      }
 
       connectionState = {
         status: 'connected',
         host,
-        error: null,
+        error: vehicleWarning,
         isSimulated: false,
-        adapterInfo: info || 'ELM327 WiFi',
+        adapterInfo: (info || 'ELM327 WiFi') + (vehicleWarning ? ' — waiting for vehicle' : ''),
       };
       onStatusChange({ ...connectionState });
       startTime = Date.now();
+      rawValues = {};
       return true;
     }
   }
@@ -229,11 +331,16 @@ async function readPID(cmd: string): Promise<string> {
   if (!response || response.includes('NO DATA') || response.includes('ERROR') || response.includes('UNABLE')) {
     return '';
   }
-  // Extract hex data after the mode+PID echo (e.g., "410C1A2B" → "1A2B")
-  const clean = response.replace(/[\s\r\n]/g, '');
-  if (clean.length >= 6) {
-    return clean.substring(4); // Skip "41XX"
+  // Strip whitespace and any "SEARCHING..." preamble, then anchor on the
+  // "41XX" response header — the ONLY reliable marker. Blindly skipping
+  // 4 chars decodes command echo or stray frames as vehicle data.
+  const clean = response.replace(/SEARCHING\.*/gi, '').replace(/[\s\r\n]/g, '');
+  const modeResponse = '41' + cmd.slice(2, 4).toUpperCase();
+  const idx = clean.toUpperCase().indexOf(modeResponse);
+  if (idx >= 0) {
+    return clean.substring(idx + 4); // Skip "41XX"
   }
+  logEvent('WiFi', 'ERROR', `Unparseable response to ${cmd}: "${response.trim()}"`);
   return '';
 }
 
@@ -426,6 +533,7 @@ export function startWiFiTelemetryLoop(
   intervalMs: number = 300
 ): () => void {
   startTime = Date.now();
+  let sweepInFlight = false;
 
   const timer = setInterval(async () => {
     if (connectionState.isSimulated) {
@@ -434,7 +542,15 @@ export function startWiFiTelemetryLoop(
     }
 
     if (elmSocket.isConnected && connectionState.status === 'connected') {
-      await pollAllPIDs();
+      // In-flight guard: a full PID sweep takes longer than the UI interval.
+      // Never start a new sweep while one is running — overlapping sweeps
+      // were the main cause of mismatched/blank readings.
+      if (!sweepInFlight) {
+        sweepInFlight = true;
+        pollAllPIDs()
+          .catch(() => {})
+          .finally(() => { sweepInFlight = false; });
+      }
       onData(buildSnapshot());
     } else {
       // Strict fallback: never show mock data if not in demo mode
@@ -518,6 +634,48 @@ function hexToAscii(hex: string): string {
     if (charCode > 31 && charCode < 127) str += String.fromCharCode(charCode);
   }
   return str.trim();
+}
+
+/**
+ * Normalize a (possibly multi-frame) Mode 09 response into one hex string.
+ * CAN vehicles return ISO-TP segmented output ("014" length line + "0:", "1:"
+ * frame-index prefixes) which are NOT hex data — this strips them.
+ */
+function cleanMultiFrame(resp: string): string {
+  return resp
+    .replace(/SEARCHING\.*/gi, '')
+    .split(/[\r\n]+/)
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && !/^[0-9A-F]{1,3}$/i.test(l)) // drop ISO-TP length line
+    .map(l => l.replace(/^[0-9A-F]{1,2}:\s*/i, ''))            // drop frame-index prefix
+    .join('')
+    .replace(/[\s>]/g, '')
+    .toUpperCase();
+}
+
+/**
+ * Extract a VIN from a raw Mode 09 PID 02 response. Handles CAN ISO-TP
+ * segmented frames AND legacy multi-line "4902 0N ..." responses.
+ */
+function extractVIN(resp: string): string | null {
+  const upper = cleanMultiFrame(resp);
+  let allHex = '';
+  let pos = 0;
+  while (true) {
+    const idx = upper.indexOf('4902', pos);
+    if (idx < 0) break;
+    const rest = upper.substring(idx + 6); // skip 4902 + count/sequence byte
+    const next = rest.indexOf('4902');
+    allHex += next >= 0 ? rest.substring(0, next) : rest;
+    pos = idx + 6;
+  }
+  if (!allHex) return null;
+  const ascii = hexToAscii(allHex).replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  // A real VIN is exactly 17 chars and never contains I, O, or Q
+  const match = ascii.match(/[A-HJ-NPR-Z0-9]{17}/);
+  if (match) return match[0];
+  logEvent('WiFi', 'ERROR', `VIN decode incomplete — ascii: "${ascii}" from hex: "${allHex}"`);
+  return ascii.length >= 11 ? ascii : null;
 }
 
 // ── Mode 02: Freeze Frame ──
@@ -724,15 +882,11 @@ export async function readPendingDTCsWiFi(): Promise<string[]> {
 export async function readVehicleInfoWiFi(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
-  // VIN
-  const vinResp = await sendWiFiOBD('0902', 5000);
-  if (vinResp) {
-    const idx = vinResp.toUpperCase().indexOf('4902');
-    if (idx >= 0) {
-      const vin = hexToAscii(vinResp.substring(idx + 6));
-      if (vin.length >= 17) info.vin = vin.substring(0, 17);
-      else if (vin.length > 0) info.vin = vin;
-    }
+  // VIN — multi-frame response; cheap adapters need a longer timeout
+  const vinResp = await sendWiFiOBD('0902', 8000);
+  if (vinResp && !vinResp.includes('NO DATA')) {
+    const vin = extractVIN(vinResp);
+    if (vin) info.vin = vin;
   }
 
   // Calibration ID

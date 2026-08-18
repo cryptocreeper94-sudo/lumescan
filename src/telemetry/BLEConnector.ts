@@ -100,6 +100,75 @@ let rawValues: Record<string, number> = {};
 let startTime = Date.now();
 
 // ═══════════════════════════════════════════════════════════════
+// Signal Smoothing & Spike Rejection
+// Cheap BLE ELM327 clones frequently return garbled hex that
+// parses as wild values (94 mph while idling). This EMA filter
+// rejects spikes and produces stable, trustworthy readings.
+// ═══════════════════════════════════════════════════════════════
+
+// Valid OBD-II ranges for each signal (SAE J1979)
+const SIGNAL_RANGES: Record<string, { min: number; max: number; maxDelta: number }> = {
+  rpm:        { min: 0,    max: 16383, maxDelta: 2000 },  // RPM can't jump >2000 in 300ms
+  speed:      { min: 0,    max: 255,   maxDelta: 30 },    // km/h can't jump >30 in 300ms
+  maf:        { min: 0,    max: 655.35,maxDelta: 50 },
+  throttle:   { min: 0,    max: 100,   maxDelta: 40 },
+  engineLoad: { min: 0,    max: 100,   maxDelta: 30 },
+  coolant:    { min: -40,  max: 215,   maxDelta: 5 },     // Temp changes slowly
+  iat:        { min: -40,  max: 215,   maxDelta: 5 },
+  map:        { min: 0,    max: 255,   maxDelta: 50 },
+  timing:     { min: -64,  max: 63.5,  maxDelta: 15 },
+  stftB1:     { min: -100, max: 99.2,  maxDelta: 20 },
+  ltftB1:     { min: -100, max: 99.2,  maxDelta: 5 },
+  stftB2:     { min: -100, max: 99.2,  maxDelta: 20 },
+  ltftB2:     { min: -100, max: 99.2,  maxDelta: 5 },
+  o2B1S1:     { min: 0,    max: 1.275, maxDelta: 0.5 },
+  o2B1S2:     { min: 0,    max: 1.275, maxDelta: 0.3 },
+  battery:    { min: 0,    max: 65.535,maxDelta: 2 },
+  baro:       { min: 0,    max: 255,   maxDelta: 5 },
+  absLoad:    { min: 0,    max: 25700, maxDelta: 5000 },
+  catTempB1:  { min: -40,  max: 6513.5,maxDelta: 50 },
+};
+
+let smoothedValues: Record<string, number> = {};
+const EMA_ALPHA = 0.3; // 0 = ignore new data, 1 = no smoothing. 0.3 = smooth but responsive
+
+/**
+ * Validate and smooth a single signal value.
+ * Rejects out-of-range values and spikes that exceed maxDelta.
+ * Returns the smoothed value, or the previous value if rejected.
+ */
+function validateAndSmooth(key: string, newVal: number): number {
+  const range = SIGNAL_RANGES[key];
+  if (!range) {
+    // No range defined — pass through without smoothing
+    smoothedValues[key] = newVal;
+    return newVal;
+  }
+
+  // Reject NaN and values outside valid OBD-II range
+  if (isNaN(newVal) || newVal < range.min || newVal > range.max) {
+    return smoothedValues[key] ?? 0;
+  }
+
+  // If no previous value, accept this one as initial
+  if (smoothedValues[key] === undefined) {
+    smoothedValues[key] = newVal;
+    return newVal;
+  }
+
+  // Spike detection: reject if delta exceeds maxDelta (adapter noise)
+  const delta = Math.abs(newVal - smoothedValues[key]);
+  if (delta > range.maxDelta) {
+    // Likely corrupted data — keep previous smoothed value
+    return smoothedValues[key];
+  }
+
+  // Exponential moving average
+  smoothedValues[key] = smoothedValues[key] * (1 - EMA_ALPHA) + newVal * EMA_ALPHA;
+  return smoothedValues[key];
+}
+
+// ═══════════════════════════════════════════════════════════════
 // OBD-II PID Definitions (SAE J1979 — universal)
 // ═══════════════════════════════════════════════════════════════
 
@@ -299,34 +368,71 @@ async function discoverCharacteristics(device: Device): Promise<{ tx: Characteri
 /**
  * Send an AT/OBD command and wait for the ELM327 prompt character (>)
  */
+// Command serialization: exactly ONE command may be in flight at a time.
+// Without this, overlapping telemetry sweeps overwrite responseResolve and
+// responses get attributed to the wrong PID (the root cause of wrong/blank data).
+let commandChain: Promise<unknown> = Promise.resolve();
+// Set when a command times out: the adapter may still send its (late) response.
+// The next command drains and discards any stragglers before transmitting,
+// so a late reply can never be attributed to the wrong command.
+let needsDrain = false;
+
 async function sendBLECommand(cmd: string, timeoutMs: number = 3000): Promise<string> {
+  const run = commandChain.then(() => executeBLECommand(cmd, timeoutMs));
+  // Keep the chain alive even if a command fails
+  commandChain = run.catch(() => {});
+  return run;
+}
+
+async function executeBLECommand(cmd: string, timeoutMs: number): Promise<string> {
   if (!txCharacteristic || !connectedDevice) return '';
+  // Strip any trailing CR from the caller — we append exactly one below.
+  // "CMD\r\r" makes the ELM327 REPEAT the previous command (a bare CR is
+  // the ELM327 'repeat' shortcut), producing phantom duplicate responses.
+  cmd = cmd.replace(/[\r\n]+$/, '');
+
+  // Drain window: if the previous command timed out, give its late response
+  // a moment to arrive, then throw it away.
+  if (needsDrain) {
+    needsDrain = false;
+    await delay(300);
+    responseBuffer = '';
+  }
 
   return new Promise((resolve) => {
-    responseResolve = resolve;
+    let settled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const finish = (value: string, timedOut: boolean = false) => {
+      if (settled) return;
+      settled = true;
+      responseResolve = null;
+      responseBuffer = '';
+      if (timedOut) needsDrain = true;
+      if (timer) clearTimeout(timer);
+      resolve(value);
+    };
+
     responseBuffer = '';
+    responseResolve = finish;
 
     const data = encodeBase64(cmd + '\r');
     logEvent('BLE', 'TX', cmd);
-    
+
     // Try writeWithResponse first, fall back to writeWithoutResponse
     const writePromise = txCharacteristic!.isWritableWithResponse
       ? txCharacteristic!.writeWithResponse(data)
       : txCharacteristic!.writeWithoutResponse(data);
-    
+
     writePromise.catch((err) => {
       console.warn(`[LumeScan] Write error (${cmd}):`, err?.message);
-      resolve('');
+      finish('');
     });
 
-    // Timeout — resolve with whatever we have
-    setTimeout(() => {
-      if (responseResolve) {
-        const partial = responseBuffer.replace(/[\r\n>]/g, '').trim();
-        responseResolve(partial);
-        responseResolve = null;
-        responseBuffer = '';
-      }
+    // Timeout — resolve with whatever partial data we have
+    timer = setTimeout(() => {
+      logEvent('BLE', 'ERROR', `Timeout after ${timeoutMs}ms waiting for response to ${cmd}`);
+      finish(responseBuffer.replace(/[\r\n>]/g, ' ').trim(), true);
     }, timeoutMs);
   });
 }
@@ -473,51 +579,84 @@ export async function connectBLENative(
         connectionState = { status: 'initializing', deviceName: name, error: null, isSimulated: false, adapterInfo: null };
         onStatusChange({ ...connectionState });
 
-        // Reset adapter
-        await sendBLECommand('ATZ', 5000);
+        // Reset adapter — should reply with a version string (e.g. "ELM327 v1.5")
+        const resetResp = await sendBLECommand('ATZ', 6000);
         await delay(1500);
+        if (!resetResp || !/ELM|OBD|STN|V[0-9]/i.test(resetResp)) {
+          logEvent('BLE', 'ERROR', `ATZ returned unexpected response: "${resetResp}"`);
+          // Some adapters swallow the ATZ banner — try once more before judging
+          const retryReset = await sendBLECommand('ATZ', 6000);
+          await delay(1500);
+          if (!retryReset && !resetResp) {
+            throw new Error('Adapter is not responding to commands. It paired over Bluetooth but its serial channel is silent — try unplugging it, plugging it back in, and reconnecting.');
+          }
+        }
 
-        // Configure for OBD-II
-        await sendBLECommand('ATE0');      // Echo off
-        await delay(100);
-        await sendBLECommand('ATL0');      // Linefeeds off  
-        await delay(100);
-        await sendBLECommand('ATS0');      // Spaces off (compact hex responses)
-        await delay(100);
-        await sendBLECommand('ATH0');      // Headers off
-        await delay(100);
-        await sendBLECommand('ATSP0');     // Auto-detect vehicle protocol
+        // Configure for OBD-II — verify each response (ELM327 replies "OK")
+        const initCmds: [string, string][] = [
+          ['ATE0', 'Echo off'],
+          ['ATL0', 'Linefeeds off'],
+          ['ATS0', 'Spaces off'],
+          ['ATH0', 'Headers off'],
+        ];
+        for (const [c, label] of initCmds) {
+          const r = await sendBLECommand(c, 2000);
+          if (!r.toUpperCase().includes('OK')) {
+            logEvent('BLE', 'ERROR', `${c} (${label}) did not return OK: "${r}"`);
+          }
+          await delay(100);
+        }
+        await sendBLECommand('ATSP0', 2000);   // Auto-detect vehicle protocol
         await delay(100);
 
         // Get adapter firmware info
         const info = await sendBLECommand('ATI');
         const firmwareInfo = info ? info.split('\n').filter(l => l.trim()).join(' ') : '';
 
-        // Test connectivity — read RPM (will return "NO DATA" if engine off, but proves protocol works)
-        const testResponse = await sendBLECommand('010C', 3000);
-        const testOk = testResponse && !testResponse.includes('UNABLE') && !testResponse.includes('ERROR');
-        
-        if (!testOk) {
-          // Try setting protocol explicitly for common protocols
-          console.warn('[LumeScan] Auto-protocol failed, trying CAN 11-bit 500k (most common)...');
-          await sendBLECommand('ATSP6');   // ISO 15765-4 CAN (11 bit, 500 kbaud)
-          await delay(500);
-          const retry = await sendBLECommand('010C', 3000);
-          if (!retry || retry.includes('UNABLE') || retry.includes('ERROR')) {
-            console.warn('[LumeScan] Protocol 6 failed, trying protocol 8 (CAN 11-bit 250k)...');
-            await sendBLECommand('ATSP8');
+        // Test connectivity — a REAL RPM reading ("41 0C ...") is the only proof
+        // the adapter can talk to the vehicle. "NO DATA" means it cannot.
+        const isLiveData = (resp: string) =>
+          resp.replace(/[\s\r\n]/g, '').toUpperCase().includes('410C');
+
+        let testResponse = await sendBLECommand('010C', 5000);
+        let protocolOk = isLiveData(testResponse);
+
+        if (!protocolOk) {
+          // Try common protocols explicitly
+          for (const proto of ['ATSP6' /* CAN 11-bit 500k */, 'ATSP8' /* CAN 11-bit 250k */]) {
+            console.warn(`[LumeScan] Retrying with ${proto}...`);
+            await sendBLECommand(proto, 2000);
             await delay(500);
+            testResponse = await sendBLECommand('010C', 5000);
+            if (isLiveData(testResponse)) { protocolOk = true; break; }
+          }
+        }
+
+        let vehicleWarning: string | null = null;
+        if (!protocolOk) {
+          const raw = testResponse.trim() || '(no response)';
+          logEvent('BLE', 'ERROR', `Vehicle test failed. Last 010C response: "${raw}"`);
+          if (/NO ?DATA/i.test(testResponse)) {
+            // Adapter works and reached the bus, but the vehicle isn't answering
+            // (common with ignition off). Connect in a degraded state so the user
+            // can start the engine and data begins flowing — but tell them why.
+            vehicleWarning = 'Adapter connected, but the vehicle is not responding yet. Turn the ignition ON (engine running is best).';
+          } else if (/UNABLE|ERROR|CAN ERROR|BUS/i.test(testResponse)) {
+            throw new Error(`The adapter could not establish a protocol with the vehicle (adapter said: ${raw}). Try with the engine running.`);
+          } else {
+            throw new Error(`The adapter never returned vehicle data (last response: ${raw}). It may not be fully plugged into the OBD port.`);
           }
         }
 
         connectionState = {
-          status: 'connected', deviceName: name, error: null,
+          status: 'connected', deviceName: name, error: vehicleWarning,
           isSimulated: false,
-          adapterInfo: firmwareInfo || `BLE: ${name}`,
+          adapterInfo: (firmwareInfo || `BLE: ${name}`) + (vehicleWarning ? ' — waiting for vehicle' : ''),
         };
         onStatusChange({ ...connectionState });
         startTime = Date.now();
         rawValues = {}; // Reset values for new connection
+        smoothedValues = {}; // Reset signal smoothing for new session
 
         // Handle unexpected disconnect
         manager.onDeviceDisconnected(connectedDevice.id, () => {
@@ -536,6 +675,11 @@ export async function connectBLENative(
           isSimulated: false, adapterInfo: null,
         };
         onStatusChange({ ...connectionState });
+        // Physically disconnect — otherwise the adapter stays attached and
+        // the next connection attempt fails or talks to an orphaned session.
+        if (connectedDevice) {
+          connectedDevice.cancelConnection().catch(() => {});
+        }
         cleanup();
         resolve(false);
       }
@@ -552,15 +696,18 @@ async function readPID(cmd: string): Promise<string> {
   if (!response || response.includes('NO DATA') || response.includes('ERROR') || response.includes('UNABLE')) return '';
   // Extract hex data after the mode+PID response header
   // Response format: "410CXXXX" (spaces off) or "41 0C XX XX" (spaces on)
-  const clean = response.replace(/[\s\r\n]/g, '');
-  // Find the response pattern (41XX for Mode 01)
+  // Strip whitespace and any "SEARCHING..." preamble the adapter may emit
+  const clean = response.replace(/SEARCHING\.*/gi, '').replace(/[\s\r\n]/g, '');
+  // Find the response pattern (41XX for Mode 01) — the ONLY reliable anchor.
   const modeResponse = '41' + cmd.slice(2, 4).toUpperCase();
   const idx = clean.toUpperCase().indexOf(modeResponse);
   if (idx >= 0) {
     return clean.substring(idx + 4); // Skip "41XX"
   }
-  // Fallback: just skip first 4 chars
-  return clean.length >= 6 ? clean.substring(4) : '';
+  // No anchor found: refuse to guess. Blindly skipping 4 chars decodes
+  // command echo or stray frames as vehicle data (= wrong readings).
+  logEvent('BLE', 'ERROR', `Unparseable response to ${cmd}: "${response.trim()}"`);
+  return '';
 }
 
 /**
@@ -977,23 +1124,67 @@ function hexToAscii(hex: string): string {
   return str.trim();
 }
 
+/**
+ * Normalize a (possibly multi-frame) Mode 09 response into one hex string.
+ * CAN vehicles return ISO-TP segmented output like:
+ *   014
+ *   0: 49 02 01 31 46 54
+ *   1: 45 57 31 45 50 34
+ *   2: ...
+ * The length line ("014") and frame-index prefixes ("0:", "1:") are NOT hex
+ * data — naively concatenating them corrupts the decode. This strips them.
+ */
+function cleanMultiFrame(resp: string): string {
+  return resp
+    .replace(/SEARCHING\.*/gi, '')
+    .split(/[\r\n]+/)
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && !/^[0-9A-F]{1,3}$/i.test(l)) // drop ISO-TP length line
+    .map(l => l.replace(/^[0-9A-F]{1,2}:\s*/i, ''))            // drop frame-index prefix
+    .join('')
+    .replace(/[\s>]/g, '')
+    .toUpperCase();
+}
+
+/**
+ * Extract a VIN from a raw Mode 09 PID 02 response.
+ * Handles CAN ISO-TP segmented frames AND legacy multi-line "4902 0N ..."
+ * responses. Returns a validated 17-char VIN when possible.
+ */
+function extractVIN(resp: string): string | null {
+  const upper = cleanMultiFrame(resp);
+  // Collect hex after every 4902 header (legacy adapters repeat it per frame),
+  // skipping the count/sequence byte that follows each header
+  let allHex = '';
+  let pos = 0;
+  while (true) {
+    const idx = upper.indexOf('4902', pos);
+    if (idx < 0) break;
+    const rest = upper.substring(idx + 6);
+    const next = rest.indexOf('4902');
+    allHex += next >= 0 ? rest.substring(0, next) : rest;
+    pos = idx + 6;
+  }
+  if (!allHex) return null;
+  const ascii = hexToAscii(allHex).replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  // A real VIN is exactly 17 chars and never contains I, O, or Q
+  const match = ascii.match(/[A-HJ-NPR-Z0-9]{17}/);
+  if (match) return match[0];
+  logEvent('BLE', 'ERROR', `VIN decode incomplete — ascii: "${ascii}" from hex: "${allHex}"`);
+  return ascii.length >= 11 ? ascii : null; // partial VIN still better than nothing
+}
+
 export async function readVehicleInfo(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
   // PID 02 — VIN (17 characters)
-  const vinResp = await sendBLECommand('0902\r', 5000);
+  // VIN is a multi-frame response — cheap adapters need longer timeout and may
+  // return multiple "4902" lines that need concatenation.
+  // Try with headers off first (simpler), then with headers on as fallback.
+  const vinResp = await sendBLECommand('0902', 8000);
   if (vinResp && !vinResp.includes('NO DATA')) {
-    const clean = vinResp.replace(/[\s\r\n]/g, '');
-    // Response: 4902 01 XXXXXXXXXX... (multi-line possible)
-    // Find "4902" header, skip count byte, rest is VIN in hex
-    const idx = clean.toUpperCase().indexOf('4902');
-    if (idx >= 0) {
-      // Skip header (4902) + count byte (2 chars) = 6 chars
-      const vinHex = clean.substring(idx + 6);
-      const vin = hexToAscii(vinHex);
-      if (vin.length >= 17) info.vin = vin.substring(0, 17);
-      else if (vin.length > 0) info.vin = vin;
-    }
+    const vin = extractVIN(vinResp);
+    if (vin) info.vin = vin;
   }
 
   // PID 04 — Calibration ID
@@ -1103,8 +1294,11 @@ export async function pollAllBLEPIDs(): Promise<void> {
     const hex = await readPID(cmd);
     if (hex && hex.length >= 2) {
       try {
-        const values = parse(hex);
-        Object.assign(rawValues, values);
+        const parsed = parse(hex);
+        // Validate and smooth each signal before storing
+        for (const [key, val] of Object.entries(parsed)) {
+          rawValues[key] = validateAndSmooth(key, val);
+        }
       } catch {
         // Skip malformed responses — adapter noise
       }
@@ -1311,6 +1505,7 @@ export function startBLENativeTelemetryLoop(
   intervalMs: number = 300
 ): () => void {
   startTime = Date.now();
+  let sweepInFlight = false;
   const timer = setInterval(async () => {
     if (connectionState.isSimulated) {
       onData(simulatedTick());
@@ -1318,7 +1513,15 @@ export function startBLENativeTelemetryLoop(
     }
 
     if (txCharacteristic && connectionState.status === 'connected') {
-      await pollAllBLEPIDs();
+      // In-flight guard: a full PID sweep takes longer than the UI interval.
+      // Never start a new sweep while one is running — overlapping sweeps
+      // were the main cause of mismatched/blank readings.
+      if (!sweepInFlight) {
+        sweepInFlight = true;
+        pollAllBLEPIDs()
+          .catch(() => {})
+          .finally(() => { sweepInFlight = false; });
+      }
       onData(buildSnapshot());
     } else {
       // Strict fallback: never show mock data if not in demo mode
@@ -1353,7 +1556,10 @@ function cleanup(): void {
   rxCharacteristic = null;
   responseBuffer = '';
   responseResolve = null;
+  commandChain = Promise.resolve(); // Invalidate any queued commands
+  needsDrain = false;
   rawValues = {};
+  smoothedValues = {};
   supportedPIDs = new Set();
   pidSupportQueried = false;
 }

@@ -6,8 +6,8 @@ import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withTiming,
   Easing, withSequence, withDelay, FadeIn, type SharedValue
 } from 'react-native-reanimated';
-import { probeForAdapter, WiFiConnection, enterDemoMode } from '../telemetry/WiFiConnector';
-import { connectBLENative, BLEConnection, enterBLEDemoMode } from '../telemetry/BLEConnector';
+import { probeForAdapter, WiFiConnection, enterDemoMode, getWiFiStatus, disconnectWiFi } from '../telemetry/WiFiConnector';
+import { connectBLENative, BLEConnection, enterBLEDemoMode, getBLENativeStatus, disconnectBLENative } from '../telemetry/BLEConnector';
 import { exportLog } from '../telemetry/FlightRecorder';
 
 const { width } = Dimensions.get('window');
@@ -68,8 +68,17 @@ export default function ConnectionScreen({ onConnect, greeting }: { onConnect: (
   const ring2Style = makeRingStyle(ring2, 260);
   const ring3Style = makeRingStyle(ring3, 320);
 
+  /** Starting a REAL connection must clear any lingering demo/simulated
+   *  state on BOTH transports — otherwise stale demo state outranks the
+   *  live scan on the dashboard. */
+  function clearDemoState() {
+    if (getWiFiStatus().isSimulated) disconnectWiFi();
+    if (getBLENativeStatus().isSimulated) disconnectBLENative();
+  }
+
   // WiFi connect
   async function handleWiFiConnect() {
+    clearDemoState();
     setMode('wifi');
     setScanning(true);
     const found = await probeForAdapter(setWifiStatus);
@@ -91,6 +100,7 @@ export default function ConnectionScreen({ onConnect, greeting }: { onConnect: (
 
   // BLE connect
   async function handleBLEConnect() {
+    clearDemoState();
     setMode('ble');
     setScanning(true);
     const found = await connectBLENative(setBleStatus);
@@ -110,6 +120,7 @@ export default function ConnectionScreen({ onConnect, greeting }: { onConnect: (
   }
 
   async function handleCustomConnect() {
+    clearDemoState();
     setMode('wifi');
     setScanning(true);
     const found = await probeForAdapter(setWifiStatus, customIP);
