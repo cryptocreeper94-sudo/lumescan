@@ -367,10 +367,20 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
       ? startBLENativeTelemetryLoop((snapshot) => { setData(snapshot); }, 300)
       : startWiFiTelemetryLoop((snapshot) => { setData(snapshot); }, 300);
 
-    // Auto-read VIN once on first connect
+    // Determine if THIS connection is simulated
+    const isSimulated = useBLE ? bleConn.isSimulated : wifiConn.isSimulated;
+    const isRealConnection = bleLive || wifiLive;
+
+    // Reset VIN read flag when switching from simulated → real connection
+    // so we always re-read VIN for a real vehicle instead of showing demo name
+    if (isRealConnection && vinReadRef.current) {
+      vinReadRef.current = false;
+      setVehicleName(null); // Clear stale demo name immediately
+    }
+
+    // Auto-read VIN once per connection type
     if (!vinReadRef.current) {
       vinReadRef.current = true;
-      const isSimulated = useBLE ? bleConn.isSimulated : wifiConn.isSimulated;
       // The demo vehicle label is ONLY shown when the active transport is
       // actually the simulator — never as a fallback for a live scan.
       if (isSimulated && !bleLive && !wifiLive) {
