@@ -277,6 +277,7 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal',
 
 export default function DashboardScreen({ onReport, tier }: { onReport?: () => void; tier: Tier }) {
   const [data, setData] = useState<TelemetrySnapshot | null>(null);
+  const [isLiveConnection, setIsLiveConnection] = useState(false);
   const [useFahrenheit, setUseFahrenheit] = useState(true); // Default to °F for US users
   const pulseAnim = useSharedValue(1);
   const isPro = tier === 'pro';
@@ -370,6 +371,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
     // Determine if THIS connection is simulated
     const isSimulated = useBLE ? bleConn.isSimulated : wifiConn.isSimulated;
     const isRealConnection = bleLive || wifiLive;
+    setIsLiveConnection(isRealConnection);
 
     // Reset VIN read flag when switching from simulated → real connection
     // so we always re-read VIN for a real vehicle instead of showing demo name
@@ -455,9 +457,9 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
             <ActivitySquare size={24} color={COLORS.cyan} />
             <Text style={styles.headerTitle}>LumeScan<Text style={styles.headerTitleSub}> Pro</Text></Text>
           </View>
-          <View style={styles.connectionBadge}>
-            <Animated.View style={[styles.statusDot, animatedStyle]} />
-            <Text style={styles.connectionText}>
+          <View style={[styles.connectionBadge, !isLiveConnection && styles.connectionBadgeDemo]}>
+            <Animated.View style={[styles.statusDot, animatedStyle, !isLiveConnection && { backgroundColor: '#f59e0b' }]} />
+            <Text style={[styles.connectionText, !isLiveConnection && { color: '#f59e0b' }]}>
               {getBLENativeStatus().status === 'connected'
                 ? getBLENativeStatus().isSimulated
                   ? 'DEMO MODE'
@@ -469,6 +471,13 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
             </Text>
           </View>
         </View>
+
+        {/* Demo Mode Warning Banner */}
+        {!isLiveConnection && (
+          <View style={styles.demoBanner}>
+            <Text style={styles.demoBannerText}>⚠️  SIMULATED DATA — Not connected to a vehicle</Text>
+          </View>
+        )}
 
         {/* Personalized Greeting */}
         <Text style={styles.greeting}>{getGreeting()}</Text>
@@ -622,10 +631,19 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
 
         {/* Condition Report Button */}
         {onReport && (
-          <TouchableOpacity style={styles.reportBtn} onPress={onReport}>
-            <FileText size={18} color={COLORS.cyan} />
-            <Text style={styles.reportBtnText}>GENERATE CONDITION REPORT</Text>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity style={[styles.reportBtn, !isLiveConnection && { borderColor: '#f59e0b' }]} onPress={onReport}>
+              <FileText size={18} color={isLiveConnection ? COLORS.cyan : '#f59e0b'} />
+              <Text style={[styles.reportBtnText, !isLiveConnection && { color: '#f59e0b' }]}>
+                {isLiveConnection ? 'GENERATE CONDITION REPORT' : 'GENERATE DEMO REPORT'}
+              </Text>
+            </TouchableOpacity>
+            {!isLiveConnection && (
+              <Text style={{ color: '#f59e0b', fontSize: 10, textAlign: 'center', marginTop: 6, opacity: 0.7 }}>
+                Report will be based on simulated data, not your vehicle
+              </Text>
+            )}
+          </View>
         )}
 
         {/* Runtime */}
@@ -654,8 +672,11 @@ const styles = StyleSheet.create({
   tempToggleText: { color: COLORS.textDim, fontSize: 12, fontWeight: '700' },
   tempToggleTextActive: { color: COLORS.cyan },
   connectionBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)', gap: 8 },
+  connectionBadgeDemo: { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)' },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.emerald },
   connectionText: { color: COLORS.emerald, fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  demoBanner: { backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16, marginBottom: 12, alignItems: 'center' },
+  demoBannerText: { color: '#f59e0b', fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
   tierBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(6,182,212,0.06)', borderWidth: 1, borderColor: 'rgba(6,182,212,0.15)', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 16, marginBottom: 12 },
   tierBadgeText: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
   tierUpgrade: { color: COLORS.cyan, fontSize: 11, fontWeight: '800' },

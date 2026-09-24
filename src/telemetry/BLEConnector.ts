@@ -1335,7 +1335,7 @@ function bleSmoothSpeed(raw: number): number {
   return Math.round(bleSmoothedSpeed);
 }
 
-function buildSnapshot(): TelemetrySnapshot {
+export function buildSnapshot(): TelemetrySnapshot {
   const r = rawValues;
   const now = Date.now();
   const runtimeSeconds = r.runtimeSinceStart || Math.floor((now - startTime) / 1000);

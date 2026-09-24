@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity, Shield, Lock } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
-import { generateConditionReport } from '../telemetry/SimulatedEngine';
+import { generateConditionReport, tick } from '../telemetry/SimulatedEngine';
 import { sealScanToLedger, buildScanPayload, type ScanRecord } from '../telemetry/TrustLayerLedger';
-import { tick } from '../telemetry/SimulatedEngine';
+import { getWiFiStatus, buildSnapshot as buildWiFiSnapshot } from '../telemetry/WiFiConnector';
+import { getBLENativeStatus, buildSnapshot as buildBLESnapshot } from '../telemetry/BLEConnector';
+import type { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
 import type { Tier } from '../config/entitlement';
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
@@ -27,11 +29,31 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
   const [tllRecord, setTllRecord] = useState<ScanRecord | null>(null);
   const [sealing, setSealing] = useState(false);
 
+  const [isDemo, setIsDemo] = useState(true);
+
   useEffect(() => {
-    // Simulate 2-second scan delay
     const timer = setTimeout(async () => {
-      const currentSignals = tick();
-      const conditionReport = generateConditionReport();
+      // Determine if we have a real adapter connection
+      const bleConn = getBLENativeStatus();
+      const wifiConn = getWiFiStatus();
+      const bleLive = bleConn.status === 'connected' && !bleConn.isSimulated;
+      const wifiLive = wifiConn.status === 'connected' && !wifiConn.isSimulated;
+      const isRealConnection = bleLive || wifiLive;
+      setIsDemo(!isRealConnection);
+
+      let currentSignals: TelemetrySnapshot;
+      let conditionReport: ReturnType<typeof generateConditionReport>;
+
+      if (isRealConnection) {
+        // Use REAL data from the connected adapter
+        currentSignals = bleLive ? buildBLESnapshot() : buildWiFiSnapshot();
+        // Build condition report from real snapshot
+        conditionReport = buildConditionReportFromSnapshot(currentSignals);
+      } else {
+        // Demo mode — use simulated data
+        currentSignals = tick();
+        conditionReport = generateConditionReport();
+      }
       setReport(conditionReport);
 
       // Seal to Trust Layer Ledger
@@ -49,6 +71,63 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Build condition report from a real TelemetrySnapshot (mirrors SimulatedEngine.generateConditionReport)
+  function buildConditionReportFromSnapshot(s: TelemetrySnapshot) {
+    return {
+      timestamp: new Date().toISOString(),
+      vehicle: 'Connected Vehicle',
+      vin: 'Read from adapter',
+      overallHealth: Math.round(s.sl11_degradation),
+      laneReady: s.sl8_dtcCount === 0 && !s.sl7_mil && s.sl3_battery > 12.0,
+      sections: [
+        {
+          name: 'Drivetrain', status: 'nominal' as const,
+          items: [
+            { label: 'Engine Load (PR7)', value: `${s.pr7_engLoad.toFixed(1)}%`, status: 'ok' as const },
+            { label: 'Combustion Efficiency (PR6)', value: `${s.pr6_combEff.toFixed(1)}%`, status: (s.pr6_combEff > 95 ? 'ok' : 'caution') as 'ok' | 'caution' },
+            { label: 'Volumetric Efficiency (TB8)', value: `${s.tb8_volEff.toFixed(1)}%`, status: 'ok' as const },
+          ]
+        },
+        {
+          name: 'Emissions', status: (s.fs7_catEff > 90 ? 'nominal' : 'caution') as 'nominal' | 'caution',
+          items: [
+            { label: 'Catalyst Efficiency (FS7)', value: `${s.fs7_catEff.toFixed(1)}%`, status: (s.fs7_catEff > 90 ? 'ok' : 'caution') as 'ok' | 'caution' },
+            { label: 'O2 Upstream B1 (FS1)', value: `${s.fs1_o2UpB1.toFixed(2)}V`, status: 'ok' as const },
+            { label: 'O2 Downstream B1 (FS2)', value: `${s.fs2_o2DnB1.toFixed(2)}V`, status: 'ok' as const },
+            { label: 'Catalyst Temp (FS5)', value: `${s.fs5_catTempB1.toFixed(0)}°C`, status: 'ok' as const },
+          ]
+        },
+        {
+          name: 'Electrical', status: (s.sl3_battery > 12.5 ? 'nominal' : 'warning') as 'nominal' | 'warning',
+          items: [
+            { label: 'Battery Voltage (SL3)', value: `${s.sl3_battery.toFixed(1)}V`, status: (s.sl3_battery > 12.5 ? 'ok' : 'warning') as 'ok' | 'warning' },
+            { label: 'MIL Status (SL7)', value: s.sl7_mil ? 'ON' : 'OFF', status: (s.sl7_mil ? 'critical' : 'ok') as 'critical' | 'ok' },
+            { label: 'DTC Count (SL8)', value: `${s.sl8_dtcCount}`, status: (s.sl8_dtcCount > 0 ? 'warning' : 'ok') as 'warning' | 'ok' },
+          ]
+        },
+        {
+          name: 'Thermal', status: 'nominal' as const,
+          items: [
+            { label: 'Coolant Temp (SL1)', value: `${s.sl1_coolant.toFixed(1)}°C`, status: (s.sl1_coolant < 105 ? 'ok' : 'warning') as 'ok' | 'warning' },
+            { label: 'Intake Air Temp (TB4)', value: `${s.tb4_iat.toFixed(1)}°C`, status: 'ok' as const },
+          ]
+        },
+        {
+          name: 'Fuel System', status: (Math.abs(s.pr3_ltftB1) < 10 ? 'nominal' : 'caution') as 'nominal' | 'caution',
+          items: [
+            { label: 'Air-Fuel Ratio (TB9)', value: `${s.tb9_afr.toFixed(1)}:1`, status: (s.tb9_afr > 14.0 && s.tb9_afr < 15.0 ? 'ok' : 'caution') as 'ok' | 'caution' },
+            { label: 'STFT B1 (PR2)', value: `${s.pr2_stftB1 > 0 ? '+' : ''}${s.pr2_stftB1.toFixed(1)}%`, status: (Math.abs(s.pr2_stftB1) < 10 ? 'ok' : 'caution') as 'ok' | 'caution' },
+            { label: 'LTFT B1 (PR3)', value: `${s.pr3_ltftB1 > 0 ? '+' : ''}${s.pr3_ltftB1.toFixed(1)}%`, status: (Math.abs(s.pr3_ltftB1) < 10 ? 'ok' : 'caution') as 'ok' | 'caution' },
+          ]
+        },
+      ],
+      componentDegradation: Math.round(s.sl11_degradation),
+      summary: s.sl8_dtcCount === 0 && !s.sl7_mil
+        ? 'All 42 governance nodes nominal. No active or pending fault codes. Vehicle is lane-ready.'
+        : `${s.sl8_dtcCount} diagnostic trouble code(s) detected. Manual inspection recommended before lane assignment.`,
+    };
+  }
 
   if (!report) {
     return (
@@ -71,7 +150,12 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
           <Text style={styles.backText}>Dashboard</Text>
         </TouchableOpacity>
 
-        <Text style={styles.pageTitle}>CONDITION REPORT</Text>
+        <Text style={styles.pageTitle}>{isDemo ? 'DEMO CONDITION REPORT' : 'CONDITION REPORT'}</Text>
+        {isDemo && (
+          <View style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 16, marginBottom: 8, alignItems: 'center' as const }}>
+            <Text style={{ color: '#f59e0b', fontSize: 11, fontWeight: '700' }}>⚠️  SIMULATED DATA — Not from a real vehicle</Text>
+          </View>
+        )}
         <Text style={styles.timestamp}>{report.timestamp}</Text>
 
         {/* Vehicle */}
