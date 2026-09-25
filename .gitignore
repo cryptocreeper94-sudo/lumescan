@@ -39,3 +39,5 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+releases/LumeScan_v1.2.0.apk
+releases/*.apk
