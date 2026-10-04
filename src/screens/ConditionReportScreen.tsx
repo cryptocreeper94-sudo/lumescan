@@ -30,7 +30,8 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
   const [tllRecord, setTllRecord] = useState<ScanRecord | null>(null);
   const [sealing, setSealing] = useState(false);
 
-  const [isDemo, setIsDemo] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
+  const [notConnected, setNotConnected] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -40,7 +41,16 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
       const bleLive = bleConn.status === 'connected' && !bleConn.isSimulated;
       const wifiLive = wifiConn.status === 'connected' && !wifiConn.isSimulated;
       const isRealConnection = bleLive || wifiLive;
-      setIsDemo(!isRealConnection);
+      const demoActive = !isRealConnection &&
+        ((bleConn.status === 'connected' && bleConn.isSimulated) ||
+         (wifiConn.status === 'connected' && wifiConn.isSimulated));
+      setIsDemo(demoActive);
+
+      // Neither a real adapter nor Demo Mode: never fall back to sample data.
+      if (!isRealConnection && !demoActive) {
+        setNotConnected(true);
+        return;
+      }
 
       let currentSignals: TelemetrySnapshot;
       let conditionReport: ReturnType<typeof generateConditionReport>;
@@ -51,7 +61,7 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
         // Build condition report from real snapshot
         conditionReport = buildConditionReportFromSnapshot(currentSignals);
       } else {
-        // Demo mode — use simulated data
+        // Demo mode ONLY — use simulated data
         currentSignals = tick();
         conditionReport = generateConditionReport();
       }
@@ -128,6 +138,21 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
         ? 'All 42 governance nodes nominal. No active or pending fault codes. Vehicle is lane-ready.'
         : `${s.sl8_dtcCount} diagnostic trouble code(s) detected. Manual inspection recommended before lane assignment.`,
     };
+  }
+
+  if (notConnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
+          <ArrowLeft size={20} color={COLORS.textMuted} />
+          <Text style={styles.backText}>Dashboard</Text>
+        </TouchableOpacity>
+        <View style={styles.scanningContainer}>
+          <Text style={styles.scanningTitle}>NOT CONNECTED</Text>
+          <Text style={styles.scanningSubtitle}>Your adapter isn't connected, so there's no vehicle data for a report. Go back and reconnect, then try again.</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   if (!report) {

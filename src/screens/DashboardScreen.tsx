@@ -189,16 +189,16 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal',
     }
   }
 
-  // Legacy hardcoded fallback if no specific codes are resolved
+  // Check engine light is on but the specific codes haven't been read yet:
+  // say exactly that — never guess a code.
   if (alerts.length === 0 && data.sl7_mil && data.sl8_dtcCount > 0) {
     alerts.push({
-      type: 'active', code: 'P0420', system: 'Catalyst System',
-      interpretation: 'Your catalytic converter isn\'t cleaning exhaust gases properly. This is the #1 most common check engine light code. You\'ll fail emissions testing.',
-      severity: 'Moderate — safe to drive short term',
-      action: 'Replace catalytic converter',
-      partName: 'Catalytic Converter', partPriceLow: 89, partPriceHigh: 350,
+      type: 'active', system: 'Check Engine Light',
+      interpretation: `Your check engine light is on and the vehicle reports ${data.sl8_dtcCount} stored trouble code${data.sl8_dtcCount === 1 ? '' : 's'}. Open the Codes tab and tap Scan to see exactly which codes and what they mean.`,
+      severity: 'Check codes',
+      action: 'Open the Codes tab and scan',
       vehicle,
-    });
+    } as FailureAlert);
   }
 
   // ── Signal-Based Imminent Failure Alerts ──
@@ -279,6 +279,22 @@ function getActiveAlerts(data: TelemetrySnapshot, vehicle: string = 'Universal',
 export default function DashboardScreen({ onReport, tier }: { onReport?: () => void; tier: Tier }) {
   const [data, setData] = useState<TelemetrySnapshot | null>(null);
   const [isLiveConnection, setIsLiveConnection] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  // Re-check the connection every 2s so a dropped adapter shows
+  // "NOT CONNECTED" instead of stale live/demo labels.
+  useEffect(() => {
+    const check = () => {
+      const b = getBLENativeStatus();
+      const w = getWiFiStatus();
+      const live = (b.status === 'connected' && !b.isSimulated) || (w.status === 'connected' && !w.isSimulated);
+      const demo = !live && ((b.status === 'connected' && b.isSimulated) || (w.status === 'connected' && w.isSimulated));
+      setIsLiveConnection(live);
+      setIsDemoMode(demo);
+    };
+    check();
+    const t = setInterval(check, 2000);
+    return () => clearInterval(t);
+  }, []);
   const [useFahrenheit, setUseFahrenheit] = useState(true); // Default to °F for US users
   const pulseAnim = useSharedValue(1);
   const isPro = tier === 'pro';
@@ -464,24 +480,25 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
             <Text style={styles.headerTitle}>LumeScan<Text style={styles.headerTitleSub}> Pro</Text></Text>
           </View>
           <View style={[styles.connectionBadge, !isLiveConnection && styles.connectionBadgeDemo]}>
-            <Animated.View style={[styles.statusDot, animatedStyle, !isLiveConnection && { backgroundColor: '#f59e0b' }]} />
-            <Text style={[styles.connectionText, !isLiveConnection && { color: '#f59e0b' }]}>
-              {getBLENativeStatus().status === 'connected'
-                ? getBLENativeStatus().isSimulated
-                  ? 'DEMO MODE'
-                  : `BLE: ${getBLENativeStatus().deviceName || 'CONNECTED'}`
-                : getWiFiStatus().isSimulated
-                  ? 'DEMO MODE'
-                  : 'WIFI CONNECTED'
-              }
+            <Animated.View style={[styles.statusDot, animatedStyle, !isLiveConnection && { backgroundColor: isDemoMode ? '#f59e0b' : '#ef4444' }]} />
+            <Text style={[styles.connectionText, !isLiveConnection && { color: isDemoMode ? '#f59e0b' : '#ef4444' }]}>
+              {isLiveConnection
+                ? (getBLENativeStatus().status === 'connected' && !getBLENativeStatus().isSimulated
+                    ? `BLE: ${getBLENativeStatus().deviceName || 'CONNECTED'}`
+                    : 'WIFI CONNECTED')
+                : isDemoMode ? 'DEMO MODE' : 'NOT CONNECTED'}
             </Text>
           </View>
         </View>
 
-        {/* Demo Mode Warning Banner */}
+        {/* Demo / disconnected banner — never label a real user's screen as demo */}
         {!isLiveConnection && (
           <View style={styles.demoBanner}>
-            <Text style={styles.demoBannerText}>⚠️  SIMULATED DATA — Not connected to a vehicle</Text>
+            <Text style={styles.demoBannerText}>
+              {isDemoMode
+                ? '⚠️  DEMO MODE — simulated sample vehicle, not your car'
+                : '⚠️  ADAPTER NOT CONNECTED — go back and reconnect'}
+            </Text>
           </View>
         )}
 
@@ -641,10 +658,10 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
             <TouchableOpacity style={[styles.reportBtn, !isLiveConnection && { borderColor: '#f59e0b' }]} onPress={onReport}>
               <FileText size={18} color={isLiveConnection ? COLORS.cyan : '#f59e0b'} />
               <Text style={[styles.reportBtnText, !isLiveConnection && { color: '#f59e0b' }]}>
-                {isLiveConnection ? 'GENERATE CONDITION REPORT' : 'GENERATE DEMO REPORT'}
+                {isLiveConnection ? 'GENERATE CONDITION REPORT' : isDemoMode ? 'GENERATE DEMO REPORT' : 'CONNECT ADAPTER FOR REPORT'}
               </Text>
             </TouchableOpacity>
-            {!isLiveConnection && (
+            {isDemoMode && !isLiveConnection && (
               <Text style={{ color: '#f59e0b', fontSize: 10, textAlign: 'center', marginTop: 6, opacity: 0.7 }}>
                 Report will be based on simulated data, not your vehicle
               </Text>

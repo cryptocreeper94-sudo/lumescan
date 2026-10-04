@@ -102,7 +102,8 @@ export default function FailureAlertBanner({ alert, tier, onUpgrade }: Props) {
               <Text style={styles.metaValue}>{alert.action}</Text>
             </View>
 
-            {/* Affiliate part links */}
+            {/* Affiliate part links (only when a specific part is known) */}
+            {!!alert.partName && (
             <View style={styles.partLinks}>
               <TouchableOpacity
                 style={[styles.partBtn, styles.amazonBtn]}
@@ -123,6 +124,7 @@ export default function FailureAlertBanner({ alert, tier, onUpgrade }: Props) {
                 </Text>
               </TouchableOpacity>
             </View>
+            )}
           </>
         ) : (
           /* ─── Free: Blurred content with upgrade CTA ─── */
