@@ -6,7 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Eas
 import { TelemetrySnapshot } from '../telemetry/SimulatedEngine';
 import { startWiFiTelemetryLoop, getWiFiStatus, readVehicleInfoWiFi } from '../telemetry/WiFiConnector';
 import { startBLENativeTelemetryLoop, getBLENativeStatus, readVehicleInfo as readVehicleInfoBLE } from '../telemetry/BLEConnector';
-import { decodeVIN } from '../telemetry/VINDecoder';
+import { decodeVIN, decodeVINOnline } from '../telemetry/VINDecoder';
 import { auth } from '../config/firebase';
 import type { Tier } from '../config/entitlement';
 import FailureAlertBanner, { type FailureAlert } from './FailureAlertBanner';
@@ -399,6 +399,11 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
               if (info.vin) {
                 const decoded = decodeVIN(info.vin);
                 setVehicleName(decoded.displayName);
+                // Upgrade to the full NHTSA decode (exact model/engine) when
+                // the phone has internet; keeps the offline name otherwise.
+                decodeVINOnline(info.vin).then(full => {
+                  if (full.displayName) setVehicleName(full.displayName);
+                }).catch(() => {});
                 return;
               }
             } catch {

@@ -90,27 +90,47 @@ class ELM327Socket {
 
   async connect(host: string, port: number): Promise<boolean> {
     return new Promise((resolve) => {
+      let settled = false;
+      const done = (ok: boolean) => { if (!settled) { settled = true; resolve(ok); } };
+      // Called when the link dies AFTER a successful connect (adapter
+      // unplugged, ignition cut, phone left the adapter hotspot).
+      const dropped = (why: string) => {
+        if (connectionState.status === 'connected' || connectionState.status === 'initializing') {
+          connectionState = {
+            status: 'disconnected', host: null, isSimulated: false, adapterInfo: null,
+            error: `Adapter connection lost (${why}). Reconnect from the Connect screen.`,
+          };
+        }
+      };
       try {
-        this.socket = TcpSocket.createConnection({
+        const sock = TcpSocket.createConnection({
           host: host,
           port: port,
-        }, () => {
+          // Android: route over the adapter's WiFi even though it has no
+          // internet (otherwise the OS may send traffic over mobile data).
+          interface: 'wifi',
+        } as any, () => {
           console.log('[LumeScan WiFi] TCP connected to ' + host + ':' + port);
           logEvent('WiFi', 'INFO', `TCP connected to ${host}:${port}`);
-          resolve(true);
+          // The 5s timeout is only for the initial connect. Leaving it on
+          // would kill the socket after any 5s quiet period.
+          try { sock.setTimeout(0); } catch {}
+          done(true);
         });
-        this.socket.setTimeout(5000);
-        this.socket.on('timeout', () => {
+        this.socket = sock;
+        sock.setTimeout(5000);
+        sock.on('timeout', () => {
           console.warn('[LumeScan WiFi] TCP connection timed out');
           logEvent('WiFi', 'ERROR', 'TCP connection timed out');
-          if (this.socket) {
-            this.socket.destroy();
+          if (this.socket === sock) {
+            sock.destroy();
             this.socket = null;
+            dropped('timeout');
           }
-          resolve(false);
+          done(false);
         });
         
-        this.socket.on('data', (data: Buffer | string) => {
+        sock.on('data', (data: Buffer | string) => {
           // Convert Buffer to string if necessary
           const text = typeof data === 'string' ? data : data.toString('utf8');
           logEvent('WiFi', 'RX', text.trim() || '<empty buffer>');
@@ -125,23 +145,31 @@ class ELM327Socket {
           }
         });
         
-        this.socket.on('error', (error: any) => {
+        sock.on('error', (error: any) => {
           console.warn('[LumeScan WiFi] TCP Error: ', error);
           logEvent('WiFi', 'ERROR', `TCP Error: ${error?.message || error}`);
-          if (this.socket) {
-            this.socket.destroy();
+          if (this.socket === sock) {
+            try { sock.destroy(); } catch {}
             this.socket = null;
+            dropped('error');
           }
-          resolve(false);
+          if (this.responseResolve) this.responseResolve('');
+          done(false);
         });
         
-        this.socket.on('close', () => {
+        sock.on('close', () => {
           console.log('[LumeScan WiFi] TCP disconnected');
           logEvent('WiFi', 'INFO', 'TCP disconnected');
+          if (this.socket === sock) {
+            this.socket = null;
+            dropped('closed');
+          }
+          if (this.responseResolve) this.responseResolve('');
+          done(false);
         });
 
       } catch {
-        resolve(false);
+        done(false);
       }
     });
   }
@@ -293,6 +321,9 @@ export async function probeForAdapter(
           // Adapter reached the bus but the vehicle isn't answering (common
           // with ignition off). Connect in a degraded state with a clear message.
           vehicleWarning = 'Adapter connected, but the vehicle is not responding yet. Turn the ignition ON (engine running is best).';
+          // We forced CAN protocols during the retry — go back to auto-detect
+          // so non-CAN vehicles can still be found once the ignition is on.
+          await elmSocket.send('ATSP0', 2000);
         } else {
           elmSocket.close();
           connectionState = {
@@ -680,13 +711,13 @@ function extractVIN(resp: string): string | null {
 
 // ── Mode 02: Freeze Frame ──
 export async function readFreezeFrameWiFi(): Promise<FreezeFrameData | null> {
-  const dtcResp = await sendWiFiOBD('0202', 3000);
+  const dtcResp = await sendWiFiOBD('020200', 3000);
   if (!dtcResp) return null;
 
   const ff: FreezeFrameData = { dtcTrigger: '' };
   const dtcIdx = dtcResp.toUpperCase().indexOf('4202');
   if (dtcIdx >= 0) {
-    const decoded = decodeDTCBytes(dtcResp.substring(dtcIdx + 4));
+    const decoded = decodeDTCBytes(dtcResp.substring(dtcIdx + 6)); // skip 4202 + frame byte
     if (decoded.length > 0) ff.dtcTrigger = decoded[0];
   }
 
@@ -883,11 +914,17 @@ export async function readVehicleInfoWiFi(): Promise<VehicleInfo> {
   const info: VehicleInfo = {};
 
   // VIN — multi-frame response; cheap adapters need a longer timeout
-  const vinResp = await sendWiFiOBD('0902', 8000);
-  if (vinResp && !vinResp.includes('NO DATA')) {
-    const vin = extractVIN(vinResp);
-    if (vin) info.vin = vin;
+  // Engine computer only (CAN 7E8) to avoid interleaved multi-ECU frames;
+  // fall back to an unfiltered read for non-CAN vehicles.
+  await sendWiFiOBD('ATCRA7E8', 1500);
+  let vinResp = await sendWiFiOBD('0902', 8000);
+  await sendWiFiOBD('ATCRA', 1500);
+  let vin = vinResp && !vinResp.includes('NO DATA') ? extractVIN(vinResp) : null;
+  if (!vin || vin.length !== 17) {
+    vinResp = await sendWiFiOBD('0902', 8000);
+    if (vinResp && !vinResp.includes('NO DATA')) vin = extractVIN(vinResp) || vin;
   }
+  if (vin) info.vin = vin;
 
   // Calibration ID
   const calResp = await sendWiFiOBD('0904', 3000);

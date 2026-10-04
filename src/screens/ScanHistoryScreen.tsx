@@ -20,6 +20,8 @@ import {
 } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { getScanHistory, getScanStats } from '../telemetry/TrustLayerLedger';
+import { getWiFiStatus } from '../telemetry/WiFiConnector';
+import { getBLENativeStatus } from '../telemetry/BLEConnector';
 import type { Tier } from '../config/entitlement';
 
 interface Props {
@@ -77,6 +79,10 @@ export default function ScanHistoryScreen({ tier }: Props) {
 
   const loadData = async () => {
     setLoading(true);
+    // Sample F-150 history is ONLY for demo mode — never shown to a real user.
+    const wifi = getWiFiStatus();
+    const ble = getBLENativeStatus();
+    const demoActive = (wifi.status === 'connected' && wifi.isSimulated) || (ble.status === 'connected' && ble.isSimulated);
     try {
       const [scanData, statData] = await Promise.all([
         getScanHistory(50),
@@ -85,14 +91,16 @@ export default function ScanHistoryScreen({ tier }: Props) {
       if (scanData && scanData.length > 0) {
         setScans(scanData as ScanEntry[]);
         if (statData) setStats(statData as ScanStats);
-      } else {
-        // Fall back to demo data
+      } else if (demoActive) {
         setScans(DEMO_SCANS);
         setStats(DEMO_STATS);
+      } else {
+        setScans([]);
+        setStats(null);
       }
     } catch {
-      setScans(DEMO_SCANS);
-      setStats(DEMO_STATS);
+      setScans(demoActive ? DEMO_SCANS : []);
+      setStats(demoActive ? DEMO_STATS : null);
     }
     setLoading(false);
   };
@@ -209,6 +217,14 @@ export default function ScanHistoryScreen({ tier }: Props) {
 
             {/* Timeline */}
             <Text style={styles.sectionTitle}>TIMELINE</Text>
+            {scans.length === 0 && (
+              <View style={styles.trendCard}>
+                <Text style={styles.trendTitle}>NO SCANS YET</Text>
+                <Text style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 20, marginTop: 6 }}>
+                  Connect your adapter and run a Condition Report. Each report you save will appear here so you can track your vehicle's health over time.
+                </Text>
+              </View>
+            )}
             {scans.map((scan, i) => {
               const healthColor = scan.healthScore >= 90 ? COLORS.emerald
                 : scan.healthScore >= 70 ? '#f59e0b' : '#ef4444';

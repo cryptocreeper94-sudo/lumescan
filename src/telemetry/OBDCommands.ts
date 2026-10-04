@@ -12,6 +12,7 @@
  */
 
 import { getWiFiStatus } from './WiFiConnector';
+import { getBLENativeStatus } from './BLEConnector';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -92,7 +93,13 @@ function generateReceiptHash(): string {
 }
 
 function isDemo(): boolean {
-  return getWiFiStatus().isSimulated || getWiFiStatus().status !== 'connected';
+  // Demo only when the active connection IS the simulator. A real adapter on
+  // either transport must never be shown simulated key/runtime data.
+  const wifi = getWiFiStatus();
+  const ble = getBLENativeStatus();
+  const liveAdapter = (wifi.status === 'connected' && !wifi.isSimulated) || (ble.status === 'connected' && !ble.isSimulated);
+  if (liveAdapter) return false;
+  return (wifi.status === 'connected' && wifi.isSimulated) || (ble.status === 'connected' && ble.isSimulated);
 }
 
 // ═══════════════════════════════════════════════════════════════

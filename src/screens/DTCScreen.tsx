@@ -77,8 +77,18 @@ export default function DTCScreen({ tier }: Props) {
   const [hasDeepScanned, setHasDeepScanned] = useState(false);
 
   const isPro = tier === 'pro';
-  const isSimulated = getWiFiStatus().isSimulated || getBLENativeStatus().isSimulated;
-  const connected = getWiFiStatus().status === 'connected' || getBLENativeStatus().status === 'connected';
+  // Read live at call time — connection can change while this screen is open.
+  const liveStatus = () => {
+    const w = getWiFiStatus();
+    const b = getBLENativeStatus();
+    const bleLive = b.status === 'connected' && !b.isSimulated;
+    const wifiLive = w.status === 'connected' && !w.isSimulated;
+    const demo = !bleLive && !wifiLive && ((w.status === 'connected' && w.isSimulated) || (b.status === 'connected' && b.isSimulated));
+    return { bleLive, wifiLive, live: bleLive || wifiLive, demo };
+  };
+  const isSimulated = liveStatus().demo;
+  const connected = liveStatus().live || isSimulated;
+  const notConnectedAlert = () => Alert.alert('Adapter Not Connected', 'Plug in your LumeScan adapter, turn the ignition ON, and connect from the Connection screen to read your vehicle\'s codes.');
 
   // Demo mode DTCs
   const DEMO_ACTIVE = ['P0171', 'P0420'];
@@ -93,11 +103,16 @@ export default function DTCScreen({ tier }: Props) {
   }, []);
 
   const handleScan = async () => {
+    const st = liveStatus();
+    if (!st.live && !st.demo) {
+      notConnectedAlert();
+      return;
+    }
     setScanning(true);
     setHasScanned(false);
     await new Promise(r => setTimeout(r, 1500)); // Brief pause for ELM327 readiness
 
-    if (isSimulated || !connected) {
+    if (st.demo) {
       // Demo mode
       setActiveDTCs(DEMO_ACTIVE.map(code => ({ code, type: 'active', alert: lookupDTC(code) })));
       setPendingDTCs(DEMO_PENDING.map(code => ({ code, type: 'pending', alert: lookupDTC(code) })));
@@ -105,8 +120,8 @@ export default function DTCScreen({ tier }: Props) {
     } else {
       // Real adapter — use static imports (already imported at top)
       try {
-        const bleConnected = getBLENativeStatus().status === 'connected';
-        const wifiConnected = getWiFiStatus().status === 'connected' && !getWiFiStatus().isSimulated;
+        const bleConnected = st.bleLive;
+        const wifiConnected = st.wifiLive;
 
         let active: string[] = [];
         let pending: string[] = [];
@@ -149,27 +164,31 @@ export default function DTCScreen({ tier }: Props) {
           text: 'Clear Codes',
           style: 'destructive',
           onPress: async () => {
+            const st = liveStatus();
+            if (!st.live && !st.demo) {
+              notConnectedAlert();
+              return;
+            }
             setClearing(true);
             await new Promise(r => setTimeout(r, 2500));
-            if (!isSimulated && connected) {
+            if (st.live) {
+              let result: { success: boolean; message: string } | null = null;
               try {
                 const ble = require('../telemetry/BLEConnector');
                 const wifi = require('../telemetry/WiFiConnector');
-                const bleConnected = ble.getBLENativeStatus().status === 'connected';
-                const wifiConnected = wifi.getWiFiStatus().status === 'connected' && !wifi.getWiFiStatus().isSimulated;
-
-                let result: { success: boolean; message: string } | null = null;
-                if (bleConnected) {
+                if (st.bleLive) {
                   result = await ble.clearDTCs();
-                } else if (wifiConnected) {
+                } else if (st.wifiLive) {
                   result = await wifi.clearDTCsWiFi();
                 }
-                if (result && !result.success) {
-                  Alert.alert('Clear Failed', result.message);
-                  setClearing(false);
-                  return;
-                }
-              } catch { /* handled below */ }
+              } catch (e: any) {
+                result = { success: false, message: e?.message || 'The adapter did not respond.' };
+              }
+              if (!result || !result.success) {
+                Alert.alert('Clear Failed', (result?.message || 'The vehicle did not confirm the clear.') + '\n\nMake sure the ignition is ON with the engine OFF, then try again.');
+                setClearing(false);
+                return;
+              }
             }
             setActiveDTCs([]);
             setPendingDTCs([]);
@@ -184,11 +203,17 @@ export default function DTCScreen({ tier }: Props) {
 
   // ── Deep Diagnostic Scan (Mode 02, 05, 06) ──
   const handleDeepScan = async () => {
+    const st = liveStatus();
+    if (!st.live && !st.demo) {
+      notConnectedAlert();
+      return;
+    }
     setDeepScanning(true);
     setHasDeepScanned(false);
 
-    const bleConnected = getBLENativeStatus().status === 'connected' && !getBLENativeStatus().isSimulated;
-    const wifiConnected = getWiFiStatus().status === 'connected' && !getWiFiStatus().isSimulated;
+    // Sample results in the else-branches below are reachable ONLY in demo mode.
+    const bleConnected = st.bleLive;
+    const wifiConnected = st.wifiLive;
 
     try {
       // Mode 02 — Freeze Frame

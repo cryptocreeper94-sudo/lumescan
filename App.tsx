@@ -17,6 +17,7 @@ import { COLORS } from './src/theme/colors';
 import { auth, onAuthStateChanged, type User } from './src/config/firebase';
 import { checkEntitlement, type EntitlementStatus } from './src/config/entitlement';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import { IS_CONSUMER } from './src/config/variant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AppState = 'login' | 'checking' | 'locked' | 'onboarding' | 'connection' | 'main';
@@ -124,14 +125,17 @@ export default function App() {
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
 
+  // Keys (Mode 05) and Remote Start (Mode 06) are not functional on real
+  // vehicles yet (NASTF SDRM pending) — never show them in the consumer build.
+  const showMechTabs = mechanicMode && !IS_CONSUMER;
   const visibleTabs = tabs.filter(t => {
-    if (t.mechOnly && !mechanicMode) return false;
+    if (t.mechOnly && !showMechTabs) return false;
     // Pro-only tabs still visible but will show upgrade screen
     return true;
   });
 
   // If user switches from mechanic to consumer while on a mechanic-only tab
-  if (!mechanicMode && (activeTab === 'keys' || activeTab === 'remote')) {
+  if (!showMechTabs && (activeTab === 'keys' || activeTab === 'remote')) {
     setActiveTab('dashboard');
   }
 

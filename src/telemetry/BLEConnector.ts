@@ -641,6 +641,8 @@ export async function connectBLENative(
             // (common with ignition off). Connect in a degraded state so the user
             // can start the engine and data begins flowing — but tell them why.
             vehicleWarning = 'Adapter connected, but the vehicle is not responding yet. Turn the ignition ON (engine running is best).';
+            // Undo the forced CAN retries so non-CAN vehicles can still be found
+            await sendBLECommand('ATSP0', 2000);
           } else if (/UNABLE|ERROR|CAN ERROR|BUS/i.test(testResponse)) {
             throw new Error(`The adapter could not establish a protocol with the vehicle (adapter said: ${raw}). Try with the engine running.`);
           } else {
@@ -753,7 +755,7 @@ export interface FreezeFrameData {
 
 export async function readFreezeFrame(): Promise<FreezeFrameData | null> {
   // First, read DTC that triggered the freeze frame (PID 02 in Mode 02)
-  const dtcResponse = await sendBLECommand('0202\r', 3000);
+  const dtcResponse = await sendBLECommand('020200', 3000);
   if (!dtcResponse || dtcResponse.includes('NO DATA')) return null;
 
   const ff: FreezeFrameData = { dtcTrigger: '' };
@@ -762,7 +764,7 @@ export async function readFreezeFrame(): Promise<FreezeFrameData | null> {
   const dtcClean = dtcResponse.replace(/[\s\r\n]/g, '');
   const dtcIdx = dtcClean.toUpperCase().indexOf('4202');
   if (dtcIdx >= 0) {
-    const dtcHex = dtcClean.substring(dtcIdx + 4);
+    const dtcHex = dtcClean.substring(dtcIdx + 6); // skip 4202 + frame byte
     const decoded = decodeDTCBytes(dtcHex);
     if (decoded.length > 0) ff.dtcTrigger = decoded[0];
   }
@@ -1181,11 +1183,18 @@ export async function readVehicleInfo(): Promise<VehicleInfo> {
   // VIN is a multi-frame response — cheap adapters need longer timeout and may
   // return multiple "4902" lines that need concatenation.
   // Try with headers off first (simpler), then with headers on as fallback.
-  const vinResp = await sendBLECommand('0902', 8000);
-  if (vinResp && !vinResp.includes('NO DATA')) {
-    const vin = extractVIN(vinResp);
-    if (vin) info.vin = vin;
+  // First listen ONLY to the engine computer (CAN ID 7E8) so frames from
+  // the transmission module don't interleave and corrupt the VIN. Non-CAN
+  // vehicles ignore/fail this, so fall back to an unfiltered read.
+  await sendBLECommand('ATCRA7E8', 1500);
+  let vinResp = await sendBLECommand('0902', 8000);
+  await sendBLECommand('ATCRA', 1500);
+  let vin = vinResp && !vinResp.includes('NO DATA') ? extractVIN(vinResp) : null;
+  if (!vin || vin.length !== 17) {
+    vinResp = await sendBLECommand('0902', 8000);
+    if (vinResp && !vinResp.includes('NO DATA')) vin = extractVIN(vinResp) || vin;
   }
+  if (vin) info.vin = vin;
 
   // PID 04 — Calibration ID
   const calResp = await sendBLECommand('0904\r', 3000);
@@ -1305,14 +1314,16 @@ export async function pollAllBLEPIDs(): Promise<void> {
     }
   }
 
-  // Read DTCs periodically (every ~30 seconds, not every poll cycle)
-  if (rawValues.mil && rawValues.dtcCount > 0 && Math.random() < 0.03) {
+  // Read DTCs periodically (every 30 seconds, not every poll cycle)
+  if (rawValues.mil && rawValues.dtcCount > 0 && Date.now() - lastBLEDtcPoll > 30000) {
+    lastBLEDtcPoll = Date.now();
     const dtcs = await readDTCs();
     if (dtcs.length > 0) {
       (rawValues as any).activeDTCs = dtcs;
     }
   }
 }
+let lastBLEDtcPoll = 0;
 
 // ═══════════════════════════════════════════════════════════════
 // Telemetry Snapshot Builder

@@ -8,10 +8,12 @@
  *   Pos 11:   Assembly Plant
  *   Pos 12-17: Serial Number
  *
- * No API calls — fully offline deterministic decoding.
- * Covers 95%+ of US-market vehicles 2000-2026.
+ * Offline deterministic decoding (decodeVIN) + optional online lookup
+ * against the free US government NHTSA vPIC database (decodeVINOnline),
+ * which covers every make/model. Online results are cached on-device.
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export interface DecodedVehicle {
   vin: string;
   year: number | null;
@@ -163,14 +165,23 @@ const GMC_MODELS: Record<string, string> = {
 /**
  * Attempt to decode model from VDS section (positions 4-8)
  */
+let wmiForModel = '';
 function decodeModel(make: string, vds: string): string | null {
   // Use first 2 chars of VDS as the model code
   const code = vds.substring(0, 2).toUpperCase();
 
   switch (make) {
     case 'Ford':
-    case 'Lincoln':
+    case 'Lincoln': {
+      // F-Series trucks: VIN position 6 is the series digit
+      // (1FTFW1E... = F-150, 1FT7W2B... = F-250, 1FT8W3B... = F-350).
+      const series = vds[2];
+      if (make === 'Ford' && /^[123]FT$/.test(wmiForModel)) {
+        const F: Record<string, string> = { '0': 'F-150', '1': 'F-150', '2': 'F-250', '3': 'F-350', '4': 'F-450', '5': 'F-550' };
+        if (F[series]) return F[series];
+      }
       return FORD_MODELS[code] || null;
+    }
     case 'Chevrolet':
       return CHEVY_MODELS[code] || null;
     case 'GMC':
@@ -202,7 +213,10 @@ export function decodeVIN(vin: string): DecodedVehicle {
 
   // Position 10 → Year
   const yearChar = clean[9];
-  const year = YEAR_CODES[yearChar] || null;
+  let year = YEAR_CODES[yearChar] || null;
+  // Year letters repeat every 30 years. For light vehicles, a DIGIT in
+  // position 7 means the earlier cycle (e.g. 'W' = 1998, not 2028).
+  if (year && year >= 2010 && /[0-9]/.test(clean[6])) year -= 30;
 
   // Positions 1-3 → Make (WMI)
   const wmi3 = clean.substring(0, 3);
@@ -230,6 +244,7 @@ export function decodeVIN(vin: string): DecodedVehicle {
 
   // Positions 4-8 → Model (VDS)
   const vds = clean.substring(3, 8);
+  wmiForModel = wmi3;
   const model = make ? decodeModel(make, vds) : null;
 
   // Build display name
@@ -243,4 +258,59 @@ export function decodeVIN(vin: string): DecodedVehicle {
     : (make || `VIN: ${clean.substring(0, 11)}...`);
 
   return { vin: clean, year, make, model, displayName };
+}
+
+// ── Online decode (NHTSA vPIC — free US government VIN database) ──
+const VIN_CACHE_PREFIX = 'lumescan_vin_';
+
+function titleCase(s: string): string {
+  // NHTSA returns "FORD" / "F-150" — make it read naturally
+  return s.length <= 3 ? s : s.charAt(0) + s.slice(1).toLowerCase();
+}
+
+/**
+ * Decode a VIN using NHTSA (needs internet), falling back to the offline
+ * decoder when offline or when the lookup fails. Never throws.
+ * Note: on a WiFi adapter the phone usually has no internet while
+ * connected — the offline result is shown and the online result is used
+ * next time (cached) or when mobile data is available.
+ */
+export async function decodeVINOnline(vin: string): Promise<DecodedVehicle> {
+  const offline = decodeVIN(vin);
+  if (offline.vin.length !== 17) return offline;
+
+  try {
+    const cached = await AsyncStorage.getItem(VIN_CACHE_PREFIX + offline.vin);
+    if (cached) return JSON.parse(cached) as DecodedVehicle;
+  } catch {}
+
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(
+      `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${offline.vin}?format=json`,
+      { signal: ctrl.signal }
+    );
+    clearTimeout(t);
+    if (!res.ok) return offline;
+    const json = await res.json();
+    const r = json?.Results?.[0];
+    if (!r) return offline;
+
+    const year = parseInt(r.ModelYear, 10) || offline.year;
+    const make = r.Make ? titleCase(String(r.Make)) : offline.make;
+    const model = r.Model ? String(r.Model) : offline.model;
+    const engine = r.DisplacementL ? `${parseFloat(r.DisplacementL).toFixed(1)}L` : '';
+    const parts = [year ? String(year) : '', make || '', model || '', engine].filter(Boolean);
+    if (!make || !model) return offline;
+
+    const decoded: DecodedVehicle = {
+      vin: offline.vin, year: year || null, make, model,
+      displayName: parts.join(' '),
+    };
+    AsyncStorage.setItem(VIN_CACHE_PREFIX + offline.vin, JSON.stringify(decoded)).catch(() => {});
+    return decoded;
+  } catch {
+    return offline;
+  }
 }
