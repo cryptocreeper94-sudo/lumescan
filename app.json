@@ -25,9 +25,8 @@
       }
     },
     "android": {
-      "package": "com.darkwavestudios.lumeauto",
+      "package": "com.darkwavestudios.lumescan",
       "versionCode": 5,
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a0c"
@@ -39,6 +38,11 @@
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -59,6 +63,7 @@
     ],
     "extra": {
       "appVariant": "consumer",
+      "distribution": "playstore",
       "eas": {
         "projectId": "4da0a734-89f0-4618-b41e-2e57abdbf36f"
       },

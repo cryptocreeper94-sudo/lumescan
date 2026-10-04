@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Dimensions, Linking } from 'react-native';
+import { openUpgrade } from '../config/store';
 import { Key, Plus, Trash2, ShieldCheck, Radio, Lock, ExternalLink } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { readIMOKeys, programIMOKey, registerDongleAsKey, deleteIMOKey, type KeyInfo } from '../telemetry/OBDCommands';
@@ -128,7 +129,7 @@ export default function KeyManagementScreen({ tier, mode05Purchased }: Props) {
                 </View>
               ))}
             </View>
-            <TouchableOpacity style={styles.upgradeBtn} activeOpacity={0.8} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+            <TouchableOpacity style={styles.upgradeBtn} activeOpacity={0.8} onPress={openUpgrade}>
               <Text style={styles.upgradeBtnText}>Unlock Mode 05 — $199</Text>
               <ExternalLink size={16} color="#000" />
             </TouchableOpacity>

@@ -13,6 +13,7 @@ import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, Linking,
 } from 'react-native';
+import { openUpgrade } from '../config/store';
 import {
   Navigation, Gauge, Fuel, Clock, Activity, TrendingUp,
   Play, Square, RotateCcw, Lock, Zap,
@@ -182,7 +183,7 @@ export default function TripComputerScreen({ tier }: Props) {
             <Text style={styles.lockedDesc}>
               Track every drive with session MPG, distance, driver scoring, fuel usage, and driving behavior analysis. See exactly how your driving affects fuel economy.
             </Text>
-            <TouchableOpacity style={styles.lockedBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+            <TouchableOpacity style={styles.lockedBtn} onPress={openUpgrade}>
               <Lock size={14} color="#000" />
               <Text style={styles.lockedBtnText}>Upgrade to Pro</Text>
             </TouchableOpacity>

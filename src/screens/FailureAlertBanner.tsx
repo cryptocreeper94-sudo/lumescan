@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Dimensions } from 'react-native';
+import { openUpgrade } from '../config/store';
 import { AlertTriangle, XCircle, Lock, ShoppingCart } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import type { Tier } from '../config/entitlement';
@@ -153,7 +154,7 @@ export default function FailureAlertBanner({ alert, tier, onUpgrade }: Props) {
             {/* Upgrade CTA overlay */}
             <TouchableOpacity
               style={styles.upgradeOverlay}
-              onPress={onUpgrade || (() => Linking.openURL('https://lumeauto.tech/order'))}
+              onPress={onUpgrade || (openUpgrade)}
               activeOpacity={0.8}
             >
               <Lock size={16} color={COLORS.cyan} />

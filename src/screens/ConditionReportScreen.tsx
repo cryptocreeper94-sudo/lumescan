@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { openUpgrade } from '../config/store';
 import { CheckCircle, AlertTriangle, XCircle, ArrowLeft, Activity, Shield, Lock } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { generateConditionReport, tick } from '../telemetry/SimulatedEngine';
@@ -213,7 +214,7 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
         {!isPro && (
           <TouchableOpacity
             style={styles.reportUpgradeCta}
-            onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+            onPress={openUpgrade}
             activeOpacity={0.8}
           >
             <Lock size={16} color={COLORS.cyan} />
@@ -272,7 +273,7 @@ export default function ConditionReportScreen({ onBack, tier }: { onBack: () => 
                 </View>
                 <TouchableOpacity
                   style={styles.tllVerifyBtn}
-                  onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+                  onPress={openUpgrade}
                 >
                   <Lock size={12} color={COLORS.cyan} />
                   <Text style={[styles.tllVerifyText, { color: COLORS.cyan }]}>Upgrade to view verification details</Text>

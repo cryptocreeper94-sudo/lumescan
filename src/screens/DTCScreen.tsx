@@ -16,6 +16,7 @@ import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, Alert, ActivityIndicator, Dimensions, Linking, TextInput, Vibration,
 } from 'react-native';
+import { openUpgrade } from '../config/store';
 import {
   AlertTriangle, XCircle, CheckCircle, Trash2, RefreshCw,
   Search, Lock, ShoppingCart, ChevronDown, ChevronUp, Clock,
@@ -373,7 +374,7 @@ export default function DTCScreen({ tier }: Props) {
                 </View>
                 <TouchableOpacity
                   style={styles.dtcUpgradeBtn}
-                  onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+                  onPress={openUpgrade}
                 >
                   <Lock size={12} color={COLORS.cyan} />
                   <Text style={styles.dtcUpgradeText}>Upgrade to Pro for full diagnosis + parts</Text>
@@ -449,7 +450,7 @@ export default function DTCScreen({ tier }: Props) {
                     <View style={[styles.blurBar, { width: '85%' }]} />
                     <View style={[styles.blurBar, { width: '70%' }]} />
                   </View>
-                  <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+                  <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={openUpgrade}>
                     <Lock size={12} color={COLORS.cyan} />
                     <Text style={styles.dtcUpgradeText}>Upgrade to Pro for interpretation</Text>
                   </TouchableOpacity>
@@ -632,7 +633,7 @@ export default function DTCScreen({ tier }: Props) {
                 )}
               </View>
             ) : (
-              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={openUpgrade}>
                 <Lock size={12} color={COLORS.cyan} />
                 <Text style={styles.dtcUpgradeText}>Upgrade to Pro for freeze frame data</Text>
               </TouchableOpacity>
@@ -681,7 +682,7 @@ export default function DTCScreen({ tier }: Props) {
                 );
               })}</>
             ) : (
-              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={openUpgrade}>
                 <Lock size={12} color={COLORS.cyan} />
                 <Text style={styles.dtcUpgradeText}>Upgrade to Pro for predictive diagnostics</Text>
               </TouchableOpacity>
@@ -709,7 +710,7 @@ export default function DTCScreen({ tier }: Props) {
                 </View>
               ))}</>
             ) : (
-              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+              <TouchableOpacity style={styles.dtcUpgradeBtn} onPress={openUpgrade}>
                 <Lock size={12} color={COLORS.cyan} />
                 <Text style={styles.dtcUpgradeText}>Upgrade to Pro for O2 sensor data</Text>
               </TouchableOpacity>

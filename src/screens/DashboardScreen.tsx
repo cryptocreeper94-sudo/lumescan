@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Dimensions, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { openUpgrade } from '../config/store';
 import { Activity, Zap, Droplets, ShieldCheck, Bluetooth, ActivitySquare, FileText, Lock, Thermometer } from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, withSequence } from 'react-native-reanimated';
@@ -528,7 +529,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
         {!isPro && (
           <TouchableOpacity
             style={styles.tierBadge}
-            onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+            onPress={openUpgrade}
             activeOpacity={0.7}
           >
             <Lock size={12} color={COLORS.cyan} />
@@ -622,7 +623,7 @@ export default function DashboardScreen({ onReport, tier }: { onReport?: () => v
                 {!isPro && group.signals.every(s => !FREE_SIGNAL_KEYS.includes(s.key)) && (
                   <TouchableOpacity
                     style={styles.cardLockOverlay}
-                    onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+                    onPress={openUpgrade}
                     activeOpacity={0.8}
                   >
                     <Lock size={14} color={COLORS.cyan} />

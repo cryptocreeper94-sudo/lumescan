@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Linking, TextInput } from 'react-native';
+import { openUpgrade, PLAY_STORE_BUILD } from '../config/store';
 import { Settings, User, Shield, Wrench, Radio, LogOut, ExternalLink, ChevronRight, Key, Zap, Edit3, Check } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import { COLORS } from '../theme/colors';
 import { auth } from '../config/firebase';
+import { deleteUser } from 'firebase/auth';
 import { getWiFiStatus, disconnectWiFi } from '../telemetry/WiFiConnector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -48,6 +50,35 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: () => auth.signOut() },
     ]);
+  };
+
+  // Google Play requires apps with sign-up to offer in-app account deletion.
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This permanently deletes your LumeScan account and the data saved on this phone. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            try {
+              const keys = (await AsyncStorage.getAllKeys()).filter(k => k.includes(user.uid));
+              for (const k of keys) await AsyncStorage.removeItem(k);
+              await deleteUser(user);
+              Alert.alert('Account deleted', 'Your account has been deleted.');
+            } catch (err: any) {
+              if (err?.code === 'auth/requires-recent-login') {
+                Alert.alert('Please sign in again', 'For your security, sign out, sign back in, then delete your account.');
+              } else {
+                Alert.alert('Could not delete account', err?.message || 'Please try again, or email support.');
+              }
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleDisconnect = () => {
@@ -111,7 +142,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
               </Text>
             </View>
             {tier !== 'pro' && (
-              <TouchableOpacity onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+              <TouchableOpacity onPress={openUpgrade}>
                 <Text style={styles.upgradeLink}>Upgrade →</Text>
               </TouchableOpacity>
             )}
@@ -155,7 +186,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
                   </Text>
                 </View>
                 {!mode05Purchased && (
-                  <TouchableOpacity onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+                  <TouchableOpacity onPress={openUpgrade}>
                     <ChevronRight size={16} color={COLORS.textDim} />
                   </TouchableOpacity>
                 )}
@@ -170,7 +201,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
                   </Text>
                 </View>
                 {!mode06Purchased && (
-                  <TouchableOpacity onPress={() => Linking.openURL('https://lumeauto.tech/order')}>
+                  <TouchableOpacity onPress={openUpgrade}>
                     <ChevronRight size={16} color={COLORS.textDim} />
                   </TouchableOpacity>
                 )}
@@ -204,7 +235,7 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
         <Text style={styles.sectionTitle}>RESOURCES</Text>
         <View style={styles.card}>
           {[
-            { label: 'Order & Pricing', url: 'https://lumeauto.tech/order' },
+            ...(PLAY_STORE_BUILD ? [] : [{ label: 'Order & Pricing', url: 'https://lumeauto.tech/order' }]),
             { label: 'Terms of Service', url: 'https://lumeauto.tech/terms' },
             { label: 'Privacy Policy', url: 'https://lumeauto.tech/privacy' },
             { label: 'DarkWave Studios', url: 'https://dwtl.io' },
@@ -224,6 +255,10 @@ export default function SettingsScreen({ mechanicMode, onToggleMechanic, tier, m
         <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
           <LogOut size={16} color="#ef4444" />
           <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+          <Text style={styles.deleteText}>Delete Account</Text>
         </TouchableOpacity>
 
         <Text style={styles.version}>LumeScan v{Constants.expoConfig?.version || '1.0.0'} · Build {Constants.expoConfig?.android?.versionCode || '—'} · DarkWave Studios LLC · US Patent Pending 64/032,339</Text>
@@ -246,5 +281,7 @@ const styles = StyleSheet.create({
   upgradeLink: { color: COLORS.cyan, fontSize: 12, fontWeight: '700' },
   signOutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, marginTop: 24, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', backgroundColor: 'rgba(239,68,68,0.04)' },
   signOutText: { color: '#ef4444', fontSize: 14, fontWeight: '600' },
+  deleteBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 10 },
+  deleteText: { color: COLORS.textDim, fontSize: 12, fontWeight: '600', textDecorationLine: 'underline' },
   version: { color: COLORS.textDim, fontSize: 9, textAlign: 'center', marginTop: 24, letterSpacing: 0.5, lineHeight: 14 },
 });

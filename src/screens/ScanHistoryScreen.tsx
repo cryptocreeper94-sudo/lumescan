@@ -14,6 +14,7 @@ import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, Linking,
 } from 'react-native';
+import { openUpgrade } from '../config/store';
 import {
   Clock, Shield, TrendingUp, TrendingDown, Minus,
   Lock, ChevronRight, Activity, CheckCircle,
@@ -140,7 +141,7 @@ export default function ScanHistoryScreen({ tier }: Props) {
             </View>
             <TouchableOpacity
               style={styles.lockedBtn}
-              onPress={() => Linking.openURL('https://lumeauto.tech/order')}
+              onPress={openUpgrade}
             >
               <Lock size={14} color="#000" />
               <Text style={styles.lockedBtnText}>Upgrade to Pro</Text>
