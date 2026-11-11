@@ -24,7 +24,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 .wp-dl{padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#059669);color:#000;font-weight:700;font-size:12px;border:none;cursor:pointer}
 /* COVER */
 .wp-cover{min-height:85vh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:120px 0 80px;border-bottom:1px solid var(--border)}
-.wp-hallmark{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:24px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:32px}
+.wp-hallmark{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:24px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin:0 auto 32px}
 .wp-hallmark::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s ease infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .wp-cover h1{font-size:clamp(2.5rem,5vw,3.8rem);font-weight:900;line-height:1.05;margin-bottom:20px;letter-spacing:-2px}
@@ -97,7 +97,10 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
 <!-- NAV -->
 <nav class="wp-nav">
-  <a href="/" class="wp-nav-brand">Lume<span>Scan</span></a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="/" class="no-print" style="font-size:12px;font-weight:700;color:var(--dim);padding:5px 12px;border:1px solid var(--border);border-radius:999px;text-decoration:none">← Back</a>
+    <a href="/" class="wp-nav-brand">Lume<span>Scan</span></a>
+  </div>
   <div class="wp-nav-links">
     <a href="/">Home</a>
     <a href="/explorer.html">Explorer</a>
@@ -110,7 +113,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 
 <!-- COVER -->
 <div class="wp-cover">
-  <div class="wp-hallmark">ðŸ›¡ï¸ Trust Layer Verified · TLL Hallmark</div>
+  <div class="wp-hallmark">🛡️ Trust Layer Verified · TLL Hallmark</div>
   <h1>Lume Scan<br><span class="gr">Technical Whitepaper</span></h1>
   <p class="wp-cover-sub">The complete architecture, security model, and product specification for the Lume Scan 42-signal deterministic diagnostic engine.</p>
   <div class="wp-meta">
@@ -131,8 +134,8 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <li><a href="#s3">42-Signal Manifest</a></li>
     <li><a href="#s4">Fuel Coaching Engine</a></li>
     <li><a href="#s5">Predictive Maintenance</a></li>
-    <li><a href="#s6">Security & Verification</a></li>
-    <li><a href="#s7">Product Tiers & Pricing</a></li>
+    <li><a href="#s6">Security &amp; Verification</a></li>
+    <li><a href="#s7">Product Tiers &amp; Pricing</a></li>
     <li><a href="#s8">Hardware Compatibility</a></li>
     <li><a href="#s9">Academic Foundation</a></li>
     <li><a href="#s10">About Lume42 Labs</a></li>
@@ -203,13 +206,13 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
     <tbody>
       <tr><td>1</td><td>Engine RPM</td><td>0x0C</td><td>rpm</td></tr>
       <tr><td>2</td><td>Vehicle Speed</td><td>0x0D</td><td>km/h</td></tr>
-      <tr><td>3</td><td>Coolant Temperature</td><td>0x05</td><td>Â°C</td></tr>
+      <tr><td>3</td><td>Coolant Temperature</td><td>0x05</td><td>°C</td></tr>
       <tr><td>4</td><td>Engine Load</td><td>0x04</td><td>%</td></tr>
-      <tr><td>5</td><td>Intake Air Temperature</td><td>0x0F</td><td>Â°C</td></tr>
+      <tr><td>5</td><td>Intake Air Temperature</td><td>0x0F</td><td>°C</td></tr>
       <tr><td>6</td><td>MAF Air Flow Rate</td><td>0x10</td><td>g/s</td></tr>
       <tr><td>7</td><td>Throttle Position</td><td>0x11</td><td>%</td></tr>
       <tr><td>8</td><td>MAP Pressure</td><td>0x0B</td><td>kPa</td></tr>
-      <tr><td>9</td><td>Timing Advance</td><td>0x0E</td><td>Â°</td></tr>
+      <tr><td>9</td><td>Timing Advance</td><td>0x0E</td><td>°</td></tr>
       <tr><td>10</td><td>Short Term Fuel Trim B1</td><td>0x06</td><td>%</td></tr>
       <tr><td>11</td><td>Long Term Fuel Trim B1</td><td>0x07</td><td>%</td></tr>
       <tr><td>12</td><td>Short Term Fuel Trim B2</td><td>0x08</td><td>%</td></tr>
@@ -218,8 +221,8 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
       <tr><td>15</td><td>O2 Sensor B1S2 Voltage</td><td>0x15</td><td>V</td></tr>
       <tr><td>16</td><td>O2 Sensor B1S1 Trim</td><td>0x14</td><td>%</td></tr>
       <tr><td>17</td><td>O2 Sensor B1S2 Trim</td><td>0x15</td><td>%</td></tr>
-      <tr><td>18</td><td>Catalyst Temp B1S1</td><td>0x3C</td><td>Â°C</td></tr>
-      <tr><td>19</td><td>Catalyst Temp B1S2</td><td>0x3E</td><td>Â°C</td></tr>
+      <tr><td>18</td><td>Catalyst Temp B1S1</td><td>0x3C</td><td>°C</td></tr>
+      <tr><td>19</td><td>Catalyst Temp B1S2</td><td>0x3E</td><td>°C</td></tr>
       <tr><td>20</td><td>Fuel System Status</td><td>0x03</td><td>enum</td></tr>
       <tr><td>21</td><td>Fuel Pressure</td><td>0x0A</td><td>kPa</td></tr>
       <tr><td>22</td><td>Commanded EGR</td><td>0x2C</td><td>%</td></tr>
@@ -230,7 +233,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
       <tr><td>27</td><td>Fuel Rail Pressure (gauge)</td><td>0x23</td><td>kPa</td></tr>
       <tr><td>28</td><td>Absolute Load Value</td><td>0x43</td><td>%</td></tr>
       <tr><td>29</td><td>Relative Throttle Position</td><td>0x45</td><td>%</td></tr>
-      <tr><td>30</td><td>Ambient Air Temperature</td><td>0x46</td><td>Â°C</td></tr>
+      <tr><td>30</td><td>Ambient Air Temperature</td><td>0x46</td><td>°C</td></tr>
       <tr><td>31</td><td>Battery Voltage (calc)</td><td>0x42</td><td>V</td></tr>
       <tr><td>32</td><td>Absolute Barometric Pressure</td><td>0x33</td><td>kPa</td></tr>
       <tr><td>33</td><td>Engine Run Time</td><td>0x1F</td><td>sec</td></tr>
@@ -285,7 +288,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   <h3>Detection Categories</h3>
   <ul>
     <li><strong>Catalyst Degradation</strong> — Cross-validates upstream vs. downstream O2 sensors to detect efficiency loss weeks before P0420/P0430 triggers. Estimated savings: $800–$1,500 (early catalyst replacement vs. emergency failure).</li>
-    <li><strong>Fuel System Drift</strong> — Monitors short-term and long-term fuel trims simultaneously. Persistent drift beyond Â±8% triggers an alert before the ECU sets a misfire or fuel system DTC. Savings: $200–$600.</li>
+    <li><strong>Fuel System Drift</strong> — Monitors short-term and long-term fuel trims simultaneously. Persistent drift beyond ±8% triggers an alert before the ECU sets a misfire or fuel system DTC. Savings: $200–$600.</li>
     <li><strong>Cooling System Degradation</strong> — Tracks coolant temperature stabilization time and thermal cycling patterns. Detects failing thermostats, low coolant, or head gasket seepage. Savings: $150–$3,000+.</li>
     <li><strong>Ignition System Wear</strong> — RPM stability analysis and misfire pattern detection identify coil pack and spark plug degradation. Savings: $100–$400.</li>
     <li><strong>Emissions Readiness</strong> — Monitors all 8 OBD-II readiness monitors continuously. Alerts if any monitor resets or fails, preventing surprise state inspection failures.</li>
@@ -301,7 +304,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <!-- 6. SECURITY & VERIFICATION -->
 <div class="wp-sec" id="s6">
   <div class="wp-sec-num">Section 06</div>
-  <h2>Security & Verification</h2>
+  <h2>Security &amp; Verification</h2>
   <p>Every Lume Scan diagnostic session produces a cryptographically verifiable record. This is not optional — it is architecturally embedded in every scan.</p>
 
   <h3>Encryption</h3>
@@ -336,7 +339,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <!-- 7. PRODUCT TIERS & PRICING -->
 <div class="wp-sec" id="s7">
   <div class="wp-sec-num">Section 07</div>
-  <h2>Product Tiers & Pricing</h2>
+  <h2>Product Tiers &amp; Pricing</h2>
   <p>Lume Scan Pro is available through two models: a License Model (one-time software purchase + monthly service fee for updates and new features) and an Own Outright Model ($249 lifetime, no monthly). The software is yours to keep regardless of subscription status.</p>
 
   <h3>Free Tier</h3>
@@ -354,7 +357,7 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
   <table class="wp-tbl">
     <thead><tr><th>Phase</th><th>Users</th><th>Price</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td><strong>Founders Edition</strong></td><td>First 100</td><td style="color:#10b981;font-weight:700">$9.99</td><td>ðŸŸ¢ Active</td></tr>
+      <tr><td><strong>Founders Edition</strong></td><td>First 100</td><td style="color:#10b981;font-weight:700">$9.99</td><td>🟢 Active</td></tr>
       <tr><td><strong>Early Adopter</strong></td><td>101 – 1,000</td><td style="color:#06b6d4;font-weight:700">$19.99</td><td>Upcoming</td></tr>
       <tr><td><strong>Standard</strong></td><td>501+</td><td style="font-weight:700">$39.99</td><td>Future</td></tr>
     </tbody>
@@ -470,10 +473,10 @@ a{color:var(--accent2);text-decoration:none}a:hover{text-decoration:underline}
 <!-- FOOTER -->
 <div class="wp-footer">
   <p>© 2026 DarkWave Studios LLC / <a href="https://lume42.com">Lume42 Labs</a> · US Provisional Patent 64/032,339 · All Rights Reserved</p>
-  <p style="margin-top:8px"><a href="https://lumescan.tech">lumescan.tech</a> · <a href="https://lumeauto.tech">lumeauto.tech</a> · <a href="https://lume42.com">lume42.com</a> · <a href="https://dwtl.io">dwtl.io</a></p>
+  <p style="margin-top:6px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.35)">7 U.S. Provisional Patent Applications Pending: U.S. 64/032,339 · 64/047,512 · 64/047,467 · 64/047,496 · 64/047,536 · 64/056,378 · 64/084,465</p>
+  <p style="margin-top:8px"><a href="https://invariant.tlid.io">invariant.tlid.io</a> · <a href="https://axiom42.com">axiom42.com</a> · <a href="https://axiomstudio.dev">axiomstudio.dev</a> · <a href="https://lume-lang.com">lume-lang.com</a> · <a href="https://lumescan.tech">lumescan.tech</a> · <a href="https://lumeauto.tech">lumeauto.tech</a> · <a href="https://dwtl.io">dwtl.io</a></p>
 </div>
 
 </div><!-- /.wp -->
 </body>
 </html>
-

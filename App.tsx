@@ -32,9 +32,8 @@ export default function App() {
   const [mechanicMode, setMechanicMode] = useState(false);
   const [preferredName, setPreferredName] = useState<string | null>(null);
 
-  // ── DEV BYPASS: Skip Firebase auth entirely for testing ──
-  // Set to true to go straight to the app with Pro tier unlocked
-  const DEV_BYPASS_AUTH = true;
+  // ── DEV BYPASS: Disabled for production builds ──
+  const DEV_BYPASS_AUTH = false;
 
   useEffect(() => {
     if (DEV_BYPASS_AUTH) {

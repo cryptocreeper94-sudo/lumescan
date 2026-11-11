@@ -157,8 +157,8 @@
     .carousel-card img { width: 100%; height: 450px; object-fit: cover; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
     .carousel-card h3 { font-size: 2rem; font-weight: 900; margin-bottom: 16px; }
     
-    .carousel-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
-    .carousel-dots { display: flex; gap: 12px; justify-content: center; }
+    .carousel-controls { display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 40px; }
+    .carousel-dots { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; cursor: pointer; transition: all 0.2s; }
     .carousel-dot.active { background: #fff; transform: scale(1.3); }
     .carousel-btn { background: var(--surface); border: 1px solid var(--border); color: #fff; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
@@ -227,14 +227,19 @@
 
   <!-- Clean Navbar -->
   <nav class="nav">
-    <div class="nav-brand">LumeScan Pro</div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="https://invariant.tlid.io" style="color:var(--text-dim); text-decoration:none; font-size:13px; font-weight:700; padding:6px 12px; border:1px solid var(--border); border-radius:999px;">← Invariant</a>
+      <div class="nav-brand">LumeScan Pro</div>
+    </div>
     <div class="nav-links">
       <a href="#warnings">Preventative</a>
       <a href="#architecture">Architecture</a>
       <a href="#modes">All Modes</a>
       <a href="#pricing">Pricing</a>
+      <a href="/explorer.html">Explorer</a>
+      <a href="/whitepaper.html">Whitepaper</a>
     </div>
-    <a href="https://github.com/cryptocreeper94-sudo/lumescan/releases/download/v1.2.0/LumeScan_v1.2.0.apk" download class="btn-nav">Download APK</a>
+    <a href="/download.html" class="btn-nav">Download APK</a>
   </nav>
 
   <!-- Hero -->
@@ -250,15 +255,15 @@
     <p>LumeScan Pro is a $5,000 dealership-grade diagnostic tablet compressed into a native mobile app. Experience deterministic 42-node real-time engine scanning, intelligent code translation, and massive preventative alerts that save engines. Yours for just $39.99 one-time.</p>
 
     <div class="hero-actions">
-      <a href="https://github.com/cryptocreeper94-sudo/lumescan/releases/download/v1.2.0/LumeScan_v1.2.0.apk" download class="btn-primary">Download Android APK</a>
-      <a href="#warnings" class="btn-secondary">Explore The Engine</a>
+      <a href="/download.html" class="btn-primary">Download Android APK</a>
+      <a href="https://lumeauto.tech/order" class="btn-secondary">Order Pro License</a>
     </div>
 
     <div class="countdown-clean">
-      <div class="cd-clean-block"><span class="cd-clean-num" id="cd-d">--</span><span class="cd-clean-label">Days</span></div>
-      <div class="cd-clean-block"><span class="cd-clean-num" id="cd-h">--</span><span class="cd-clean-label">Hours</span></div>
-      <div class="cd-clean-block"><span class="cd-clean-num" id="cd-m">--</span><span class="cd-clean-label">Mins</span></div>
-      <div class="cd-clean-block"><span class="cd-clean-num" id="cd-s">--</span><span class="cd-clean-label">Secs</span></div>
+      <div class="cd-clean-block"><span class="cd-clean-num">42</span><span class="cd-clean-label">Live Signals</span></div>
+      <div class="cd-clean-block"><span class="cd-clean-num">10</span><span class="cd-clean-label">OBD-II Modes</span></div>
+      <div class="cd-clean-block"><span class="cd-clean-num">10Hz</span><span class="cd-clean-label">Scan Rate</span></div>
+      <div class="cd-clean-block"><span class="cd-clean-num">SHA-256</span><span class="cd-clean-label">TLL Sealed</span></div>
     </div>
   </section>
 
@@ -445,44 +450,52 @@
       <p class="section-subtitle">No massive upfront hardware investments. You provide the $10 Bluetooth adapter. We provide the $5,000 brain. Purchase the software license once, subscribe for continuous cloud services.</p>
     </div>
 
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-tier">Free Tier</div>
-        <div class="price-amount">$0</div>
-        <div class="price-sub">Forever Free</div>
-        <div style="flex-grow:1; margin-top:24px;">
-          <div class="p-feat"><i>✓</i> Basic Code Reading & Clearing</div>
-          <div class="p-feat"><i>✓</i> 3 Live Signals (RPM, Speed, Coolant)</div>
-          <div class="p-feat disabled"><i>✕</i> 42-Node Live Engine Signals</div>
-          <div class="p-feat disabled"><i>✕</i> Predictive Maintenance</div>
+    <div class="carousel-wrap" id="pricing-carousel">
+      <div class="carousel-track">
+        <div class="carousel-card price-card">
+          <div class="price-tier">Free Tier</div>
+          <div class="price-amount">$0</div>
+          <div class="price-sub">Forever Free</div>
+          <div style="flex-grow:1; margin-top:24px;">
+            <div class="p-feat"><i>✓</i> Basic Code Reading &amp; Clearing</div>
+            <div class="p-feat"><i>✓</i> 3 Live Signals (RPM, Speed, Coolant)</div>
+            <div class="p-feat disabled"><i>✕</i> 42-Node Live Engine Signals</div>
+            <div class="p-feat disabled"><i>✕</i> Predictive Maintenance</div>
+          </div>
+          <a href="/download.html" class="btn-secondary" style="width:100%; justify-content:center; margin-top:32px;">Download Free</a>
         </div>
-        <a href="https://github.com/cryptocreeper94-sudo/lumescan/releases/download/v1.2.0/LumeScan_v1.2.0.apk" download class="btn-secondary" style="width:100%; justify-content:center; margin-top:32px;">Download Free</a>
+
+        <div class="carousel-card price-card featured">
+          <div class="price-tier" style="color:#fff;">Founders Club</div>
+          <div class="price-amount">$9.99</div>
+          <div class="price-sub">+ $1.99/mo Cloud Service</div>
+          <div style="flex-grow:1; margin-top:24px;">
+            <div class="p-feat"><i>✓</i> Full 42-Node Signal Engine</div>
+            <div class="p-feat"><i>✓</i> Intelligent Code Interpretation</div>
+            <div class="p-feat"><i>✓</i> Predictive Maintenance Suite</div>
+            <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
+          </div>
+          <a href="https://lumeauto.tech/order" class="btn-primary" style="width:100%; justify-content:center; margin-top:32px;">Claim Founder Slot</a>
+        </div>
+
+        <div class="carousel-card price-card">
+          <div class="price-tier">Standard Pro</div>
+          <div class="price-amount">$39.99</div>
+          <div class="price-sub">+ $4.99/mo Cloud Service</div>
+          <div style="flex-grow:1; margin-top:24px;">
+            <div class="p-feat"><i>✓</i> Full 42-Node Signal Engine</div>
+            <div class="p-feat"><i>✓</i> Intelligent Code Interpretation</div>
+            <div class="p-feat"><i>✓</i> Predictive Maintenance Suite</div>
+            <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
+          </div>
+          <a href="https://lumeauto.tech/order" class="btn-secondary" style="width:100%; justify-content:center; margin-top:32px;">Order Standard Pro</a>
+        </div>
       </div>
 
-      <div class="price-card featured">
-        <div class="price-tier" style="color:#fff;">Founders Club</div>
-        <div class="price-amount">$9.99</div>
-        <div class="price-sub">+ $1.99/mo Cloud Service</div>
-        <div style="flex-grow:1; margin-top:24px;">
-          <div class="p-feat"><i>✓</i> Full 42-Node Signal Engine</div>
-          <div class="p-feat"><i>✓</i> Intelligent Code Interpretation</div>
-          <div class="p-feat"><i>✓</i> Predictive Maintenance Suite</div>
-          <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
-        </div>
-        <a href="#" class="btn-primary" style="width:100%; justify-content:center; margin-top:32px;">Claim Founder Slot</a>
-      </div>
-
-      <div class="price-card">
-        <div class="price-tier">Standard Pro</div>
-        <div class="price-amount">$39.99</div>
-        <div class="price-sub">+ $4.99/mo Cloud Service</div>
-        <div style="flex-grow:1; margin-top:24px;">
-          <div class="p-feat"><i>✓</i> Full 42-Node Signal Engine</div>
-          <div class="p-feat"><i>✓</i> Intelligent Code Interpretation</div>
-          <div class="p-feat"><i>✓</i> Predictive Maintenance Suite</div>
-          <div class="p-feat"><i>✓</i> Mode 05 / 06 Eligible</div>
-        </div>
-        <a href="#" class="btn-secondary" style="width:100%; justify-content:center; margin-top:32px;">Join Waitlist</a>
+      <div class="carousel-controls">
+        <button class="carousel-btn" aria-label="Previous plan" onclick="scrollCarousel('pricing-carousel', -1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+        <div class="carousel-dots"></div>
+        <button class="carousel-btn" aria-label="Next plan" onclick="scrollCarousel('pricing-carousel', 1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
     </div>
   </section>
@@ -533,47 +546,29 @@
   <footer>
     <div class="footer-links">
       <a href="https://darkwavestudios.io">DarkWave Studios</a>
+      <a href="https://invariant.tlid.io">Invariant Ecosystem</a>
+      <a href="https://axiom42.com">AXIOM42</a>
+      <a href="https://axiomstudio.dev">Axiom Studio</a>
+      <a href="https://lume-lang.com">Lume Language</a>
+      <a href="https://lumev.tlid.io">Lume-V</a>
+      <a href="https://fla.tlid.io">Fractal Ledger</a>
       <a href="https://dwtl.io">Trust Layer</a>
       <a href="https://lumeauto.tech">Lume Auto</a>
+      <a href="/explorer.html">Scan Explorer</a>
+      <a href="/whitepaper.html">Whitepaper</a>
       <a href="/terms.html">Terms of Service</a>
       <a href="/privacy.html">Privacy Policy</a>
     </div>
-    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">© 2026 DarkWave Studios LLC. US Patent Pending 64/032,339.</p>
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:8px;">© 2026 DarkWave Studios LLC. US Patent Pending 64/032,339.</p>
+    <p style="font-size:11px; font-family:monospace; color:rgba(255,255,255,0.4); margin-bottom:16px; line-height:1.7;">7 U.S. Provisional Patent Applications Pending: U.S. 64/032,339 · 64/047,512 · 64/047,467 · 64/047,496 · 64/047,536 · 64/056,378 · 64/084,465</p>
     <p style="font-size:12px; color:rgba(255,255,255,0.3); max-width:800px; margin:0 auto; line-height:1.6;">LumeScan Pro subscriptions are billed monthly via Stripe. Hardware adapter not included (user must provide ELM327 BLE/WiFi adapter). Google Play and the Google Play logo are trademarks of Google LLC. Apple and the Apple logo are trademarks of Apple Inc.</p>
   </footer>
-
-  <!-- BLACKOUT OVERLAY HTML -->
-  <div id="glass-blackout-overlay" class="hidden">
-    <div class="gb-modal">
-      <div class="gb-badge">🔒 Ecosystem Unlock <span style="opacity:0.5; margin:0 8px;">|</span> June 23, 2026</div>
-      <h1 class="gb-title">Downloads Locked</h1>
-      <p class="gb-subtitle">The executable builds of LumeScan Pro are restricted to authorized Beta Testers until our public launch. You may continue exploring the Web Demo without an account.</p>
-      
-      <div class="gb-ctas">
-        <button class="gb-btn-primary" onclick="triggerBetaLogin()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Beta Testers Enter Here
-        </button>
-        <button class="gb-btn-secondary" onclick="closeBlackoutModal()">Return to Demo</button>
-      </div>
-
-      <div class="gb-free-banner">
-        <p>While you wait, download our 100% Free & Ad-Free platforms today:</p>
-        <div class="gb-free-links">
-          <a href="https://chronoverse.tlid.io" class="gb-free-link">Chronoverse</a>
-          <a href="https://trustshield.tech" class="gb-free-link">TrustShield</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="gb-toast-container"></div>
 
   <!-- Carousel & Logic Scripts -->
   <script>
     // Hero Ken Burns Slider
     const heroSlides = document.querySelectorAll('.hero-slide');
-    if(heroSlides.length > 0) {
+    if (heroSlides.length > 0) {
       let heroCur = 0;
       setInterval(() => {
         heroSlides[heroCur].classList.remove('active');
@@ -582,63 +577,45 @@
       }, 5000);
     }
 
-    // Countdown
-    (function(){
-      var launch = new Date('2026-06-23T09:00:00-05:00').getTime();
-      function tick(){
-        var diff = launch - Date.now();
-        if(diff <= 0){
-          var m = document.querySelector('.countdown-clean');
-          if(m) m.innerHTML = '<span style="font-size:2rem;font-weight:900;color:#fff;">We are live!</span>';
-          return;
-        }
-        var pad = function(n){ return n < 10 ? '0' + n : '' + n; };
-        var dEl = document.getElementById('cd-d'); if(dEl) dEl.textContent = pad(Math.floor(diff / 86400000));
-        var hEl = document.getElementById('cd-h'); if(hEl) hEl.textContent = pad(Math.floor((diff % 86400000) / 3600000));
-        var mEl = document.getElementById('cd-m'); if(mEl) mEl.textContent = pad(Math.floor((diff % 3600000) / 60000));
-        var sEl = document.getElementById('cd-s'); if(sEl) sEl.textContent = pad(Math.floor((diff % 60000) / 1000));
-      }
-      tick(); setInterval(tick, 1000);
-    })();
-
-    // Carousel Engine
-    function initCarousel(id) {
+    // Carousel Engine (1-card step with centered dots)
+    function initCarousel(id, desktopVisible) {
       const wrap = document.getElementById(id);
       if (!wrap) return;
       const track = wrap.querySelector('.carousel-track');
       const cards = wrap.querySelectorAll('.carousel-card');
       const dotsContainer = wrap.querySelector('.carousel-dots');
-      if (!cards.length) return;
+      if (!track || !cards.length) return;
 
       let page = 0;
       const isMobile = window.innerWidth <= 768;
-      const perPage = isMobile ? 1 : 1; 
-      const totalPages = Math.ceil(cards.length / perPage);
-      const gap = 40;
+      const visibleCount = isMobile ? 1 : (desktopVisible || 1);
+      const totalSteps = Math.max(1, cards.length - visibleCount + 1);
+      const gap = 32;
 
       const wrapWidth = wrap.offsetWidth;
-      const cardWidth = isMobile ? wrapWidth : (wrapWidth - gap * (perPage - 1)) / perPage;
+      const cardWidth = isMobile ? wrapWidth : (wrapWidth - gap * (visibleCount - 1)) / visibleCount;
       const trackWidth = cardWidth * cards.length + gap * (cards.length - 1);
-      
+
       track.style.width = trackWidth + 'px';
       track.style.gap = gap + 'px';
       cards.forEach(c => { c.style.flex = '0 0 ' + cardWidth + 'px'; c.style.maxWidth = cardWidth + 'px'; });
 
       if (dotsContainer) {
         dotsContainer.innerHTML = '';
-        for (let i = 0; i < totalPages; i++) {
+        for (let i = 0; i < totalSteps; i++) {
           const dot = document.createElement('button');
+          dot.type = 'button';
           dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-          dot.setAttribute('aria-label', 'Page ' + (i + 1));
+          dot.setAttribute('aria-label', 'Slide ' + (i + 1));
           dot.onclick = () => goTo(i);
           dotsContainer.appendChild(dot);
         }
       }
 
       function goTo(p) {
-        page = Math.max(0, Math.min(totalPages - 1, p));
-        const offset = page * perPage * (cardWidth + gap);
-        const maxOffset = trackWidth - wrapWidth;
+        page = Math.max(0, Math.min(totalSteps - 1, p));
+        const offset = page * (cardWidth + gap);
+        const maxOffset = Math.max(0, trackWidth - wrapWidth);
         const clampedOffset = Math.min(offset, maxOffset);
         track.style.transform = 'translateX(-' + clampedOffset + 'px)';
         if (dotsContainer) {
@@ -656,7 +633,9 @@
         else if (dx > 40) goTo(page - 1);
       }, { passive: true });
 
-      wrap._goTo = goTo; wrap._getPage = () => page; wrap._totalPages = totalPages;
+      wrap._goTo = goTo;
+      wrap._getPage = () => page;
+      wrap._totalPages = totalSteps;
     }
 
     function scrollCarousel(id, dir) {
@@ -665,46 +644,18 @@
       wrap._goTo(wrap._getPage() + dir);
     }
 
-    initCarousel('feat-carousel');
+    function initAllCarousels() {
+      initCarousel('feat-carousel', 1);
+      initCarousel('modes-carousel', 1);
+      initCarousel('pricing-carousel', 2);
+    }
+
+    initAllCarousels();
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { initCarousel('feat-carousel'); }, 250);
+      resizeTimer = setTimeout(initAllCarousels, 250);
     });
-
-    // Blackout Overlay Logic
-    window.closeBlackoutModal = function() {
-      document.getElementById('glass-blackout-overlay').classList.add('hidden');
-    };
-    window.triggerBetaLogin = function() {
-      window.closeBlackoutModal();
-      window.location.href = '/beta.html';
-    };
-    function showToast(msg) {
-      const container = document.getElementById('gb-toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'gb-toast';
-      toast.textContent = msg;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('hiding'); setTimeout(() => toast.remove(), 300); }, 3000);
-    }
-    (function(){
-      if (window.location.search.includes('admin_unlock=42')) { localStorage.setItem('gb_admin_override', 'true'); }
-      document.body.addEventListener('click', function(e) {
-        const target = e.target.closest('a, button');
-        if (!target) return;
-        const href = (target.href || '').toLowerCase();
-        const isDownloadAction = href.includes('.exe') || href.includes('.apk') || href.includes('.dmg') || href.includes('.appimage') || (target.hasAttribute('download'));
-        if (isDownloadAction) {
-          var isWhitelisted = localStorage.getItem('gb_admin_override') === 'true' || localStorage.getItem('beta_tester_unlocked') === 'true';
-          var isNative = navigator.userAgent.toLowerCase().includes(' electron/') || navigator.userAgent.toLowerCase().includes('capacitor') || navigator.userAgent.toLowerCase().includes('wv');
-          if (!isWhitelisted && !isNative) {
-            e.preventDefault(); e.stopPropagation();
-            document.getElementById('glass-blackout-overlay').classList.remove('hidden');
-          }
-        }
-      }, true);
-    })();
   </script>
 </body>
 </html>
