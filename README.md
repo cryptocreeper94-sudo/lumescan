@@ -63,7 +63,7 @@ npx eas build --platform ios --profile production
 - [lumeauto.tech](https://lumeauto.tech) — Order & download portal
 - [lumescan.tech](https://lumescan.tech) — Product landing page
 - [cox.tlid.io](https://cox.tlid.io) — Cox Enterprise Platform
-- [dwtl.io](https://dwtl.io) — Trust Layer Ledger
+- [dwtl.io](https://trustlayer.tlid.io) — Trust Layer Ledger
 
 ## Legal
 
